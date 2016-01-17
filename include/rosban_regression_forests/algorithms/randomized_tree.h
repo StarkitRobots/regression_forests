@@ -13,7 +13,7 @@ namespace regression_forests
 class RandomizedTrees
 {
 public:
-  class ExtraTreesConfig
+  class Config
   {
   public:
     size_t k;
@@ -23,7 +23,7 @@ public:
     bool bootstrap;
     ApproximationType apprType;
 
-    ExtraTreesConfig();
+    Config();
     std::vector<std::string> names() const;
     std::vector<std::string> values() const;
     void load(const std::vector<std::string> &names, const std::vector<std::string> &values);

@@ -14,7 +14,7 @@
 
 namespace regression_forests
 {
-RandomizedTrees::ExtraTreesConfig::ExtraTreesConfig()
+RandomizedTrees::Config::Config()
 {
   k = 1;
   nMin = 1;
@@ -24,12 +24,12 @@ RandomizedTrees::ExtraTreesConfig::ExtraTreesConfig()
   apprType = ApproximationType::PWC;
 }
 
-std::vector<std::string> RandomizedTrees::ExtraTreesConfig::names() const
+std::vector<std::string> RandomizedTrees::Config::names() const
 {
   return {"K", "NMin", "NbTrees", "MinVar", "Bootstrap", "ApprType"};
 }
 
-std::vector<std::string> RandomizedTrees::ExtraTreesConfig::values() const
+std::vector<std::string> RandomizedTrees::Config::values() const
 {
   std::vector<std::string> result;
   result.push_back(std::to_string(k));
@@ -44,8 +44,8 @@ std::vector<std::string> RandomizedTrees::ExtraTreesConfig::values() const
   return result;
 }
 
-void RandomizedTrees::ExtraTreesConfig::load(const std::vector<std::string> &colNames,
-                                             const std::vector<std::string> &colValues)
+void RandomizedTrees::Config::load(const std::vector<std::string> &colNames,
+                                   const std::vector<std::string> &colValues)
 {
   auto expectedNames = names();
   if (colNames.size() != expectedNames.size())

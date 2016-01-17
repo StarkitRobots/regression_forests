@@ -1,5 +1,9 @@
 #pragma once
 
+#include <Eigen/Core>
+
+#include <random>
+
 namespace regression_forests
 {
 
