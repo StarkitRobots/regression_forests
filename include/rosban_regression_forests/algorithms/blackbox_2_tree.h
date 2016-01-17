@@ -18,7 +18,7 @@ typedef std::function<double(const Eigen::VectorXd &)> EvalFunc;
 class SplitEntry
 {
 public:
-  RegressionNode *node;
+  Node *node;
   double gain;
   OrthogonalSplit split;
   TrainingSet::Subset samples;
@@ -51,8 +51,8 @@ public:
   void load(const std::vector<std::string> &names, const std::vector<std::string> &values);
 };
 
-std::unique_ptr<RegressionTree> bb2Tree(const BB2TreeConfig &config);
-std::unique_ptr<RegressionForest> bb2Forest(const BB2TreeConfig &config);
+std::unique_ptr<Tree> bb2Tree(const BB2TreeConfig &config);
+std::unique_ptr<Forest> bb2Forest(const BB2TreeConfig &config);
 }
 }
 

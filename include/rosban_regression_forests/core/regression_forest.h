@@ -4,23 +4,23 @@
 
 namespace regression_forests
 {
-class RegressionForest
+class Forest
 {
 private:
-  std::vector<std::unique_ptr<RegressionTree>> trees;
+  std::vector<std::unique_ptr<Tree>> trees;
 
 public:
-  RegressionForest();
-  RegressionForest(const RegressionForest &other) = delete;
-  virtual ~RegressionForest();
+  Forest();
+  Forest(const Forest &other) = delete;
+  virtual ~Forest();
 
   size_t nbTrees() const;
-  const RegressionTree &getTree(size_t treeId) const;
+  const Tree &getTree(size_t treeId) const;
 
   /**
-   * transfers ownership of t to the RegressionForest
+   * transfers ownership of t to the Forest
    */
-  void push(std::unique_ptr<RegressionTree> t);
+  void push(std::unique_ptr<Tree> t);
 
   size_t maxSplitDim() const;
 
@@ -30,12 +30,12 @@ public:
   // default (0 value)
   // When preFilter is activated, each tree is projected before being merged
   // in the final result
-  std::unique_ptr<RegressionTree> unifiedProjectedTree(const Eigen::MatrixXd &limits, size_t maxLeafs = 0,
+  std::unique_ptr<Tree> unifiedProjectedTree(const Eigen::MatrixXd &limits, size_t maxLeafs = 0,
                                                        bool preFilter = false, bool parallelMerge = false);
 
   void save(const std::string &path) const;
-  static std::unique_ptr<RegressionForest> loadFile(const std::string &path);
+  static std::unique_ptr<Forest> loadFile(const std::string &path);
 };
 }
 
-std::ostream &operator<<(std::ostream &out, const regression_forests::RegressionForest &forest);
+std::ostream &operator<<(std::ostream &out, const regression_forests::Forest &forest);

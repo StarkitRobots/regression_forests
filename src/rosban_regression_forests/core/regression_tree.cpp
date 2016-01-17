@@ -5,11 +5,11 @@
 
 namespace regression_forests
 {
-RegressionTree::RegressionTree() : root(NULL)
+Tree::Tree() : root(NULL)
 {
 }
 
-RegressionTree::~RegressionTree()
+Tree::~Tree()
 {
   if (root != NULL)
   {
@@ -17,38 +17,38 @@ RegressionTree::~RegressionTree()
   }
 }
 
-size_t RegressionTree::nbLeafs() const
+size_t Tree::nbLeafs() const
 {
   return root->nbLeafs();
 }
 
-size_t RegressionTree::maxSplitDim() const
+size_t Tree::maxSplitDim() const
 {
   return root->maxSplitDim();
 }
 
-double RegressionTree::getValue(const Eigen::VectorXd &input) const
+double Tree::getValue(const Eigen::VectorXd &input) const
 {
   return root->getValue(input);
 }
 
-double RegressionTree::getMax(const Eigen::MatrixXd &limits) const
+double Tree::getMax(const Eigen::MatrixXd &limits) const
 {
   return getMaxPair(limits).first;
 }
 
-Eigen::VectorXd RegressionTree::getArgMax(const Eigen::MatrixXd &limits) const
+Eigen::VectorXd Tree::getArgMax(const Eigen::MatrixXd &limits) const
 {
   return getMaxPair(limits).second;
 }
 
-std::pair<double, Eigen::VectorXd> RegressionTree::getMaxPair(const Eigen::MatrixXd &limits) const
+std::pair<double, Eigen::VectorXd> Tree::getMaxPair(const Eigen::MatrixXd &limits) const
 {
   Eigen::MatrixXd localLimits = limits;
   return root->getMaxPair(localLimits);
 }
 
-void RegressionTree::fillProjection(std::vector<std::vector<Eigen::VectorXd>> &out, RegressionNode *currentNode,
+void Tree::fillProjection(std::vector<std::vector<Eigen::VectorXd>> &out, Node *currentNode,
                                     const std::vector<int> &freeDimensions, Eigen::MatrixXd &limits)
 {
   // If leaf, fill vector and return
@@ -83,7 +83,7 @@ void RegressionTree::fillProjection(std::vector<std::vector<Eigen::VectorXd>> &o
   }
 }
 
-std::vector<std::vector<Eigen::VectorXd>> RegressionTree::project(const std::vector<int> &freeDimensions,
+std::vector<std::vector<Eigen::VectorXd>> Tree::project(const std::vector<int> &freeDimensions,
                                                                   const Eigen::MatrixXd &limits)
 {
   std::vector<std::vector<Eigen::VectorXd>> out;
@@ -92,7 +92,7 @@ std::vector<std::vector<Eigen::VectorXd>> RegressionTree::project(const std::vec
   return out;
 }
 
-void RegressionTree::addSubTree(RegressionNode *node, Eigen::MatrixXd &limits, const RegressionTree &other,
+void Tree::addSubTree(Node *node, Eigen::MatrixXd &limits, const Tree &other,
                                 double otherWeight)
 {
   if (otherWeight == 0)
@@ -102,7 +102,7 @@ void RegressionTree::addSubTree(RegressionNode *node, Eigen::MatrixXd &limits, c
   if (node->isLeaf())
   {
     // Deep copy of the 'other' subTree corresponding to limits
-    RegressionNode *subTreeRoot = other.root->subTreeCopy(limits);
+    Node *subTreeRoot = other.root->subTreeCopy(limits);
     // If the subTree is void, then nothing needs to be done
     if (subTreeRoot == NULL)
     {
@@ -152,7 +152,7 @@ void RegressionTree::addSubTree(RegressionNode *node, Eigen::MatrixXd &limits, c
   }
 }
 
-void RegressionTree::avgTree(const RegressionTree &other, double otherWeight)
+void Tree::avgTree(const Tree &other, double otherWeight)
 {
   size_t dim = 1 + std::max(maxSplitDim(), other.maxSplitDim());
   Eigen::MatrixXd limits(dim, 2);
@@ -164,33 +164,33 @@ void RegressionTree::avgTree(const RegressionTree &other, double otherWeight)
   avgTree(other, otherWeight, limits);
 }
 
-void RegressionTree::avgTree(const RegressionTree &other, double otherWeight, const Eigen::MatrixXd &limits)
+void Tree::avgTree(const Tree &other, double otherWeight, const Eigen::MatrixXd &limits)
 {
   Eigen::MatrixXd localLimits = limits;
   addSubTree(root, localLimits, other, otherWeight);
 }
 
-std::unique_ptr<RegressionTree> RegressionTree::avgTrees(const RegressionTree &t1, const RegressionTree &t2, double w1,
+std::unique_ptr<Tree> Tree::avgTrees(const Tree &t1, const Tree &t2, double w1,
                                                          double w2, const Eigen::MatrixXd &limits)
 {
   Eigen::MatrixXd localLimits = limits;
-  std::unique_ptr<RegressionTree> result(new RegressionTree());
-  result->root = new RegressionNode();
-  RegressionNode::parallelMerge(*result->root, *t1.root, *t2.root, w1, w2, localLimits);
+  std::unique_ptr<Tree> result(new Tree());
+  result->root = new Node();
+  Node::parallelMerge(*result->root, *t1.root, *t2.root, w1, w2, localLimits);
   return result;
 }
 
-std::unique_ptr<RegressionTree> RegressionTree::project(const Eigen::MatrixXd &limits) const
+std::unique_ptr<Tree> Tree::project(const Eigen::MatrixXd &limits) const
 {
-  std::unique_ptr<RegressionTree> t(new RegressionTree);
-  t->root = new RegressionNode(NULL, NULL);
+  std::unique_ptr<Tree> t(new Tree);
+  t->root = new Node(NULL, NULL);
   Eigen::MatrixXd localLimits = limits;
   t->addSubTree(t->root, localLimits, *this, 1.0);
   return t;
 }
 }
 
-std::ostream &operator<<(std::ostream &out, const regression_forests::RegressionTree &tree)
+std::ostream &operator<<(std::ostream &out, const regression_forests::Tree &tree)
 {
   if (tree.root != NULL)
   {

@@ -7,30 +7,30 @@
 
 namespace regression_forests
 {
-RegressionForest::RegressionForest()
+Forest::Forest()
 {
 }
 
-RegressionForest::~RegressionForest()
+Forest::~Forest()
 {
 }
 
-size_t RegressionForest::nbTrees() const
+size_t Forest::nbTrees() const
 {
   return trees.size();
 }
 
-const RegressionTree &RegressionForest::getTree(size_t treeId) const
+const Tree &Forest::getTree(size_t treeId) const
 {
   return *trees[treeId];
 }
 
-void RegressionForest::push(std::unique_ptr<RegressionTree> t)
+void Forest::push(std::unique_ptr<Tree> t)
 {
   trees.push_back(std::move(t));
 }
 
-size_t RegressionForest::maxSplitDim() const
+size_t Forest::maxSplitDim() const
 {
   size_t max = 0;
   for (const auto &t : trees)
@@ -40,7 +40,7 @@ size_t RegressionForest::maxSplitDim() const
   return max;
 }
 
-double RegressionForest::getValue(const Eigen::VectorXd &input) const
+double Forest::getValue(const Eigen::VectorXd &input) const
 {
   double sum = 0.0;
   for (const auto &t : trees)
@@ -50,10 +50,10 @@ double RegressionForest::getValue(const Eigen::VectorXd &input) const
   return sum / trees.size();
 }
 
-std::unique_ptr<RegressionTree> RegressionForest::unifiedProjectedTree(const Eigen::MatrixXd &limits, size_t maxLeafs,
+std::unique_ptr<Tree> Forest::unifiedProjectedTree(const Eigen::MatrixXd &limits, size_t maxLeafs,
                                                                        bool preFilter, bool parallelMerge)
 {
-  std::unique_ptr<RegressionTree> result;
+  std::unique_ptr<Tree> result;
   if (trees.size() == 0)
     return result;
   result = trees[0]->project(limits);
@@ -63,7 +63,7 @@ std::unique_ptr<RegressionTree> RegressionForest::unifiedProjectedTree(const Eig
   }
   for (size_t treeId = 1; treeId < trees.size(); treeId++)
   {
-    std::unique_ptr<RegressionTree> tree;
+    std::unique_ptr<Tree> tree;
     if (preFilter)
     {
       tree = trees[treeId]->project(limits);
@@ -74,7 +74,7 @@ std::unique_ptr<RegressionTree> RegressionForest::unifiedProjectedTree(const Eig
     }
     if (parallelMerge)
     {
-      result = RegressionTree::avgTrees(*result, *tree, treeId, 1, limits);
+      result = Tree::avgTrees(*result, *tree, treeId, 1, limits);
     }
     else
     {
@@ -93,7 +93,7 @@ std::unique_ptr<RegressionTree> RegressionForest::unifiedProjectedTree(const Eig
   return result;
 }
 
-void RegressionForest::save(const std::string &path) const
+void Forest::save(const std::string &path) const
 {
   std::ofstream ofs;
   ofs.open(path);
@@ -101,7 +101,7 @@ void RegressionForest::save(const std::string &path) const
   ofs.close();
 }
 
-std::unique_ptr<RegressionForest> RegressionForest::loadFile(const std::string &path)
+std::unique_ptr<Forest> Forest::loadFile(const std::string &path)
 {
   std::ifstream in(path, std::ios::in | std::ios::binary);
   if (in)
@@ -118,7 +118,7 @@ std::unique_ptr<RegressionForest> RegressionForest::loadFile(const std::string &
 }
 }
 
-std::ostream &operator<<(std::ostream &out, const regression_forests::RegressionForest &forest)
+std::ostream &operator<<(std::ostream &out, const regression_forests::Forest &forest)
 {
   out << 'f';
   for (size_t treeId = 0; treeId < forest.nbTrees(); treeId++)

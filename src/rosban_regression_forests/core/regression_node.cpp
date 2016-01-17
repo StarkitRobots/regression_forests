@@ -4,20 +4,20 @@
 
 namespace regression_forests
 {
-RegressionNode::RegressionNode() : a(NULL), father(NULL), upperChild(NULL), lowerChild(NULL)
+Node::Node() : a(NULL), father(NULL), upperChild(NULL), lowerChild(NULL)
 {
 }
 
-RegressionNode::RegressionNode(RegressionNode *father_) : a(NULL), father(father_), upperChild(NULL), lowerChild(NULL)
+Node::Node(Node *father_) : a(NULL), father(father_), upperChild(NULL), lowerChild(NULL)
 {
 }
 
-RegressionNode::RegressionNode(RegressionNode *father_, Approximation *a_)
+Node::Node(Node *father_, Approximation *a_)
   : a(a_), father(father_), upperChild(NULL), lowerChild(NULL)
 {
 }
 
-RegressionNode::~RegressionNode()
+Node::~Node()
 {
   if (upperChild != NULL)
   {
@@ -33,7 +33,7 @@ RegressionNode::~RegressionNode()
   }
 }
 
-size_t RegressionNode::maxSplitDim() const
+size_t Node::maxSplitDim() const
 {
   if (isLeaf())
     return 0;
@@ -41,7 +41,7 @@ size_t RegressionNode::maxSplitDim() const
   return std::max(s.dim, childMaxDim);
 }
 
-size_t RegressionNode::nbLeafs() const
+size_t Node::nbLeafs() const
 {
   if (isLeaf())
   {
@@ -50,12 +50,12 @@ size_t RegressionNode::nbLeafs() const
   return lowerChild->nbLeafs() + upperChild->nbLeafs();
 }
 
-bool RegressionNode::isLeaf() const
+bool Node::isLeaf() const
 {
   return (lowerChild == NULL && upperChild == NULL);
 }
 
-const RegressionNode *RegressionNode::getLeaf(const Eigen::VectorXd &state) const
+const Node *Node::getLeaf(const Eigen::VectorXd &state) const
 {
   if (isLeaf())
     return this;
@@ -66,10 +66,10 @@ const RegressionNode *RegressionNode::getLeaf(const Eigen::VectorXd &state) cons
   return upperChild->getLeaf(state);
 }
 
-Eigen::MatrixXd RegressionNode::getSubSpace(const Eigen::MatrixXd &space) const
+Eigen::MatrixXd Node::getSubSpace(const Eigen::MatrixXd &space) const
 {
   Eigen::MatrixXd subSpace = space;
-  const RegressionNode *current = this;
+  const Node *current = this;
   while (current->father != NULL)
   {
     size_t sDim = current->father->s.dim;
@@ -92,7 +92,7 @@ Eigen::MatrixXd RegressionNode::getSubSpace(const Eigen::MatrixXd &space) const
     }
     else
     {
-      throw std::runtime_error("Inconsistency detected in RegressionNode");
+      throw std::runtime_error("Inconsistency detected in Node");
     }
     // Jump to father
     current = current->father;
@@ -100,7 +100,7 @@ Eigen::MatrixXd RegressionNode::getSubSpace(const Eigen::MatrixXd &space) const
   return subSpace;
 }
 
-void RegressionNode::addApproximation(const Approximation *newApproximation, double newWeight)
+void Node::addApproximation(const Approximation *newApproximation, double newWeight)
 {
   if (!isLeaf())
   {
@@ -117,29 +117,29 @@ void RegressionNode::addApproximation(const Approximation *newApproximation, dou
   }
 }
 
-double RegressionNode::getValue(const Eigen::VectorXd &state) const
+double Node::getValue(const Eigen::VectorXd &state) const
 {
   if (!isLeaf())
   {
-    const RegressionNode *leaf = getLeaf(state);
+    const Node *leaf = getLeaf(state);
     return leaf->getValue(state);
   }
   return a->eval(state);
 }
 
-double RegressionNode::getMax(Eigen::MatrixXd &limits) const
+double Node::getMax(Eigen::MatrixXd &limits) const
 {
   std::pair<double, Eigen::VectorXd> best;
   best.first = std::numeric_limits<double>::lowest();
   return getMaxPair(limits).first;
 }
 
-Eigen::VectorXd RegressionNode::getArgMax(Eigen::MatrixXd &limits) const
+Eigen::VectorXd Node::getArgMax(Eigen::MatrixXd &limits) const
 {
   return getMaxPair(limits).second;
 }
 
-std::pair<double, Eigen::VectorXd> RegressionNode::getMaxPair(Eigen::MatrixXd &limits) const
+std::pair<double, Eigen::VectorXd> Node::getMaxPair(Eigen::MatrixXd &limits) const
 {
   std::pair<double, Eigen::VectorXd> best;
   best.first = std::numeric_limits<double>::lowest();
@@ -148,7 +148,7 @@ std::pair<double, Eigen::VectorXd> RegressionNode::getMaxPair(Eigen::MatrixXd &l
   return best;
 }
 
-void RegressionNode::updateMaxPair(Eigen::MatrixXd &limits, std::pair<double, Eigen::VectorXd> &best) const
+void Node::updateMaxPair(Eigen::MatrixXd &limits, std::pair<double, Eigen::VectorXd> &best) const
 {
   if (isLeaf())
   {
@@ -172,12 +172,12 @@ void RegressionNode::updateMaxPair(Eigen::MatrixXd &limits, std::pair<double, Ei
   }
 }
 
-std::vector<Eigen::VectorXd> RegressionNode::project(const std::vector<int> &freeDimensions,
+std::vector<Eigen::VectorXd> Node::project(const std::vector<int> &freeDimensions,
                                                      const Eigen::MatrixXd &limits)
 {
   if (a == NULL)
   {
-    throw std::runtime_error("RegressionNode::project: no approximation "
+    throw std::runtime_error("Node::project: no approximation "
                              "available on the current node");
   }
   int D = freeDimensions.size();
@@ -204,9 +204,9 @@ std::vector<Eigen::VectorXd> RegressionNode::project(const std::vector<int> &fre
   return result;
 }
 
-RegressionNode *RegressionNode::clone() const
+Node *Node::clone() const
 {
-  RegressionNode *copy = softClone();
+  Node *copy = softClone();
   copy->copyContent(this);
   if (lowerChild != NULL)
   {
@@ -221,7 +221,7 @@ RegressionNode *RegressionNode::clone() const
   return copy;
 }
 
-void RegressionNode::copyContent(const RegressionNode *other)
+void Node::copyContent(const Node *other)
 {
   if (a != NULL)
   {
@@ -238,19 +238,19 @@ void RegressionNode::copyContent(const RegressionNode *other)
   s = other->s;
 }
 
-RegressionNode *RegressionNode::softClone() const
+Node *Node::softClone() const
 {
-  return new RegressionNode();
+  return new Node();
 }
 
-RegressionNode *RegressionNode::subTreeCopy(const Eigen::MatrixXd &limits) const
+Node *Node::subTreeCopy(const Eigen::MatrixXd &limits) const
 {
   // End of recursion on leaf
   if (isLeaf())
   {
     return clone();
   }
-  RegressionNode *result = NULL;
+  Node *result = NULL;
   // If splitVal is above limits return a copy of the lower child
   if (s.val > limits(s.dim, 1))
   {
@@ -273,7 +273,7 @@ RegressionNode *RegressionNode::subTreeCopy(const Eigen::MatrixXd &limits) const
   return result;
 }
 
-void RegressionNode::parallelMerge(RegressionNode &node, const RegressionNode &t1, const RegressionNode &t2, double w1,
+void Node::parallelMerge(Node &node, const Node &t1, const Node &t2, double w1,
                                    double w2, Eigen::MatrixXd &limits)
 {
   // 1. T1 is a leaf
@@ -315,12 +315,12 @@ void RegressionNode::parallelMerge(RegressionNode &node, const RegressionNode &t
       // Setting split
       node.s = t1.s;
       // Handling lowerChild
-      node.lowerChild = new RegressionNode(&node);
+      node.lowerChild = new Node(&node);
       limits(sDim, 1) = sVal;
       parallelMerge(*node.lowerChild, t2, *t1.lowerChild, w2, w1, limits);
       limits(sDim, 1) = max;  // Restore limit
       // Handling upperChild
-      node.upperChild = new RegressionNode(&node);
+      node.upperChild = new Node(&node);
       limits(sDim, 0) = sVal;
       parallelMerge(*node.upperChild, t2, *t1.upperChild, w2, w1, limits);
       limits(sDim, 0) = min;  // Restore limit
@@ -329,7 +329,7 @@ void RegressionNode::parallelMerge(RegressionNode &node, const RegressionNode &t
 }
 }
 
-std::ostream &operator<<(std::ostream &out, const regression_forests::RegressionNode &node)
+std::ostream &operator<<(std::ostream &out, const regression_forests::Node &node)
 {
   out << "n";
   if (node.isLeaf())

@@ -17,10 +17,10 @@ Approximation *approximation(const std::string &s, size_t *index = NULL);
 
 OrthogonalSplit orthogonalSplit(const std::string &s, size_t *index = NULL);
 
-RegressionNode *regressionNode(const std::string &s, size_t *index = NULL);
+Node *regressionNode(const std::string &s, size_t *index = NULL);
 
-std::unique_ptr<RegressionTree> regressionTree(const std::string &s, size_t *index = NULL);
+std::unique_ptr<Tree> regressionTree(const std::string &s, size_t *index = NULL);
 
-std::unique_ptr<RegressionForest> regressionForest(const std::string &s, size_t *index = NULL);
+std::unique_ptr<Forest> regressionForest(const std::string &s, size_t *index = NULL);
 }
 }

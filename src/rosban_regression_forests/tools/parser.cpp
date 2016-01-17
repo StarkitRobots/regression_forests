@@ -18,7 +18,7 @@ Approximation *approximation(const std::string &s, size_t *index)
   }
   if (s[idx] != 'a')
   {
-    throw std::runtime_error("RegressionTree parser: expecting a for approximation");
+    throw std::runtime_error("Tree parser: expecting a for approximation");
   }
   idx++;
   // Read PWCApproximation
@@ -124,9 +124,9 @@ OrthogonalSplit orthogonalSplit(const std::string &s, size_t *index)
   return result;
 }
 
-RegressionNode *regressionNode(const std::string &s, size_t *index)
+Node *regressionNode(const std::string &s, size_t *index)
 {
-  RegressionNode *result = NULL;
+  Node *result = NULL;
   size_t idx = 0;
   if (index != NULL)
   {
@@ -137,7 +137,7 @@ RegressionNode *regressionNode(const std::string &s, size_t *index)
     throw std::runtime_error("Expecting a 'n' for the beginning of a regressionNode");
   }
   idx++;
-  result = new RegressionNode();
+  result = new Node();
   // Leaf case:
   if (s[idx] == 'a')
   {
@@ -166,16 +166,16 @@ RegressionNode *regressionNode(const std::string &s, size_t *index)
   return result;
 }
 
-std::unique_ptr<RegressionTree> regressionTree(const std::string &s, size_t *index)
+std::unique_ptr<Tree> regressionTree(const std::string &s, size_t *index)
 {
-  std::unique_ptr<RegressionTree> tree(new RegressionTree);
+  std::unique_ptr<Tree> tree(new Tree);
   tree->root = regressionNode(s, index);
   return tree;
 }
 
-std::unique_ptr<RegressionForest> regressionForest(const std::string &s, size_t *index)
+std::unique_ptr<Forest> regressionForest(const std::string &s, size_t *index)
 {
-  std::unique_ptr<RegressionForest> forest(new RegressionForest);
+  std::unique_ptr<Forest> forest(new Forest);
   size_t idx = 0;
   if (index != NULL)
   {

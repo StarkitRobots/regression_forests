@@ -190,7 +190,7 @@ double evalSplitScore(const TrainingSet &ls, const TrainingSet::Subset &samples,
   return (varAll - weightedNewVar) / varAll;
 }
 
-SplitEntry getBestSplitEntry(RegressionNode *node, const TrainingSet &ts, TrainingSet::Subset &samples,
+SplitEntry getBestSplitEntry(Node *node, const TrainingSet &ts, TrainingSet::Subset &samples,
                              const Eigen::MatrixXd &space, int k, int nMin, ApproximationType apprType)
 {
   auto generator = regression_forests::get_random_engine();
@@ -244,7 +244,7 @@ SplitEntry getBestSplitEntry(RegressionNode *node, const TrainingSet &ts, Traini
   return e;
 }
 
-void treat(RegressionNode *node, TrainingSet &ts, TrainingSet::Subset &samples, const Eigen::MatrixXd &space,
+void treat(Node *node, TrainingSet &ts, TrainingSet::Subset &samples, const Eigen::MatrixXd &space,
            const BB2TreeConfig &c, std::set<SplitEntry> &splitCandidates)
 {
   populate(ts, samples, space, 2 * c.nMin, c.minDensity, c.eval);
@@ -264,13 +264,13 @@ void treat(RegressionNode *node, TrainingSet &ts, TrainingSet::Subset &samples, 
   }
 }
 
-std::unique_ptr<RegressionTree> bb2Tree(const BB2TreeConfig &config)
+std::unique_ptr<Tree> bb2Tree(const BB2TreeConfig &config)
 {
-  std::unique_ptr<RegressionTree> tree(new RegressionTree);
+  std::unique_ptr<Tree> tree(new Tree);
   std::set<SplitEntry> splitCandidates;
   TrainingSet ts(config.space.rows());
   TrainingSet::Subset samples;
-  tree->root = new RegressionNode();
+  tree->root = new Node();
   treat(tree->root, ts, samples, config.space, config, splitCandidates);
   size_t nbLeafs = 1;
   while (splitCandidates.size() > 0 && nbLeafs < config.maxLeafs)
@@ -278,7 +278,7 @@ std::unique_ptr<RegressionTree> bb2Tree(const BB2TreeConfig &config)
     // Retrieving bestSplit Candidates
     SplitEntry entry = *std::prev(splitCandidates.end());
     splitCandidates.erase(std::prev(splitCandidates.end()));
-    RegressionNode *node = entry.node;
+    Node *node = entry.node;
     // Splitting Samples
     TrainingSet::Subset lSamples, uSamples;
     ts.applySplit(entry.split, entry.samples, lSamples, uSamples);
@@ -286,8 +286,8 @@ std::unique_ptr<RegressionTree> bb2Tree(const BB2TreeConfig &config)
     delete (node->a);
     node->a = NULL;
     node->s = entry.split;
-    node->lowerChild = new RegressionNode();
-    node->upperChild = new RegressionNode();
+    node->lowerChild = new Node();
+    node->upperChild = new Node();
     // Getting spaces
     Eigen::MatrixXd lowerSpace = entry.space;
     lowerSpace(entry.split.dim, 1) = entry.split.val;
@@ -317,9 +317,9 @@ std::unique_ptr<RegressionTree> bb2Tree(const BB2TreeConfig &config)
   return tree;
 }
 
-std::unique_ptr<RegressionForest> bb2Forest(const BB2TreeConfig &config)
+std::unique_ptr<Forest> bb2Forest(const BB2TreeConfig &config)
 {
-  std::unique_ptr<RegressionForest> forest(new RegressionForest);
+  std::unique_ptr<Forest> forest(new Forest);
   for (int i = 0; i < config.nbTrees; i++)
   {
     forest->push(bb2Tree(config));

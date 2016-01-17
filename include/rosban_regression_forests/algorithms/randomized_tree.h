@@ -36,10 +36,10 @@ double evalSplitScore(const TrainingSet &ls, const TrainingSet::Subset &samples,
  * minVariance: if variance is lower than the given threshold,
  *              do not split any further
  */
-std::unique_ptr<RegressionTree> learn(const TrainingSet &ls, size_t k, size_t nmin, double minVariance = 0,
+std::unique_ptr<Tree> learn(const TrainingSet &ls, size_t k, size_t nmin, double minVariance = 0,
                                       enum ApproximationType apprType = ApproximationType::PWC);
 
-std::unique_ptr<RegressionForest> extraTrees(const TrainingSet &ls, size_t k, size_t nmin, size_t nbTrees,
+std::unique_ptr<Forest> extraTrees(const TrainingSet &ls, size_t k, size_t nmin, size_t nbTrees,
                                              double minVariance = 0, bool bootstrap = false,
                                              enum ApproximationType apprType = ApproximationType::PWC);
 };

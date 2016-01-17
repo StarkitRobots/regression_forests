@@ -120,7 +120,7 @@ double evalSplitScore(const TrainingSet &ls, const TrainingSet::Subset &samples,
   return (varAll - weightedNewVar) / varAll;
 }
 
-std::unique_ptr<RegressionTree> learn(const TrainingSet &ls, size_t k, size_t nmin, double minVariance,
+std::unique_ptr<Tree> learn(const TrainingSet &ls, size_t k, size_t nmin, double minVariance,
                                       enum ApproximationType apprType)
 {
   std::function<Approximation *(const TrainingSet::Subset &)> approximateSamples;
@@ -140,12 +140,12 @@ std::unique_ptr<RegressionTree> learn(const TrainingSet &ls, size_t k, size_t nm
       break;
   }
 
-  std::unique_ptr<RegressionTree> t(new RegressionTree);
+  std::unique_ptr<Tree> t(new Tree);
   auto generator = regression_forests::get_random_engine();
   // All along the resolution, we will stack samples
   std::stack<TrainingSet::Subset> samplesStack;
-  std::stack<RegressionNode *> nodesStack;
-  t->root = new RegressionNode(NULL);
+  std::stack<Node *> nodesStack;
+  t->root = new Node(NULL);
   // If splitting is not allowed, end directly the process
   if (ls.size() < 2 * nmin)
   {
@@ -157,7 +157,7 @@ std::unique_ptr<RegressionTree> learn(const TrainingSet &ls, size_t k, size_t nm
   // While there is still nodes to explore
   while (nodesStack.size() != 0)
   {
-    RegressionNode *node = nodesStack.top();
+    Node *node = nodesStack.top();
     TrainingSet::Subset samples = samplesStack.top();
     nodesStack.pop();
     samplesStack.pop();
@@ -212,7 +212,7 @@ std::unique_ptr<RegressionTree> learn(const TrainingSet &ls, size_t k, size_t nm
     TrainingSet::Subset lowerSamples, upperSamples;
     ls.applySplit(node->s, samples, lowerSamples, upperSamples);
     // UpperChild
-    node->upperChild = new RegressionNode(node);
+    node->upperChild = new Node(node);
     if (upperSamples.size() >= 2 * nmin)
     {
       nodesStack.push(node->upperChild);
@@ -223,7 +223,7 @@ std::unique_ptr<RegressionTree> learn(const TrainingSet &ls, size_t k, size_t nm
       node->upperChild->a = approximateSamples(upperSamples);
     }
     // LowerChild
-    node->lowerChild = new RegressionNode(node);
+    node->lowerChild = new Node(node);
     if (lowerSamples.size() >= 2 * nmin)
     {
       nodesStack.push(node->lowerChild);
@@ -237,10 +237,10 @@ std::unique_ptr<RegressionTree> learn(const TrainingSet &ls, size_t k, size_t nm
   return t;
 }
 
-std::unique_ptr<RegressionForest> extraTrees(const TrainingSet &ls, size_t k, size_t nmin, size_t nbTrees,
+std::unique_ptr<Forest> extraTrees(const TrainingSet &ls, size_t k, size_t nmin, size_t nbTrees,
                                              double minVariance, bool bootstrap, enum ApproximationType apprType)
 {
-  std::unique_ptr<RegressionForest> f(new RegressionForest);
+  std::unique_ptr<Forest> f(new Forest);
   for (size_t i = 0; i < nbTrees; i++)
   {
     if (bootstrap)

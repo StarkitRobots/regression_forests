@@ -6,20 +6,20 @@
 
 namespace regression_forests
 {
-class RegressionTree
+class Tree
 {
 protected:
-  void fillProjection(std::vector<std::vector<Eigen::VectorXd>> &out, RegressionNode *currentNode,
+  void fillProjection(std::vector<std::vector<Eigen::VectorXd>> &out, Node *currentNode,
                       const std::vector<int> &freeDimensions, Eigen::MatrixXd &limits);
 
-  void addSubTree(RegressionNode *node, Eigen::MatrixXd &limits, const RegressionTree &other, double otherWeight);
+  void addSubTree(Node *node, Eigen::MatrixXd &limits, const Tree &other, double otherWeight);
 
 public:
-  RegressionNode *root;
+  Node *root;
 
-  RegressionTree();
-  RegressionTree(const RegressionTree &other) = delete;
-  virtual ~RegressionTree();
+  Tree();
+  Tree(const Tree &other) = delete;
+  virtual ~Tree();
 
   size_t maxSplitDim() const;
   size_t nbLeafs() const;
@@ -50,14 +50,14 @@ public:
    * limits might be used to select the space on which the 'other' tree is
    * projected
    */
-  void avgTree(const RegressionTree &other, double otherWeight);
-  void avgTree(const RegressionTree &other, double otherWeight, const Eigen::MatrixXd &limits);
+  void avgTree(const Tree &other, double otherWeight);
+  void avgTree(const Tree &other, double otherWeight, const Eigen::MatrixXd &limits);
 
-  static std::unique_ptr<RegressionTree> avgTrees(const RegressionTree &t1, const RegressionTree &t2, double w1,
+  static std::unique_ptr<Tree> avgTrees(const Tree &t1, const Tree &t2, double w1,
                                                   double w2, const Eigen::MatrixXd &limits);
 
-  std::unique_ptr<RegressionTree> project(const Eigen::MatrixXd &limits) const;
+  std::unique_ptr<Tree> project(const Eigen::MatrixXd &limits) const;
 };
 }
 
-std::ostream &operator<<(std::ostream &out, const regression_forests::RegressionTree &tree);
+std::ostream &operator<<(std::ostream &out, const regression_forests::Tree &tree);

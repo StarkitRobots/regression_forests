@@ -5,28 +5,28 @@
 
 namespace regression_forests
 {
-class RegressionNode
+class Node
 {
 public:
   Approximation *a;
-  RegressionNode *father, *upperChild, *lowerChild;
+  Node *father, *upperChild, *lowerChild;
   OrthogonalSplit s;
 
   /**
    * Regression Node takes in charge the destruction of both childs and of
    * the approximation function but not of the father
    */
-  RegressionNode();
-  RegressionNode(const RegressionNode &other) = delete;
-  RegressionNode(RegressionNode *father);
-  RegressionNode(RegressionNode *father, Approximation *a);
-  virtual ~RegressionNode();
+  Node();
+  Node(const Node &other) = delete;
+  Node(Node *father);
+  Node(Node *father, Approximation *a);
+  virtual ~Node();
 
   size_t maxSplitDim() const;
 
   size_t nbLeafs() const;
   bool isLeaf() const;
-  const RegressionNode *getLeaf(const Eigen::VectorXd &state) const;
+  const Node *getLeaf(const Eigen::VectorXd &state) const;
 
   // Return the intersection between provided space and space associated to
   // the node by iterating on all the father
@@ -62,35 +62,35 @@ public:
    * Return a deepCopy of the current regressionNode.
    * The link to the father is set to NULL.
    */
-  virtual RegressionNode *clone() const;
+  virtual Node *clone() const;
 
   /**
    * Copy the content of the node 'other' inside the current node
    * default is action copy and split copy, behavior might be extended
    * for child classes
    */
-  virtual void copyContent(const RegressionNode *other);
+  virtual void copyContent(const Node *other);
 
   /**
    * Return an empty node of the same class as the parameter
    */
-  virtual RegressionNode *softClone() const;
+  virtual Node *softClone() const;
 
   /**
    * Return a deepCopy of the subTree rooted on the given node.
    * The deepCopy will automatically remove the split which do not belong
    * to the limits given as parameter.
    */
-  RegressionNode *subTreeCopy(const Eigen::MatrixXd &limits) const;
+  Node *subTreeCopy(const Eigen::MatrixXd &limits) const;
 
   /**
    * Merge parallely t1 and t2 at n, using given weights and limits.
    * limits are modified during the process but its final content is
    * the same as the original
    */
-  static void parallelMerge(RegressionNode &node, const RegressionNode &t1, const RegressionNode &t2, double w1,
+  static void parallelMerge(Node &node, const Node &t1, const Node &t2, double w1,
                             double w2, Eigen::MatrixXd &limits);
 };
 }
 
-std::ostream &operator<<(std::ostream &out, const regression_forests::RegressionNode &node);
+std::ostream &operator<<(std::ostream &out, const regression_forests::Node &node);

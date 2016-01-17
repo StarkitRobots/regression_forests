@@ -8,7 +8,7 @@
 
 namespace regression_forests
 {
-typedef std::pair<RegressionNode *, double> EvaluatedNode;
+typedef std::pair<Node *, double> EvaluatedNode;
 
 static double spaceSize(const Eigen::MatrixXd &space)
 {
@@ -24,12 +24,12 @@ static double spaceSize(const Eigen::MatrixXd &space)
   return size;
 }
 
-bool isLastSplit(RegressionNode *node)
+bool isLastSplit(Node *node)
 {
   return node->lowerChild->isLeaf() && node->upperChild->isLeaf();
 }
 
-void pushLastSplitNodes(RegressionNode *node, std::list<RegressionNode *> &splitNodes)
+void pushLastSplitNodes(Node *node, std::list<Node *> &splitNodes)
 {
   if (node->isLeaf())
   {
@@ -48,7 +48,7 @@ void pushLastSplitNodes(RegressionNode *node, std::list<RegressionNode *> &split
   }
 }
 
-std::pair<Approximation *, double> getSplitData(RegressionNode *node, const Eigen::MatrixXd &limits)
+std::pair<Approximation *, double> getSplitData(Node *node, const Eigen::MatrixXd &limits)
 {
   std::pair<Approximation *, double> result;
   Eigen::MatrixXd nodeSpace = node->getSubSpace(limits);
@@ -69,7 +69,7 @@ std::pair<Approximation *, double> getSplitData(RegressionNode *node, const Eige
   return result;
 }
 
-std::unique_ptr<RegressionTree> pruneTree(std::unique_ptr<RegressionTree> tree, const Eigen::MatrixXd &limits,
+std::unique_ptr<Tree> pruneTree(std::unique_ptr<Tree> tree, const Eigen::MatrixXd &limits,
                                           size_t maxLeafs)
 {
   // 1. count leafs and add preLeafs
@@ -78,7 +78,7 @@ std::unique_ptr<RegressionTree> pruneTree(std::unique_ptr<RegressionTree> tree, 
   {
     return tree;
   }
-  std::list<RegressionNode *> splitNodes;
+  std::list<Node *> splitNodes;
   pushLastSplitNodes(tree->root, splitNodes);
   auto nodeComp = [](const EvaluatedNode &a, const EvaluatedNode &b)
   {
@@ -89,7 +89,7 @@ std::unique_ptr<RegressionTree> pruneTree(std::unique_ptr<RegressionTree> tree, 
     return a.second < b.second;
   };
   std::map<EvaluatedNode, Approximation *, decltype(nodeComp)> splits(nodeComp);
-  for (RegressionNode *node : splitNodes)
+  for (Node *node : splitNodes)
   {
     auto splitData = getSplitData(node, limits);
     EvaluatedNode key(node, splitData.second);
@@ -99,7 +99,7 @@ std::unique_ptr<RegressionTree> pruneTree(std::unique_ptr<RegressionTree> tree, 
   while (nbLeafs > maxLeafs)
   {
     // Retrieving node which bring the lowest quality improvement
-    RegressionNode *current = splits.begin()->first.first;
+    Node *current = splits.begin()->first.first;
     Approximation *app = splits.begin()->second;
     auto second = ++splits.begin();
     splits.erase(splits.begin(), second);
@@ -115,7 +115,7 @@ std::unique_ptr<RegressionTree> pruneTree(std::unique_ptr<RegressionTree> tree, 
     current->upperChild = NULL;
     nbLeafs--;
     // If father is now a lastSplit, add it to the splitNodes
-    RegressionNode *father = current->father;
+    Node *father = current->father;
     if (father != NULL && isLastSplit(father))
     {
       auto splitData = getSplitData(father, limits);
