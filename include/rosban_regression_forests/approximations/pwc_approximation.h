@@ -1,26 +1,28 @@
 #pragma once
 
-#include "Approximation.hpp"
+#include "rosban_regression_forests/approximations/approximation.h"
 
-namespace Math {
-  namespace RegressionTree {
+namespace Math
+{
+namespace RegressionTree
+{
+class PWCApproximation : public Approximation
+{
+private:
+  double value;
 
-    class PWCApproximation : public Approximation {
-    private:
-      double value;
-    public:
-      PWCApproximation(double value);
-      virtual ~PWCApproximation();
+public:
+  PWCApproximation(double value);
+  virtual ~PWCApproximation();
 
-      double getValue() const;
+  double getValue() const;
 
-      virtual double eval(const Eigen::VectorXd& state) const override;
-      virtual void updateMaxPair(const Eigen::MatrixXd& limits,
-                                 std::pair<double, Eigen::VectorXd>& best) const override;
+  virtual double eval(const Eigen::VectorXd &state) const override;
+  virtual void updateMaxPair(const Eigen::MatrixXd &limits, std::pair<double, Eigen::VectorXd> &best) const override;
 
-      virtual Approximation * clone() const override;
+  virtual Approximation *clone() const override;
 
-      virtual void print(std::ostream& out) const override;
-    };
-  }
+  virtual void print(std::ostream &out) const override;
+};
+}
 }

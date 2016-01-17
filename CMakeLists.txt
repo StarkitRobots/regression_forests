@@ -6,6 +6,11 @@ project(rosban_regression_forests)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED)
 
+find_package(PkgConfig)
+pkg_search_module(Eigen3 REQUIRED eigen3>=3.2.3)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -96,41 +101,52 @@ find_package(catkin REQUIRED)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES rosban_regression_forests
+  INCLUDE_DIRS include
+  LIBRARIES rosban_regression_forests
 #  CATKIN_DEPENDS other_catkin_pkg
-#  DEPENDS system_lib
+  DEPENDS Eigen3
 )
 
 ###########
 ## Build ##
 ###########
 
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
-# include_directories(include)
+include_directories(
+  include
+  ${EIGEN3_INCLUDE_DIR}
+  )
 
-## Declare a C++ library
-# add_library(rosban_regression_forests
-#   src/${PROJECT_NAME}/rosban_regression_forests.cpp
-# )
+# Directories containing sources files
+set(DIRECTORIES
+  src/rosban_regression_forests/algorithms
+  src/rosban_regression_forests/approximations
+  src/rosban_regression_forests/core
+  src/rosban_regression_forests/tools
+  )
 
-## Add cmake target dependencies of the library
-## as an example, code may need to be generated before libraries
-## either from message generation or dynamic reconfigure
-# add_dependencies(rosban_regression_forests ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# Build ALL_SOURCES
+set (SOURCES)
+set (ALL_SOURCES)
+set (PREFIXED_SOURCES)
+foreach (DIRECTORY ${DIRECTORIES})
+    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/${DIRECTORY}")
+    include (${DIRECTORY}/sources.cmake)
 
-## Declare a C++ executable
-# add_executable(rosban_regression_forests_node src/rosban_regression_forests_node.cpp)
+    foreach (SOURCE ${SOURCES})
+        set (PREFIXED_SOURCES ${PREFIXED_SOURCES} ${DIRECTORY}/${SOURCE})
+    endforeach (SOURCE)
 
-## Add cmake target dependencies of the executable
-## same as for the library above
-# add_dependencies(rosban_regression_forests_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+    set (ALL_SOURCES ${ALL_SOURCES} ${PREFIXED_SOURCES})
+endforeach (DIRECTORY)
 
-## Specify libraries to link a library or executable target against
-# target_link_libraries(rosban_regression_forests_node
-#   ${catkin_LIBRARIES}
-# )
+# Declare a C++ library
+add_library(rosban_regression_forests
+  ${ALL_SOURCES}
+)
+
+target_link_libraries(rosban_regression_forests
+  ${catkin_LIBRARIES}
+  )
 
 #############
 ## Install ##
