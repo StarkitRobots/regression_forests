@@ -24,4 +24,3 @@ std::unique_ptr<RegressionTree> regressionTree(const std::string &s, size_t *ind
 std::unique_ptr<RegressionForest> regressionForest(const std::string &s, size_t *index = NULL);
 }
 }
-}

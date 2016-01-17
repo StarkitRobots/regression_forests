@@ -25,4 +25,3 @@ double Sample::getOutput() const
   return output;
 }
 }
-}

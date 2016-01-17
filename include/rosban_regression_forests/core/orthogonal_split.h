@@ -17,6 +17,5 @@ public:
   bool isLower(const Eigen::VectorXd &input) const;
 };
 }
-}
 
-std::ostream &operator<<(std::ostream &out, const Math::RegressionTree::OrthogonalSplit &split);
+std::ostream &operator<<(std::ostream &out, const regression_forests::OrthogonalSplit &split);

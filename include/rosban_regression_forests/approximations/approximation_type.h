@@ -12,6 +12,5 @@ enum ApproximationType
 };
 
 ApproximationType loadApproximationType(const std::string &s);
-std::string to_string(Math::RegressionTree::ApproximationType at);
-}
+std::string to_string(ApproximationType at);
 }

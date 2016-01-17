@@ -52,4 +52,3 @@ public:
   TrainingSet buildBootstrap(size_t nbSamples) const;
 };
 }
-}

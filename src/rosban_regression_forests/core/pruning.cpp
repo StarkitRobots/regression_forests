@@ -130,4 +130,3 @@ std::unique_ptr<RegressionTree> pruneTree(std::unique_ptr<RegressionTree> tree, 
   return tree;
 }
 }
-}

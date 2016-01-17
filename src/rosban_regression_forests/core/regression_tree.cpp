@@ -189,9 +189,8 @@ std::unique_ptr<RegressionTree> RegressionTree::project(const Eigen::MatrixXd &l
   return t;
 }
 }
-}
 
-std::ostream &operator<<(std::ostream &out, const Math::RegressionTree::RegressionTree &tree)
+std::ostream &operator<<(std::ostream &out, const regression_forests::RegressionTree &tree)
 {
   if (tree.root != NULL)
   {

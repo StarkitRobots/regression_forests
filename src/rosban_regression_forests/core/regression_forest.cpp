@@ -117,9 +117,8 @@ std::unique_ptr<RegressionForest> RegressionForest::loadFile(const std::string &
   throw std::runtime_error("Failed to open file '" + path + "'");
 }
 }
-}
 
-std::ostream &operator<<(std::ostream &out, const Math::RegressionTree::RegressionForest &forest)
+std::ostream &operator<<(std::ostream &out, const regression_forests::RegressionForest &forest)
 {
   out << 'f';
   for (size_t treeId = 0; treeId < forest.nbTrees(); treeId++)

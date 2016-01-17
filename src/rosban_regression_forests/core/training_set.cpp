@@ -116,4 +116,3 @@ TrainingSet TrainingSet::buildBootstrap(size_t nbSamples) const
   return bootstrap;
 }
 }
-}

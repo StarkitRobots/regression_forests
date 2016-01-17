@@ -203,4 +203,3 @@ std::unique_ptr<RegressionForest> regressionForest(const std::string &s, size_t 
 }
 }
 }
-}

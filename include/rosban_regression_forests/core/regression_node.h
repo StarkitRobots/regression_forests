@@ -92,6 +92,5 @@ public:
                             double w2, Eigen::MatrixXd &limits);
 };
 }
-}
 
-std::ostream &operator<<(std::ostream &out, const Math::RegressionTree::RegressionNode &node);
+std::ostream &operator<<(std::ostream &out, const regression_forests::RegressionNode &node);

@@ -55,7 +55,6 @@ std::unique_ptr<RegressionTree> bb2Tree(const BB2TreeConfig &config);
 std::unique_ptr<RegressionForest> bb2Forest(const BB2TreeConfig &config);
 }
 }
-}
 
-bool operator<(const Math::RegressionTree::BB2Tree::SplitEntry &se1,
-               const Math::RegressionTree::BB2Tree::SplitEntry &se2);
+bool operator<(const regression_forests::BB2Tree::SplitEntry &se1,
+               const regression_forests::BB2Tree::SplitEntry &se2);

@@ -117,4 +117,3 @@ void PWLApproximation::print(std::ostream &out) const
   out << "$";
 }
 }
-}

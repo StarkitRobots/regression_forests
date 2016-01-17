@@ -46,4 +46,3 @@ public:
   static double difference(const Approximation *a1, const Approximation *a2);
 };
 }
-}

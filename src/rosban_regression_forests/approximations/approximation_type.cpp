@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-using Math::RegressionTree::ApproximationType;
+using regression_forests::ApproximationType;
 
 namespace regression_forests
 {
@@ -19,7 +19,7 @@ ApproximationType loadApproximationType(const std::string &s)
   throw std::runtime_error("Unknown approximation description '" + s + "'");
 }
 
-std::string to_string(Math::RegressionTree::ApproximationType at)
+std::string to_string(regression_forests::ApproximationType at)
 {
   switch (at)
   {
@@ -29,6 +29,5 @@ std::string to_string(Math::RegressionTree::ApproximationType at)
       return "PWL";
   }
   throw std::runtime_error("Unkown ApproximationType");
-}
 }
 }

@@ -22,6 +22,5 @@ public:
   virtual void print(std::ostream &out) const = 0;
 };
 }
-}
 
-std::ostream &operator<<(std::ostream &out, const Math::RegressionTree::Approximation &a);
+std::ostream &operator<<(std::ostream &out, const regression_forests::Approximation &a);

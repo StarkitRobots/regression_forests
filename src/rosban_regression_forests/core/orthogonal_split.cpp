@@ -15,9 +15,8 @@ bool OrthogonalSplit::isLower(const Eigen::VectorXd &input) const
   return input(dim) <= val;
 }
 }
-}
 
-std::ostream &operator<<(std::ostream &out, const Math::RegressionTree::OrthogonalSplit &split)
+std::ostream &operator<<(std::ostream &out, const regression_forests::OrthogonalSplit &split)
 {
   return out << "sd" << split.dim << "$v" << split.val << "$$";
 }

@@ -44,4 +44,3 @@ void PWCApproximation::print(std::ostream &out) const
   out << "apwc" << value << "$";
 }
 }
-}

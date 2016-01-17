@@ -37,6 +37,5 @@ public:
   static std::unique_ptr<RegressionForest> loadFile(const std::string &path);
 };
 }
-}
 
-std::ostream &operator<<(std::ostream &out, const Math::RegressionTree::RegressionForest &forest);
+std::ostream &operator<<(std::ostream &out, const regression_forests::RegressionForest &forest);

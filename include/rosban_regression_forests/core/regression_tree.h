@@ -59,6 +59,5 @@ public:
   std::unique_ptr<RegressionTree> project(const Eigen::MatrixXd &limits) const;
 };
 }
-}
 
-std::ostream &operator<<(std::ostream &out, const Math::RegressionTree::RegressionTree &tree);
+std::ostream &operator<<(std::ostream &out, const regression_forests::RegressionTree &tree);

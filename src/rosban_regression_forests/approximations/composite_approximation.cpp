@@ -126,4 +126,3 @@ double CompositeApproximation::difference(const Approximation *a1, const Approxi
   return pwc1->getValue() - pwc2->getValue();
 }
 }
-}

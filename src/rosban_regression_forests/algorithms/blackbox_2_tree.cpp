@@ -328,4 +328,3 @@ std::unique_ptr<RegressionForest> bb2Forest(const BB2TreeConfig &config)
 }
 }  // Namespace BB2Tree
 }
-}

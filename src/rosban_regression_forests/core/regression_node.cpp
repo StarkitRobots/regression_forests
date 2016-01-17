@@ -328,9 +328,8 @@ void RegressionNode::parallelMerge(RegressionNode &node, const RegressionNode &t
   }
 }
 }
-}
 
-std::ostream &operator<<(std::ostream &out, const Math::RegressionTree::RegressionNode &node)
+std::ostream &operator<<(std::ostream &out, const regression_forests::RegressionNode &node)
 {
   out << "n";
   if (node.isLeaf())

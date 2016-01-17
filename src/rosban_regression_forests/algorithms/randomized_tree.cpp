@@ -256,4 +256,3 @@ std::unique_ptr<RegressionForest> extraTrees(const TrainingSet &ls, size_t k, si
 }
 }
 }
-}
