@@ -11,49 +11,50 @@
  */
 namespace regression_forests
 {
-namespace BB2Tree
-{
-typedef std::function<double(const Eigen::VectorXd &)> EvalFunc;
-
-class SplitEntry
+class BB2Tree
 {
 public:
-  Node *node;
-  double gain;
-  OrthogonalSplit split;
-  TrainingSet::Subset samples;
-  Eigen::MatrixXd space;
+  typedef std::function<double(const Eigen::VectorXd &)> EvalFunc;
 
-  bool operator<(const SplitEntry &other) const;
+  class SplitEntry
+  {
+  public:
+    Node *node;
+    double gain;
+    OrthogonalSplit split;
+    TrainingSet::Subset samples;
+    Eigen::MatrixXd space;
+
+    bool operator<(const SplitEntry &other) const;
+  };
+
+  class BB2TreeConfig
+  {
+  public:
+    ApproximationType apprType;  // Which approximation for leafs?
+    int k;                       // Number of dimensions used at each split choice
+    // End condition
+    double minPotGain;
+    size_t maxLeafs;
+    // Avoiding undersampling
+    int nMin;
+    double minDensity;
+    // From input to output (no need to know the successor state)
+    EvalFunc eval;
+    // Overall Space of the problem
+    Eigen::MatrixXd space;
+    // Only for forests
+    int nbTrees;
+
+    BB2TreeConfig();
+    std::vector<std::string> names() const;
+    std::vector<std::string> values() const;
+    void load(const std::vector<std::string> &names, const std::vector<std::string> &values);
+  };
+
+  static std::unique_ptr<Tree> bb2Tree(const BB2TreeConfig &config);
+  static std::unique_ptr<Forest> bb2Forest(const BB2TreeConfig &config);
 };
-
-class BB2TreeConfig
-{
-public:
-  ApproximationType apprType;  // Which approximation for leafs?
-  int k;                       // Number of dimensions used at each split choice
-  // End condition
-  double minPotGain;
-  size_t maxLeafs;
-  // Avoiding undersampling
-  int nMin;
-  double minDensity;
-  // From input to output (no need to know the successor state)
-  EvalFunc eval;
-  // Overall Space of the problem
-  Eigen::MatrixXd space;
-  // Only for forests
-  int nbTrees;
-
-  BB2TreeConfig();
-  std::vector<std::string> names() const;
-  std::vector<std::string> values() const;
-  void load(const std::vector<std::string> &names, const std::vector<std::string> &values);
-};
-
-std::unique_ptr<Tree> bb2Tree(const BB2TreeConfig &config);
-std::unique_ptr<Forest> bb2Forest(const BB2TreeConfig &config);
-}
 }
 
 bool operator<(const regression_forests::BB2Tree::SplitEntry &se1,

@@ -14,9 +14,7 @@
 
 namespace regression_forests
 {
-namespace RandomizedTree
-{
-ExtraTreesConfig::ExtraTreesConfig()
+RandomizedTrees::ExtraTreesConfig::ExtraTreesConfig()
 {
   k = 1;
   nMin = 1;
@@ -26,12 +24,12 @@ ExtraTreesConfig::ExtraTreesConfig()
   apprType = ApproximationType::PWC;
 }
 
-std::vector<std::string> ExtraTreesConfig::names() const
+std::vector<std::string> RandomizedTrees::ExtraTreesConfig::names() const
 {
   return {"K", "NMin", "NbTrees", "MinVar", "Bootstrap", "ApprType"};
 }
 
-std::vector<std::string> ExtraTreesConfig::values() const
+std::vector<std::string> RandomizedTrees::ExtraTreesConfig::values() const
 {
   std::vector<std::string> result;
   result.push_back(std::to_string(k));
@@ -46,7 +44,8 @@ std::vector<std::string> ExtraTreesConfig::values() const
   return result;
 }
 
-void ExtraTreesConfig::load(const std::vector<std::string> &colNames, const std::vector<std::string> &colValues)
+void RandomizedTrees::ExtraTreesConfig::load(const std::vector<std::string> &colNames,
+                                             const std::vector<std::string> &colValues)
 {
   auto expectedNames = names();
   if (colNames.size() != expectedNames.size())
@@ -70,7 +69,9 @@ void ExtraTreesConfig::load(const std::vector<std::string> &colNames, const std:
   apprType = loadApproximationType(colValues[5]);
 }
 
-double avgSquaredErrors(const TrainingSet &ls, const TrainingSet::Subset &samples, enum ApproximationType apprType)
+static double avgSquaredErrors(const TrainingSet &ls,
+                               const TrainingSet::Subset &samples,
+                               enum ApproximationType apprType)
 {
   switch (apprType)
   {
@@ -93,8 +94,10 @@ double avgSquaredErrors(const TrainingSet &ls, const TrainingSet::Subset &sample
   throw std::runtime_error("Unknown ApprType");
 }
 
-double evalSplitScore(const TrainingSet &ls, const TrainingSet::Subset &samples, const OrthogonalSplit &split,
-                      enum ApproximationType apprType)
+double RandomizedTrees::evalSplitScore(const TrainingSet &ls,
+                                       const TrainingSet::Subset &samples,
+                                       const OrthogonalSplit &split,
+                                       enum ApproximationType apprType)
 {
   std::vector<int> samplesUpper, samplesLower;
   ls.applySplit(split, samples, samplesLower, samplesUpper);
@@ -120,8 +123,11 @@ double evalSplitScore(const TrainingSet &ls, const TrainingSet::Subset &samples,
   return (varAll - weightedNewVar) / varAll;
 }
 
-std::unique_ptr<Tree> learn(const TrainingSet &ls, size_t k, size_t nmin, double minVariance,
-                                      enum ApproximationType apprType)
+std::unique_ptr<Tree> RandomizedTrees::learn(const TrainingSet &ls,
+                                             size_t k,
+                                             size_t nmin,
+                                             double minVariance,
+                                             enum ApproximationType apprType)
 {
   std::function<Approximation *(const TrainingSet::Subset &)> approximateSamples;
   switch (apprType)
@@ -237,8 +243,13 @@ std::unique_ptr<Tree> learn(const TrainingSet &ls, size_t k, size_t nmin, double
   return t;
 }
 
-std::unique_ptr<Forest> extraTrees(const TrainingSet &ls, size_t k, size_t nmin, size_t nbTrees,
-                                             double minVariance, bool bootstrap, enum ApproximationType apprType)
+std::unique_ptr<Forest> RandomizedTrees::extraTrees(const TrainingSet &ls,
+                                                    size_t k,
+                                                    size_t nmin,
+                                                    size_t nbTrees,
+                                                    double minVariance,
+                                                    bool bootstrap,
+                                                    enum ApproximationType apprType)
 {
   std::unique_ptr<Forest> f(new Forest);
   for (size_t i = 0; i < nbTrees; i++)
@@ -253,6 +264,5 @@ std::unique_ptr<Forest> extraTrees(const TrainingSet &ls, size_t k, size_t nmin,
     }
   }
   return f;
-}
 }
 }

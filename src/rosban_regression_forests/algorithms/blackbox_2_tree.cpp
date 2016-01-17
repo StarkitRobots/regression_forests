@@ -10,9 +10,7 @@
 
 namespace regression_forests
 {
-namespace BB2Tree
-{
-bool SplitEntry::operator<(const SplitEntry &other) const
+bool BB2Tree::SplitEntry::operator<(const SplitEntry &other) const
 {
   if (gain == other.gain)
   {
@@ -21,18 +19,24 @@ bool SplitEntry::operator<(const SplitEntry &other) const
   return gain < other.gain;
 }
 
-BB2TreeConfig::BB2TreeConfig()
-  : apprType(ApproximationType::PWC), k(1), minPotGain(0), maxLeafs(0), nMin(1), minDensity(0), nbTrees(1)
+BB2Tree::BB2TreeConfig::BB2TreeConfig()
+  : apprType(ApproximationType::PWC),
+    k(1),
+    minPotGain(0),
+    maxLeafs(0),
+    nMin(1),
+    minDensity(0),
+    nbTrees(1)
 {
 }
 
-std::vector<std::string> BB2TreeConfig::names() const
+std::vector<std::string> BB2Tree::BB2TreeConfig::names() const
 {
   std::vector<std::string> result = {"ApprType", "k", "minPotGain", "maxLeafs", "nMin", "minDensity", "nbTrees"};
   return result;
 }
 
-std::vector<std::string> BB2TreeConfig::values() const
+std::vector<std::string> BB2Tree::BB2TreeConfig::values() const
 {
   std::vector<std::string> result;
   result.push_back(to_string(apprType));
@@ -45,7 +49,8 @@ std::vector<std::string> BB2TreeConfig::values() const
   return result;
 }
 
-void BB2TreeConfig::load(const std::vector<std::string> &colNames, const std::vector<std::string> &colValues)
+void BB2Tree::BB2TreeConfig::load(const std::vector<std::string> &colNames,
+                                  const std::vector<std::string> &colValues)
 {
   auto expectedNames = names();
   if (colNames.size() != expectedNames.size())
@@ -70,7 +75,7 @@ void BB2TreeConfig::load(const std::vector<std::string> &colNames, const std::ve
   nbTrees = std::stoi(colValues[6]);
 }
 
-double size(const Eigen::MatrixXd &space)
+static double size(const Eigen::MatrixXd &space)
 {
   if (space.cols() != 2)
   {
@@ -90,8 +95,12 @@ double size(const Eigen::MatrixXd &space)
 }
 
 // TODO multi-thread version
-void populate(TrainingSet &ts, TrainingSet::Subset &samples, const Eigen::MatrixXd &space, int minSize,
-              double minDensity, EvalFunc eval)
+static void populate(TrainingSet &ts,
+                     TrainingSet::Subset &samples,
+                     const Eigen::MatrixXd &space,
+                     int minSize,
+                     double minDensity,
+                     BB2Tree::EvalFunc eval)
 {
   int minSamplesByDensity = ceil(minDensity * size(space));
   int wishedSamples = std::max(minSize, minSamplesByDensity) - samples.size();
@@ -107,7 +116,9 @@ void populate(TrainingSet &ts, TrainingSet::Subset &samples, const Eigen::Matrix
   }
 }
 
-Approximation *getApproximation(const TrainingSet &ts, const TrainingSet::Subset &samples, ApproximationType apprType)
+static Approximation * getApproximation(const TrainingSet &ts,
+                                        const TrainingSet::Subset &samples,
+                                        ApproximationType apprType)
 {
   switch (apprType)
   {
@@ -119,8 +130,10 @@ Approximation *getApproximation(const TrainingSet &ts, const TrainingSet::Subset
   throw std::runtime_error("Unknown approximation type in getApproximation");
 }
 
-double potentialGain(const TrainingSet &ts, const TrainingSet::Subset &samples, Approximation *a,
-                     const Eigen::MatrixXd &space)
+static double potentialGain(const TrainingSet &ts,
+                            const TrainingSet::Subset &samples,
+                            Approximation *a,
+                            const Eigen::MatrixXd &space)
 {
   double squaredSum = 0;
   for (int s : samples)
@@ -133,7 +146,9 @@ double potentialGain(const TrainingSet &ts, const TrainingSet::Subset &samples, 
   return res;
 }
 
-double avgSquaredErrors(const TrainingSet &ls, const TrainingSet::Subset &samples, enum ApproximationType apprType)
+static double avgSquaredErrors(const TrainingSet &ls,
+                               const TrainingSet::Subset &samples,
+                               enum ApproximationType apprType)
 {
   switch (apprType)
   {
@@ -156,8 +171,10 @@ double avgSquaredErrors(const TrainingSet &ls, const TrainingSet::Subset &sample
   throw std::runtime_error("Unknown ApprType");
 }
 
-double evalSplitScore(const TrainingSet &ls, const TrainingSet::Subset &samples, const OrthogonalSplit &split,
-                      enum ApproximationType apprType)
+static double evalSplitScore(const TrainingSet &ls,
+                             const TrainingSet::Subset &samples,
+                             const OrthogonalSplit &split,
+                             enum ApproximationType apprType)
 {
   std::vector<int> samplesUpper, samplesLower;
   ls.applySplit(split, samples, samplesLower, samplesUpper);
@@ -190,11 +207,16 @@ double evalSplitScore(const TrainingSet &ls, const TrainingSet::Subset &samples,
   return (varAll - weightedNewVar) / varAll;
 }
 
-SplitEntry getBestSplitEntry(Node *node, const TrainingSet &ts, TrainingSet::Subset &samples,
-                             const Eigen::MatrixXd &space, int k, int nMin, ApproximationType apprType)
+static BB2Tree::SplitEntry getBestSplitEntry(Node *node,
+                                             const TrainingSet &ts,
+                                             TrainingSet::Subset &samples,
+                                             const Eigen::MatrixXd &space,
+                                             int k,
+                                             int nMin,
+                                             ApproximationType apprType)
 {
-  auto generator = regression_forests::get_random_engine();
-  std::vector<size_t> dimCandidates = regression_forests::getKDistinctFromN(k, ts.getInputDim(), &generator);
+  auto generator = get_random_engine();
+  std::vector<size_t> dimCandidates = getKDistinctFromN(k, ts.getInputDim(), &generator);
   std::vector<OrthogonalSplit> splitCandidates;
   splitCandidates.reserve(k);
   for (int i = 0; i < k; i++)
@@ -234,7 +256,7 @@ SplitEntry getBestSplitEntry(Node *node, const TrainingSet &ts, TrainingSet::Sub
     }
   }
 
-  SplitEntry e;
+  BB2Tree::SplitEntry e;
   e.node = node;
   ;
   e.gain = bestSplitScore * size(space);
@@ -244,8 +266,12 @@ SplitEntry getBestSplitEntry(Node *node, const TrainingSet &ts, TrainingSet::Sub
   return e;
 }
 
-void treat(Node *node, TrainingSet &ts, TrainingSet::Subset &samples, const Eigen::MatrixXd &space,
-           const BB2TreeConfig &c, std::set<SplitEntry> &splitCandidates)
+static void treat(Node *node,
+                  TrainingSet &ts,
+                  TrainingSet::Subset &samples,
+                  const Eigen::MatrixXd &space,
+                  const BB2Tree::BB2TreeConfig &c,
+                  std::set<BB2Tree::SplitEntry> &splitCandidates)
 {
   populate(ts, samples, space, 2 * c.nMin, c.minDensity, c.eval);
   node->a = getApproximation(ts, samples, c.apprType);
@@ -264,7 +290,7 @@ void treat(Node *node, TrainingSet &ts, TrainingSet::Subset &samples, const Eige
   }
 }
 
-std::unique_ptr<Tree> bb2Tree(const BB2TreeConfig &config)
+std::unique_ptr<Tree> BB2Tree::bb2Tree(const BB2Tree::BB2TreeConfig &config)
 {
   std::unique_ptr<Tree> tree(new Tree);
   std::set<SplitEntry> splitCandidates;
@@ -317,7 +343,7 @@ std::unique_ptr<Tree> bb2Tree(const BB2TreeConfig &config)
   return tree;
 }
 
-std::unique_ptr<Forest> bb2Forest(const BB2TreeConfig &config)
+std::unique_ptr<Forest> BB2Tree::bb2Forest(const BB2Tree::BB2TreeConfig &config)
 {
   std::unique_ptr<Forest> forest(new Forest);
   for (int i = 0; i < config.nbTrees; i++)
@@ -326,5 +352,4 @@ std::unique_ptr<Forest> bb2Forest(const BB2TreeConfig &config)
   }
   return forest;
 }
-}  // Namespace BB2Tree
 }
