@@ -4,9 +4,7 @@
 
 #include <iostream>
 
-namespace Math
-{
-namespace RegressionTree
+namespace regression_forests
 {
 PWLApproximation::PWLApproximation(const Eigen::VectorXd &factors_) : factors(factors_)
 {

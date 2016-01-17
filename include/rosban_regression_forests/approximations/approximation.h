@@ -4,9 +4,7 @@
 
 #include <Eigen/Core>
 
-namespace Math
-{
-namespace RegressionTree
+namespace regression_forests
 {
 class Approximation
 {

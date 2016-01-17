@@ -12,9 +12,7 @@
 #include <stack>
 #include <string>
 
-namespace Math
-{
-namespace RegressionTree
+namespace regression_forests
 {
 namespace RandomizedTree
 {

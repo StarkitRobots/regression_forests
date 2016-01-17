@@ -6,9 +6,7 @@
 #include <list>
 #include <map>
 
-namespace Math
-{
-namespace RegressionTree
+namespace regression_forests
 {
 typedef std::pair<RegressionNode *, double> EvaluatedNode;
 

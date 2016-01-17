@@ -2,9 +2,7 @@
 
 #include "rosban_regression_forests/tools/random.h"
 
-namespace Math
-{
-namespace RegressionTree
+namespace regression_forests
 {
 TrainingSet::TrainingSet(int inputDim_) : inputDim(inputDim_)
 {

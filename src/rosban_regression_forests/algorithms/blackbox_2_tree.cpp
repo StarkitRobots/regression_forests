@@ -8,9 +8,7 @@
 #include <iostream>
 #include <set>
 
-namespace Math
-{
-namespace RegressionTree
+namespace regression_forests
 {
 namespace BB2Tree
 {

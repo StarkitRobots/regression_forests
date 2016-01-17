@@ -5,9 +5,7 @@
 
 #include <fstream>
 
-namespace Math
-{
-namespace RegressionTree
+namespace regression_forests
 {
 RegressionForest::RegressionForest()
 {

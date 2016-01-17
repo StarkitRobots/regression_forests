@@ -4,9 +4,7 @@
 
 #include <memory>
 
-namespace Math
-{
-namespace RegressionTree
+namespace regression_forests
 {
 class RegressionTree
 {

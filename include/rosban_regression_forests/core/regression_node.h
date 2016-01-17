@@ -3,9 +3,7 @@
 #include "rosban_regression_forests/approximations/approximation.h"
 #include "rosban_regression_forests/core/orthogonal_split.h"
 
-namespace Math
-{
-namespace RegressionTree
+namespace regression_forests
 {
 class RegressionNode
 {

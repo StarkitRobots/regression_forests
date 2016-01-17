@@ -1,8 +1,6 @@
 #include "rosban_regression_forests/approximations/pwc_approximation.h"
 
-namespace Math
-{
-namespace RegressionTree
+namespace regression_forests
 {
 PWCApproximation::PWCApproximation(double value_) : value(value_)
 {

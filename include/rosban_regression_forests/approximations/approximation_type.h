@@ -3,9 +3,7 @@
 #include <string>
 #include <ostream>
 
-namespace Math
-{
-namespace RegressionTree
+namespace regression_forests
 {
 enum ApproximationType
 {

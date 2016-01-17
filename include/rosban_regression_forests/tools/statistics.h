@@ -2,7 +2,7 @@
 
 #include <vector>
 
-namespace Math
+namespace regression_forests
 {
 namespace Statistics
 {

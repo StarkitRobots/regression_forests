@@ -3,9 +3,7 @@
 #include "rosban_regression_forests/approximations/pwc_approximation.h"
 #include "rosban_regression_forests/approximations/pwl_approximation.h"
 
-namespace Math
-{
-namespace RegressionTree
+namespace regression_forests
 {
 CompositeApproximation::CompositeApproximation()
 {

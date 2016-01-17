@@ -2,9 +2,7 @@
 
 #include "rosban_regression_forests/core/regression_tree.h"
 
-namespace Math
-{
-namespace RegressionTree
+namespace regression_forests
 {
 class RegressionForest
 {

@@ -4,9 +4,7 @@
 
 using Math::RegressionTree::ApproximationType;
 
-namespace Math
-{
-namespace RegressionTree
+namespace regression_forests
 {
 ApproximationType loadApproximationType(const std::string &s)
 {

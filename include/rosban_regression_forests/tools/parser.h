@@ -4,9 +4,7 @@
 #include "rosban_regression_forests/core/orthogonal_split.h"
 #include "rosban_regression_forests/core/regression_forest.h"
 
-namespace Math
-{
-namespace RegressionTree
+namespace regression_forests
 {
 namespace Parser
 {

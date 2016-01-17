@@ -2,9 +2,7 @@
 
 #include "rosban_regression_forests/approximations/composite_approximation.h"
 
-namespace Math
-{
-namespace RegressionTree
+namespace regression_forests
 {
 RegressionNode::RegressionNode() : a(NULL), father(NULL), upperChild(NULL), lowerChild(NULL)
 {

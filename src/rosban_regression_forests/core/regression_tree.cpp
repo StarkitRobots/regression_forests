@@ -3,9 +3,7 @@
 #include <limits>
 #include <iostream>
 
-namespace Math
-{
-namespace RegressionTree
+namespace regression_forests
 {
 RegressionTree::RegressionTree() : root(NULL)
 {

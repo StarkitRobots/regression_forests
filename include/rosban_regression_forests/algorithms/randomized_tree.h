@@ -8,9 +8,7 @@
 /**
  * Based on 'Extremely Randomized Trees' (Geurts06)
  */
-namespace Math
-{
-namespace RegressionTree
+namespace regression_forests
 {
 namespace RandomizedTree
 {

@@ -3,9 +3,7 @@
 #include "rosban_regression_forests/core/orthogonal_split.h"
 #include "rosban_regression_forests/core/sample.h"
 
-namespace Math
-{
-namespace RegressionTree
+namespace regression_forests
 {
 class TrainingSet
 {

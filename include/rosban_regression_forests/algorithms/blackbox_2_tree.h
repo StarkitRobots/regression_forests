@@ -9,9 +9,7 @@
  * Extension of 'Extremely Randomized Trees' (Geurts06) to a situation where
  * the tree is not grown from an example but from a black box
  */
-namespace Math
-{
-namespace RegressionTree
+namespace regression_forests
 {
 namespace BB2Tree
 {

@@ -1,8 +1,6 @@
 #include "rosban_regression_forests/core/sample.h"
 
-namespace Math
-{
-namespace RegressionTree
+namespace regression_forests
 {
 Sample::Sample() : input(), output(0)
 {

@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace Math
+namespace regression_forests
 {
 namespace Statistics
 {
