@@ -2,8 +2,8 @@
 
 #include "rosban_regression_forests/approximations/approximation_type.h"
 #include "rosban_regression_forests/core/training_set.h"
-#include "rosban_regression_forests/core/regression_tree.h"
-#include "rosban_regression_forests/core/regression_forest.h"
+#include "rosban_regression_forests/core/tree.h"
+#include "rosban_regression_forests/core/forest.h"
 
 /**
  * Extension of 'Extremely Randomized Trees' (Geurts06) to a situation where

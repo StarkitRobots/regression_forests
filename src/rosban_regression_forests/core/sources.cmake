@@ -1,9 +1,9 @@
 set(SOURCES
   orthogonal_split.cpp
   pruning.cpp
-  regression_forest.cpp
-  regression_node.cpp
-  regression_tree.cpp
+  forest.cpp
+  node.cpp
+  tree.cpp
   sample.cpp
   training_set.cpp
 )

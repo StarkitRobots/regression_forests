@@ -2,7 +2,7 @@
 
 #include "rosban_regression_forests/approximations/approximation.h"
 #include "rosban_regression_forests/core/orthogonal_split.h"
-#include "rosban_regression_forests/core/regression_forest.h"
+#include "rosban_regression_forests/core/forest.h"
 
 namespace regression_forests
 {

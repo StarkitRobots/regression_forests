@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rosban_regression_forests/core/regression_node.h"
+#include "rosban_regression_forests/core/node.h"
 
 #include <memory>
 

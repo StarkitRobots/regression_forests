@@ -1,4 +1,4 @@
-#include "rosban_regression_forests/core/regression_forest.h"
+#include "rosban_regression_forests/core/forest.h"
 
 #include "rosban_regression_forests/tools/parser.h"
 #include "rosban_regression_forests/core/pruning.h"

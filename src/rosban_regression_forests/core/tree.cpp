@@ -1,4 +1,4 @@
-#include "rosban_regression_forests/core/regression_tree.h"
+#include "rosban_regression_forests/core/tree.h"
 
 #include <limits>
 #include <iostream>
