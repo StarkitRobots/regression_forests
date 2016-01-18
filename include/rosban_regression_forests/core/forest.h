@@ -17,9 +17,7 @@ public:
   size_t nbTrees() const;
   const Tree &getTree(size_t treeId) const;
 
-  /**
-   * transfers ownership of t to the Forest
-   */
+  /// transfers ownership of t to the Forest
   void push(std::unique_ptr<Tree> t);
 
   size_t maxSplitDim() const;
