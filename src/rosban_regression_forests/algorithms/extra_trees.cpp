@@ -14,7 +14,7 @@
 
 namespace regression_forests
 {
-RandomizedTrees::Config::Config()
+ExtraTrees::Config::Config()
 {
   k = 1;
   nMin = 1;
@@ -24,12 +24,12 @@ RandomizedTrees::Config::Config()
   apprType = ApproximationType::PWC;
 }
 
-std::vector<std::string> RandomizedTrees::Config::names() const
+std::vector<std::string> ExtraTrees::Config::names() const
 {
   return {"K", "NMin", "NbTrees", "MinVar", "Bootstrap", "ApprType"};
 }
 
-std::vector<std::string> RandomizedTrees::Config::values() const
+std::vector<std::string> ExtraTrees::Config::values() const
 {
   std::vector<std::string> result;
   result.push_back(std::to_string(k));
@@ -44,7 +44,7 @@ std::vector<std::string> RandomizedTrees::Config::values() const
   return result;
 }
 
-void RandomizedTrees::Config::load(const std::vector<std::string> &colNames,
+void ExtraTrees::Config::load(const std::vector<std::string> &colNames,
                                    const std::vector<std::string> &colValues)
 {
   auto expectedNames = names();
@@ -94,7 +94,7 @@ static double avgSquaredErrors(const TrainingSet &ls,
   throw std::runtime_error("Unknown ApprType");
 }
 
-double RandomizedTrees::evalSplitScore(const TrainingSet &ls,
+double ExtraTrees::evalSplitScore(const TrainingSet &ls,
                                        const TrainingSet::Subset &samples,
                                        const OrthogonalSplit &split,
                                        enum ApproximationType apprType)
@@ -123,7 +123,7 @@ double RandomizedTrees::evalSplitScore(const TrainingSet &ls,
   return (varAll - weightedNewVar) / varAll;
 }
 
-std::unique_ptr<Tree> RandomizedTrees::learn(const TrainingSet &ls,
+std::unique_ptr<Tree> ExtraTrees::learn(const TrainingSet &ls,
                                              size_t k,
                                              size_t nmin,
                                              double minVariance,
@@ -243,7 +243,7 @@ std::unique_ptr<Tree> RandomizedTrees::learn(const TrainingSet &ls,
   return t;
 }
 
-std::unique_ptr<Forest> RandomizedTrees::extraTrees(const TrainingSet &ls,
+std::unique_ptr<Forest> ExtraTrees::extraTrees(const TrainingSet &ls,
                                                     size_t k,
                                                     size_t nmin,
                                                     size_t nbTrees,

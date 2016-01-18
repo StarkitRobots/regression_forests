@@ -10,7 +10,7 @@
  */
 namespace regression_forests
 {
-class RandomizedTrees
+class ExtraTrees
 {
 public:
   class Config
