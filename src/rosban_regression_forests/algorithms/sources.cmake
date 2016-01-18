@@ -1,4 +1,4 @@
 set(SOURCES
   blackbox_2_tree.cpp
-  randomized_tree.cpp
+  extra_trees.cpp
 )

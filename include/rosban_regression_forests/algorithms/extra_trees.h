@@ -16,12 +16,16 @@ public:
   class Config
   {
   public:
+    /// nb_trees: the number of trees to grow
+    size_t nb_trees;
+    /// k: the number of dimensions used for randomCut
     size_t k;
-    size_t nMin;
-    size_t nbTrees;
-    double minVar;
-    bool bootstrap;
-    ApproximationType apprType;
+    /// n_min: the minimal number of samples per leaf
+    size_t n_min;
+    /// min_var: if variance is lower than the given threshold, do not split any further
+    double min_var;
+    /// appr_type: which types of approximation should be used for the leafs
+    ApproximationType appr_type;
 
     Config();
     std::vector<std::string> names() const;
@@ -29,28 +33,15 @@ public:
     void load(const std::vector<std::string> &names, const std::vector<std::string> &values);
   };
 
+  Config conf;
+
   static double evalSplitScore(const TrainingSet &ls,
                                const TrainingSet::Subset &samples,
                                const OrthogonalSplit &split,
-                               enum ApproximationType apprType);
-/**
- * k: the number of dimensions used for randomCut
- * nmin: the minimal number of samples per leaf
- * minVariance: if variance is lower than the given threshold,
- *              do not split any further
- */
-  static std::unique_ptr<Tree> learn(const TrainingSet &ls,
-                                     size_t k,
-                                     size_t nmin,
-                                     double minVariance = 0,
-                                     enum ApproximationType apprType = ApproximationType::PWC);
+                               enum ApproximationType appr_type);
 
-  static std::unique_ptr<Forest> extraTrees(const TrainingSet &ls,
-                                            size_t k,
-                                            size_t nmin,
-                                            size_t nbTrees,
-                                            double minVariance = 0,
-                                            bool bootstrap = false,
-                                            enum ApproximationType apprType = ApproximationType::PWC);
+  std::unique_ptr<Tree> solveTree(const TrainingSet &ts);
+  std::unique_ptr<Forest> solve(const TrainingSet &ts);
 };
+
 }
