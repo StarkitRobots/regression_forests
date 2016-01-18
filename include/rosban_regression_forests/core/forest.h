@@ -30,8 +30,7 @@ public:
   // default (0 value)
   // When preFilter is activated, each tree is projected before being merged
   // in the final result
-  std::unique_ptr<Tree> unifiedProjectedTree(const Eigen::MatrixXd &limits, size_t maxLeafs = 0,
-                                                       bool preFilter = false, bool parallelMerge = false);
+  std::unique_ptr<Tree> unifiedProjectedTree(const Eigen::MatrixXd &limits, size_t maxLeafs = 0);
 
   void save(const std::string &path) const;
   static std::unique_ptr<Forest> loadFile(const std::string &path);

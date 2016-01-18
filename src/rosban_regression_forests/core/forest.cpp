@@ -50,8 +50,7 @@ double Forest::getValue(const Eigen::VectorXd &input) const
   return sum / trees.size();
 }
 
-std::unique_ptr<Tree> Forest::unifiedProjectedTree(const Eigen::MatrixXd &limits, size_t maxLeafs,
-                                                                       bool preFilter, bool parallelMerge)
+std::unique_ptr<Tree> Forest::unifiedProjectedTree(const Eigen::MatrixXd &limits, size_t maxLeafs)
 {
   std::unique_ptr<Tree> result;
   if (trees.size() == 0)
@@ -64,27 +63,10 @@ std::unique_ptr<Tree> Forest::unifiedProjectedTree(const Eigen::MatrixXd &limits
   for (size_t treeId = 1; treeId < trees.size(); treeId++)
   {
     std::unique_ptr<Tree> tree;
-    if (preFilter)
-    {
-      tree = trees[treeId]->project(limits);
-    }
-    else
-    {
-      tree = std::move(trees[treeId]);
-    }
-    if (parallelMerge)
-    {
-      result = Tree::avgTrees(*result, *tree, treeId, 1, limits);
-    }
-    else
-    {
-      result->avgTree(*tree, 1.0 / treeId, limits);
-    }
+    tree = std::move(trees[treeId]);
+    result = Tree::avgTrees(*result, *tree, treeId, 1, limits);
     // Give back property to the vector
-    if (!preFilter)
-    {
-      trees[treeId] = std::move(tree);
-    }
+    trees[treeId] = std::move(tree);
     if (maxLeafs != 0)
     {
       result = pruneTree(std::move(result), limits, maxLeafs);
