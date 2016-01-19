@@ -44,8 +44,15 @@ std::vector<size_t> getKDistinctFromN(size_t k, size_t n,
 }
 
 std::vector<Eigen::VectorXd> getUniformSamples(const Eigen::MatrixXd& limits,
-                                                       size_t nbSamples)
+                                               size_t nbSamples,
+                                               std::default_random_engine * engine)
 {
+  bool cleanAtEnd = false;
+  if (engine == NULL) {
+    cleanAtEnd = true;
+    unsigned long seed = std::chrono::system_clock::now().time_since_epoch().count();
+    engine = new std::default_random_engine(seed);
+  }
   std::vector<Eigen::VectorXd> result;
   result.reserve(nbSamples);
   auto generator = get_random_engine();
@@ -62,6 +69,8 @@ std::vector<Eigen::VectorXd> getUniformSamples(const Eigen::MatrixXd& limits,
     }
     result.push_back(sample);
   }
+  if (cleanAtEnd)
+    delete(engine);
   return result;
 }
 
