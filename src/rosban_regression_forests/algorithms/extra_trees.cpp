@@ -187,7 +187,13 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts)
         continue;
       }
       std::uniform_real_distribution<double> distribution(s_val_min, s_val_max);
-      split_candidates.push_back(OrthogonalSplit(dim, distribution(generator)));
+      double split_value = distribution(generator);
+      // This should never happen according to the definition of uniform_real_distribution,
+      // because split_value is supposed to be in [min,max[, but in practice, it happens.
+      // Therefore this extra condition is required to ensure that there won't be any empty
+      // square
+      if (split_value == s_val_max) continue;
+      split_candidates.push_back(OrthogonalSplit(dim, split_value));
     }
     // If no splits are available do not split node
     if (split_candidates.size() == 0)
