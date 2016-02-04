@@ -44,10 +44,23 @@ PWLApproximation::PWLApproximation(const std::vector<Eigen::VectorXd> &inputs, c
   // factors = a.fullPivHouseholderQr().solve(b);// Weird results when testing
   // this one
   factors = a.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(b);
-  // std::cout << "################################" << std::endl;
-  // std::cout << "Inputs"  << std::endl << a       << std::endl;
-  // std::cout << "Outputs" << std::endl << b       << std::endl;
-  // std::cout << "factors" << std::endl << factors << std::endl;
+  // DEBUG: checking validity of factors
+  bool weird_factor = false;
+  for (int i = 0; i < factors.rows(); i++)
+  {
+    if (std::fabs(factors(i)) > std::pow(10,6))
+    {
+      weird_factor = true;
+      break;
+    }
+  }
+  if (weird_factor)
+  {
+    std::cout << "################################" << std::endl;
+    std::cout << "Inputs"  << std::endl << a       << std::endl;
+    std::cout << "Outputs" << std::endl << b       << std::endl;
+    std::cout << "factors" << std::endl << factors << std::endl;
+  }
 }
 
 PWLApproximation::~PWLApproximation()

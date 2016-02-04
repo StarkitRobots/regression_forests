@@ -4,7 +4,9 @@ project(rosban_regression_forests)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED
+  rosban_utils
+)
 
 find_package(PkgConfig)
 pkg_search_module(Eigen3 REQUIRED eigen3>=3.2.3)
@@ -103,7 +105,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES rosban_regression_forests
-#  CATKIN_DEPENDS other_catkin_pkg
+  CATKIN_DEPENDS rosban_utils
   DEPENDS Eigen3
 )
 
@@ -113,6 +115,7 @@ catkin_package(
 
 include_directories(
   include
+  ${catkin_INCLUDE_DIRS} 
   ${EIGEN3_INCLUDE_DIR}
   )
 

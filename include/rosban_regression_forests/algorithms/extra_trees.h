@@ -5,6 +5,8 @@
 #include "rosban_regression_forests/core/tree.h"
 #include "rosban_regression_forests/core/forest.h"
 
+#include <rosban_utils/serializable.h>
+
 /**
  * Based on 'Extremely Randomized Trees' (Geurts06)
  */
@@ -13,7 +15,7 @@ namespace regression_forests
 class ExtraTrees
 {
 public:
-  class Config
+  class Config : public rosban_utils::Serializable
   {
   public:
     /// nb_trees: the number of trees to grow
@@ -31,6 +33,11 @@ public:
     std::vector<std::string> names() const;
     std::vector<std::string> values() const;
     void load(const std::vector<std::string> &names, const std::vector<std::string> &values);
+
+    // XML stuff
+    virtual std::string class_name() const override;
+    virtual void to_xml(std::ostream &out) const override;
+    virtual void from_xml(TiXmlNode *node) override;
   };
 
   Config conf;

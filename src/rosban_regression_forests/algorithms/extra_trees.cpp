@@ -67,6 +67,32 @@ void ExtraTrees::Config::load(const std::vector<std::string> &col_names,
   appr_type = loadApproximationType(col_values[4]);
 }
 
+std::string ExtraTrees::Config::class_name() const
+{
+  return "ExtraTreesConfig";
+}
+
+void ExtraTrees::Config::to_xml(std::ostream &out) const
+{
+  rosban_utils::xml_tools::write<int>("k", k, out);
+  rosban_utils::xml_tools::write<int>("n_min", n_min, out);
+  rosban_utils::xml_tools::write<int>("nb_trees", nb_trees, out);
+  rosban_utils::xml_tools::write<double>("min_var", min_var, out);
+  rosban_utils::xml_tools::write<std::string>("appr_type", to_string(appr_type), out);  
+}
+
+void ExtraTrees::Config::from_xml(TiXmlNode *node)
+{
+  k         = rosban_utils::xml_tools::read<int>(node, "k");
+  n_min     = rosban_utils::xml_tools::read<int>(node, "n_min");
+  nb_trees  = rosban_utils::xml_tools::read<int>(node, "nb_trees");
+  min_var   = rosban_utils::xml_tools::read<double>(node, "min_var");
+  std::string appr_type_str;
+  appr_type_str =rosban_utils::xml_tools::read<std::string>(node, "appr_type");
+  appr_type = loadApproximationType(appr_type_str);
+}
+
+
 static double avgSquaredErrors(const TrainingSet &ts,
                                const TrainingSet::Subset &samples,
                                enum ApproximationType appr_type)
