@@ -5,7 +5,7 @@
 
 namespace regression_forests
 {
-enum ApproximationType
+enum class ApproximationType
 {
   PWC,
   PWL

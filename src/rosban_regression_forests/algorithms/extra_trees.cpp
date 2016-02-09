@@ -95,13 +95,13 @@ void ExtraTrees::Config::from_xml(TiXmlNode *node)
 
 static double avgSquaredErrors(const TrainingSet &ts,
                                const TrainingSet::Subset &samples,
-                               enum ApproximationType appr_type)
+                               ApproximationType appr_type)
 {
   switch (appr_type)
   {
-    case PWC:
+    case ApproximationType::PWC:
       return Statistics::variance(ts.values(samples));
-    case PWL:
+    case ApproximationType::PWL:
     {
       std::vector<Eigen::VectorXd> inputs = ts.inputs(samples);
       std::vector<double> outputs = ts.values(samples);
@@ -153,13 +153,13 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts)
   std::function<Approximation *(const TrainingSet::Subset &)> approximateSamples;
   switch (conf.appr_type)
   {
-    case PWC:
+    case ApproximationType::PWC:
       approximateSamples = [&ts](const TrainingSet::Subset &samples)
       {
         return new PWCApproximation(Statistics::mean(ts.values(samples)));
       };
       break;
-    case PWL:
+    case ApproximationType::PWL:
       approximateSamples = [&ts](const TrainingSet::Subset &samples)
       {
         return new PWLApproximation(ts.inputs(samples), ts.values(samples));

@@ -122,9 +122,9 @@ static Approximation * getApproximation(const TrainingSet &ts,
 {
   switch (apprType)
   {
-    case PWC:
+    case ApproximationType::PWC:
       return new PWCApproximation(Statistics::mean(ts.values(samples)));
-    case PWL:
+    case ApproximationType::PWL:
       return new PWLApproximation(ts.inputs(samples), ts.values(samples));
   }
   throw std::runtime_error("Unknown approximation type in getApproximation");
@@ -148,13 +148,13 @@ static double potentialGain(const TrainingSet &ts,
 
 static double avgSquaredErrors(const TrainingSet &ls,
                                const TrainingSet::Subset &samples,
-                               enum ApproximationType apprType)
+                               ApproximationType apprType)
 {
   switch (apprType)
   {
-    case PWC:
+    case ApproximationType::PWC:
       return Statistics::variance(ls.values(samples));
-    case PWL:
+    case ApproximationType::PWL:
     {
       std::vector<Eigen::VectorXd> inputs = ls.inputs(samples);
       std::vector<double> outputs = ls.values(samples);
