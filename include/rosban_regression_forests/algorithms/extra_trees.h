@@ -15,6 +15,10 @@ namespace regression_forests
 class ExtraTrees
 {
 public:
+
+  typedef std::function<Approximation *(const TrainingSet::Subset &,
+                                        const Eigen::MatrixXd &)> Approximator;
+
   class Config : public rosban_utils::Serializable
   {
   public:
@@ -28,6 +32,10 @@ public:
     double min_var;
     /// appr_type: which types of approximation should be used for the leafs
     ApproximationType appr_type;
+    /// val_max: Approximations are not allowed to send a value above
+    double val_max;
+    /// val_min: Approximations are not allowed to send a value below
+    double val_min;
 
     Config();
     std::vector<std::string> names() const;
@@ -45,10 +53,13 @@ public:
   static double evalSplitScore(const TrainingSet &ls,
                                const TrainingSet::Subset &samples,
                                const OrthogonalSplit &split,
-                               enum ApproximationType appr_type);
+                               Approximator approximator,
+                               const Eigen::MatrixXd &limits);
 
-  std::unique_ptr<Tree> solveTree(const TrainingSet &ts);
-  std::unique_ptr<Forest> solve(const TrainingSet &ts);
+  std::unique_ptr<Tree> solveTree(const TrainingSet &ts,
+                                  const Eigen::MatrixXd &limits);
+  std::unique_ptr<Forest> solve(const TrainingSet &ts,
+                                const Eigen::MatrixXd &limits);
 };
 
 }

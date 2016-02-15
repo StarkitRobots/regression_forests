@@ -10,7 +10,8 @@ PWLApproximation::PWLApproximation(const Eigen::VectorXd &factors_) : factors(fa
 {
 }
 
-PWLApproximation::PWLApproximation(const std::vector<Eigen::VectorXd> &inputs, const std::vector<double> &outputs)
+PWLApproximation::PWLApproximation(const std::vector<Eigen::VectorXd> &inputs,
+                                   const std::vector<double> &outputs)
 {
   // Checking various stuff
   if (inputs.size() == 0)
@@ -44,23 +45,6 @@ PWLApproximation::PWLApproximation(const std::vector<Eigen::VectorXd> &inputs, c
   // factors = a.fullPivHouseholderQr().solve(b);// Weird results when testing
   // this one
   factors = a.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(b);
-  // DEBUG: checking validity of factors
-  bool weird_factor = false;
-  for (int i = 0; i < factors.rows(); i++)
-  {
-    if (std::fabs(factors(i)) > std::pow(10,6))
-    {
-      weird_factor = true;
-      break;
-    }
-  }
-  if (weird_factor)
-  {
-    std::cout << "################################" << std::endl;
-    std::cout << "Inputs"  << std::endl << a       << std::endl;
-    std::cout << "Outputs" << std::endl << b       << std::endl;
-    std::cout << "factors" << std::endl << factors << std::endl;
-  }
 }
 
 PWLApproximation::~PWLApproximation()
@@ -89,29 +73,57 @@ double PWLApproximation::eval(const Eigen::VectorXd &state) const
   return value;
 }
 
-void PWLApproximation::updateMaxPair(const Eigen::MatrixXd &limits, std::pair<double, Eigen::VectorXd> &best) const
+std::pair<double,Eigen::VectorXd> PWLApproximation::getMinPair(const Eigen::MatrixXd &limits) const
 {
-  Eigen::VectorXd bestState(factors.rows() - 1);
-  for (int dim = 0; dim < bestState.rows(); dim++)
+  Eigen::VectorXd worst_state(factors.rows() - 1);
+  for (int dim = 0; dim < worst_state.rows(); dim++)
   {
     if (factors(dim) > 0)
     {
-      bestState(dim) = limits(dim, 1);
+      worst_state(dim) = limits(dim, 1);
     }
     else if (factors(dim) < 0)
     {
-      bestState(dim) = limits(dim, 0);
+      worst_state(dim) = limits(dim, 0);
     }
     else
     {
-      bestState(dim) = (limits(dim, 0) + limits(dim, 1)) / 2;
+      worst_state(dim) = (limits(dim, 0) + limits(dim, 1)) / 2;
     }
   }
-  double value = eval(bestState);
-  if (best.first < value)
+  double value = eval(worst_state);
+  return std::pair<double,Eigen::VectorXd>(value, worst_state);
+}
+std::pair<double,Eigen::VectorXd> PWLApproximation::getMaxPair(const Eigen::MatrixXd &limits) const
+{
+  Eigen::VectorXd best_state(factors.rows() - 1);
+  for (int dim = 0; dim < best_state.rows(); dim++)
   {
-    best.first = value;
-    best.second = bestState;
+    if (factors(dim) > 0)
+    {
+      best_state(dim) = limits(dim, 1);
+    }
+    else if (factors(dim) < 0)
+    {
+      best_state(dim) = limits(dim, 0);
+    }
+    else
+    {
+      best_state(dim) = (limits(dim, 0) + limits(dim, 1)) / 2;
+    }
+  }
+  double value = eval(best_state);
+  return std::pair<double,Eigen::VectorXd>(value, best_state);
+}
+
+void PWLApproximation::updateMaxPair(const Eigen::MatrixXd &limits,
+                                     std::pair<double, Eigen::VectorXd> &best) const
+{
+  auto new_pair = getMaxPair(limits);
+  if (best.first < new_pair.first)
+  {
+    best.first = new_pair.first;
+    best.second = new_pair.second;
   }
 }
 
