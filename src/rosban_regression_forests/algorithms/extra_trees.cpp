@@ -138,6 +138,10 @@ double ExtraTrees::evalSplitScore(const TrainingSet &ts,
   double varUpper = avgSquaredErrors(ts, samples_upper, approx_upper);
   double weightedNewVar = (varLower * samples_lower.size()
                            + varUpper * samples_upper.size()) / nb_samples;
+  // Avoid memory leaks
+  delete(approx);
+  delete(approx_lower);
+  delete(approx_upper);
   return (varAll - weightedNewVar) / varAll;
 }
 
@@ -167,6 +171,8 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
         {
           return (Approximation*)pwl_app;
         }
+        /// Shunting the PWC approximation (test)
+        return (Approximation*)pwl_app;
         /// If not, delete it and return a PWC approximation
         delete(pwl_app);
         return (Approximation*)new PWCApproximation(Statistics::mean(ts.values(samples)));
