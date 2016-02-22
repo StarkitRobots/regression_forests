@@ -13,17 +13,14 @@ find_package(Eigen REQUIRED)
 
 find_package(rosban_viewer)
 
-set(DELEG_INCLUDE_DIRS
-  include
-)
-set(DELEG_LIBRARIES
-  rosban_regression_forests
-)
+set(DELEG_INCLUDE_DIRS include)
+set(DELEG_LIBRARIES rosban_regression_forests)
 
 if (rosban_viewer_FOUND)
   message("rosban_viewer found, adding support for regression_forests viewer")
-    list(APPEND DELEG_INCLUDE_DIRS ${rosban_viewer_INCLUDE_DIRS})
-    list(APPEND DELEG_LIBRARIES ${rosban_viewer_LIBRARIES})
+  set (EXTRA_LIBS ${rosban_viewer_LIBRARIES})
+  list(APPEND DELEG_INCLUDE_DIRS ${rosban_viewer_INCLUDE_DIRS})
+  list(APPEND DELEG_LIBRARIES ${rosban_viewer_LIBRARIES})
 else()
   message("rosban_viewer was not found, no support for regression_forests viewer")
 endif(rosban_viewer_FOUND)
@@ -80,7 +77,7 @@ foreach (DIRECTORY ${DIRECTORIES})
     set (ALL_SOURCES ${ALL_SOURCES} ${PREFIXED_SOURCES})
 endforeach (DIRECTORY)
 
-# if rosban_viewer is found, then add the support
+# if rosban_viewer is found, then add the support for viewers
 if (rosban_viewer_FOUND)
   set (ALL_SOURCES
     ${ALL_SOURCES}
@@ -95,56 +92,15 @@ add_library(rosban_regression_forests
 
 target_link_libraries(rosban_regression_forests
   ${catkin_LIBRARIES}
+  ${EXTRA_LIBS}
   )
 
-# if rosban_viewer is found, then add the support
+# if rosban_viewer is found, then add the viewer executable as target
 if (rosban_viewer_FOUND)
+  add_executable(viewer src/viewer.cpp)
+
+  target_link_libraries(viewer
+    ${catkin_LIBRARIES}
+    ${DELEG_LIBRARIES}
+    )
 endif(rosban_viewer_FOUND)
-
-#############
-## Install ##
-#############
-
-# all install targets should use catkin DESTINATION variables
-# See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
-
-## Mark executable scripts (Python etc.) for installation
-## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
-
-## Mark executables and/or libraries for installation
-# install(TARGETS rosban_regression_forests rosban_regression_forests_node
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
-
-## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE
-# )
-
-## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
-#   # myfile1
-#   # myfile2
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
-
-#############
-## Testing ##
-#############
-
-## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_rosban_regression_forests.cpp)
-# if(TARGET ${PROJECT_NAME}-test)
-#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
-# endif()
-
-## Add folders to be run by python nosetests
-# catkin_add_nosetests(test)

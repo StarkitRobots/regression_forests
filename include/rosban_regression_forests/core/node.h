@@ -47,6 +47,10 @@ public:
   std::pair<double, Eigen::VectorXd> getMaxPair(Eigen::MatrixXd &limits) const;
   void updateMaxPair(Eigen::MatrixXd &limits, std::pair<double, Eigen::VectorXd> &best) const;
 
+  /// Return min over all leafs
+  std::pair<double, Eigen::VectorXd> getMinPair(Eigen::MatrixXd &limits) const;
+  void updateMinPair(Eigen::MatrixXd &limits, std::pair<double, Eigen::VectorXd> &best) const;
+
   /**
    * Return a vector of size 2^|freeDimensions| containing the 'corners' of
    * the freeDimensions inside limits.

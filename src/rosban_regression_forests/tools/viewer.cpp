@@ -197,6 +197,9 @@ void Viewer::updateCorners()
   projectedTree = forest->unifiedProjectedTree(localLimits, maxLeafs);
   std::cout << "Finding max:" << std::endl;
   std::pair<double, Eigen::VectorXd> projectionMax = projectedTree->getMaxPair(localLimits);
+  std::pair<double, Eigen::VectorXd> projectionMin = projectedTree->getMinPair(localLimits);
+  std::cout << "\tMin: " << projectionMin.first << " at "
+            << projectionMin.second.transpose() << std::endl;
   std::cout << "\tMax: " << projectionMax.first << " at "
             << projectionMax.second.transpose() << std::endl;
   std::cout << "Projecting projectTree" << std::endl;
@@ -217,10 +220,27 @@ void Viewer::updateCorners()
       }
       // Rescale z value (output)
       double rawOutput = projectedTile[cornerId](freeDims.size());
+      if (rawOutput > limits(inputDim,1)) rawOutput = limits(inputDim,1);
+      if (rawOutput < limits(inputDim,0)) rawOutput = limits(inputDim,0);
       double output = rescaleValue(rawOutput, inputDim);
+      bool adjusted = true;//TODO: handle as a mode
+      if (adjusted)
+      {
+        double minVal = std::max(projectionMin.first, limits(inputDim,0));
+        double maxVal = std::min(projectionMax.first, limits(inputDim,1));
+        double diff =  maxVal - minVal;
+        if (diff == 0)
+        {
+          output = 0.5;
+        }
+        else
+        {
+          output = (rawOutput - minVal) / diff;
+        }
+      }
       corner(2) = output;
       Color color;
-      double altColor = 1 - 2 * abs(output - 0.5);
+      double altColor = 1.0 - 2 * std::fabs(output - 0.5);
       if (output > 0.5) {
         color = Color(1, altColor, altColor);
       }

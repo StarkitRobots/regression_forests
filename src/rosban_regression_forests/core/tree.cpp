@@ -42,6 +42,12 @@ Eigen::VectorXd Tree::getArgMax(const Eigen::MatrixXd &limits) const
   return getMaxPair(limits).second;
 }
 
+std::pair<double, Eigen::VectorXd> Tree::getMinPair(const Eigen::MatrixXd &limits) const
+{
+  Eigen::MatrixXd localLimits = limits;
+  return root->getMinPair(localLimits);
+}
+
 std::pair<double, Eigen::VectorXd> Tree::getMaxPair(const Eigen::MatrixXd &limits) const
 {
   Eigen::MatrixXd localLimits = limits;

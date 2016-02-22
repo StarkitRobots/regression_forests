@@ -30,6 +30,7 @@ public:
   double getMax(const Eigen::MatrixXd &limits) const;
   Eigen::VectorXd getArgMax(const Eigen::MatrixXd &limits) const;
 
+  std::pair<double, Eigen::VectorXd> getMinPair(const Eigen::MatrixXd &limits) const;
   std::pair<double, Eigen::VectorXd> getMaxPair(const Eigen::MatrixXd &limits) const;
 
   /**

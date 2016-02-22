@@ -172,6 +172,39 @@ void Node::updateMaxPair(Eigen::MatrixXd &limits, std::pair<double, Eigen::Vecto
   }
 }
 
+std::pair<double, Eigen::VectorXd> Node::getMinPair(Eigen::MatrixXd &limits) const
+{
+  std::pair<double, Eigen::VectorXd> best;
+  best.first = std::numeric_limits<double>::max();
+  best.second = Eigen::VectorXd(limits.rows());
+  updateMinPair(limits, best);
+  return best;
+}
+
+void Node::updateMinPair(Eigen::MatrixXd &limits, std::pair<double, Eigen::VectorXd> &best) const
+{
+  if (isLeaf())
+  {
+    return a->updateMinPair(limits, best);
+  }
+  double oldMin = limits(s.dim, 0);
+  double oldMax = limits(s.dim, 1);
+  // If split is above limits min, search in lower child
+  if (oldMin <= s.val)
+  {
+    limits(s.dim, 1) = s.val;
+    lowerChild->updateMinPair(limits, best);
+    limits(s.dim, 1) = oldMax;
+  }
+  // If split is above limits min, search in lower child
+  if (oldMax > s.val)
+  {
+    limits(s.dim, 0) = s.val;
+    upperChild->updateMinPair(limits, best);
+    limits(s.dim, 0) = oldMin;
+  }
+}
+
 std::vector<Eigen::VectorXd> Node::project(const std::vector<int> &freeDimensions,
                                                      const Eigen::MatrixXd &limits)
 {

@@ -116,6 +116,17 @@ std::pair<double,Eigen::VectorXd> PWLApproximation::getMaxPair(const Eigen::Matr
   return std::pair<double,Eigen::VectorXd>(value, best_state);
 }
 
+void PWLApproximation::updateMinPair(const Eigen::MatrixXd &limits,
+                                     std::pair<double, Eigen::VectorXd> &best) const
+{
+  auto new_pair = getMinPair(limits);
+  if (best.first > new_pair.first)
+  {
+    best.first = new_pair.first;
+    best.second = new_pair.second;
+  }
+}
+
 void PWLApproximation::updateMaxPair(const Eigen::MatrixXd &limits,
                                      std::pair<double, Eigen::VectorXd> &best) const
 {

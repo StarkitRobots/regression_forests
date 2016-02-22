@@ -27,6 +27,31 @@ double CompositeApproximation::eval(const Eigen::VectorXd &state) const
   return sum / approximations.size();
 }
 
+void CompositeApproximation::updateMinPair(const Eigen::MatrixXd &limits,
+                                           std::pair<double, Eigen::VectorXd> &best) const
+{
+  double sum = 0.0;
+  for (Approximation *a : approximations)
+  {
+    PWCApproximation *pwcA = dynamic_cast<PWCApproximation *>(a);
+    if (pwcA == NULL)
+    {
+      throw std::runtime_error("CompositeApproximation: getMin of node is only "
+                               "implemented for PWCApproximation yet");
+    }
+    sum += pwcA->eval(Eigen::VectorXd());
+  }
+  double value = sum / approximations.size();
+  if (best.first > value)
+  {
+    best.first = value;
+    for (int row = 0; row < limits.rows(); row++)
+    {
+      best.second(row) = (limits(row, 0) + limits(row, 1)) / 2;
+    }
+  }
+}
+
 void CompositeApproximation::updateMaxPair(const Eigen::MatrixXd &limits,
                                            std::pair<double, Eigen::VectorXd> &best) const
 {
