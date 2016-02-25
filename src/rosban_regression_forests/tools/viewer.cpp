@@ -13,18 +13,20 @@ using rosban_viewer::Color;
 
 namespace regression_forests {
 
-Viewer::Viewer(const std::string& forestFile,
-               const std::string& configFile,
-               unsigned int width, unsigned int height)
+Viewer::Viewer(const std::string& forest_path,
+               const std::string& config_path,
+               unsigned int width,
+               unsigned int height)
   : rosban_viewer::Viewer(width, height),
-    currentDim(-1)
+    dim_index(-1),
+    sub_dim_index(-1)
 {
-  std::cout << "Loading file '" << forestFile << "' as a forestFile" << std::endl;
-  forest = Forest::loadFile(forestFile);
+  std::cout << "Loading file '" << forest_path << "' as a forest" << std::endl;
+  forest = Forest::loadFile(forest_path);
 
   // Read config
   std::ifstream configStream;
-  configStream.open(configFile);
+  configStream.open(config_path);
   std::vector<std::string> lines;
   while(configStream.good()) {
     std::string line;
@@ -36,28 +38,32 @@ Viewer::Viewer(const std::string& forestFile,
     throw std::runtime_error("Expecting 3 lines in config file: (header, mins, maxs)");
   }
   std::vector<std::string> mins, maxs;
-  dimNames = rosban_utils::split_string(lines[0], ',');
+  dim_names = rosban_utils::split_string(lines[0], ',');
   mins     = rosban_utils::split_string(lines[1], ',');
   maxs     = rosban_utils::split_string(lines[2], ',');
-  if (dimNames.size() != mins.size() || dimNames.size() != maxs.size()) {
+  if (dim_names.size() != mins.size() || dim_names.size() != maxs.size()) {
     throw std::runtime_error("Inconsistent config file");
   }
-  limits = Eigen::MatrixXd(dimNames.size(), 2);
-  for (size_t dim = 0; dim < dimNames.size(); dim++) {
-    limits(dim, 0) = std::stod(mins[dim]);
-    limits(dim, 1) = std::stod(maxs[dim]);
-  }
-  inputDim = dimNames.size() - 1;
-
-  if (forest->maxSplitDim() > inputDim) {
-    throw std::runtime_error("configFile has not enough columns");
+  space_limits = Eigen::MatrixXd(dim_names.size(), 2);
+  for (size_t dim = 0; dim < dim_names.size(); dim++) {
+    space_limits(dim, 0) = std::stod(mins[dim]);
+    space_limits(dim, 1) = std::stod(maxs[dim]);
   }
 
-  lockValues = Eigen::VectorXd(inputDim);
+  if (forest->maxSplitDim() > inputSize()) {
+    throw std::runtime_error("config has not enough columns");
+  }
+
+  // Initially, all dimensions are locked on the middle value (special behavior for output)
+  current_limits = Eigen::MatrixXd(dim_names.size(), 2);
   locked.clear();
-  for (size_t dimIdx = 0; dimIdx < inputDim; dimIdx++) {
+  for (size_t dim = 0; dim < inputSize(); dim++) {
     locked.push_back(true);
-    lockValues(dimIdx) = (limits(dimIdx, 0) + limits(dimIdx, 1)) / 2;
+    double mid_val = (space_limits(dim, 0) + space_limits(dim, 1)) / 2;
+    for (int sub_dim : {0,1})
+    {
+      current_limits(dim, sub_dim) = mid_val;
+    }
   }
 
   // Initializing keyboard callbacks
@@ -74,10 +80,8 @@ Viewer::Viewer(const std::string& forestFile,
                                            { this->valueToMax(); });
   onKeyPress[sf::Keyboard::End].push_back([this]()
                                           { this->valueToMin(); });
-  onKeyPress[sf::Keyboard::L].push_back([this]()
-                                        { this->lock(); });
-  onKeyPress[sf::Keyboard::F].push_back([this]()
-                                        { this->unlock(); });
+  onKeyPress[sf::Keyboard::T].push_back([this]()
+                                        { this->toggle(); });
 
   // Default messages
   font.loadFromFile("monkey.ttf");//Follow it!
@@ -92,62 +96,139 @@ Viewer::Viewer(const std::string& forestFile,
   }
 }
 
+int Viewer::inputSize() const
+{
+  return dim_names.size() - 1;
+}
+
 double Viewer::rescaleValue(double rawValue, int dim)
 {
-  double min = limits(dim, 0);
-  double max = limits(dim, 1);
+  double min = current_limits(dim, 0);
+  double max = current_limits(dim, 1);
   double delta = max - min;
   return (rawValue - min) / delta;
 }
 
 void Viewer::increaseValue(double ratio)
 {
-  if (currentDim == -1) return;
+  // If no dimension is selected, do nothing
+  if (dim_index == -1) return;
+  // Applying eventual modifiers
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) { ratio *= 10; }
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) { ratio /= 10; }
-  double oldVal = lockValues(currentDim);
-  double min = limits(currentDim, 0);
-  double max = limits(currentDim, 1);
+  // Getting basic properties
+  double old_min = current_limits(dim_index,0);
+  double old_max = current_limits(dim_index,1);
+  double min = space_limits(dim_index, 0);
+  double max = space_limits(dim_index, 1);
   double delta = max - min;
-  double newVal = oldVal + delta * ratio;
-  if (newVal > max) { newVal -= delta; }
-  if (newVal < min) { newVal += delta; }
-  lockValues(currentDim) = newVal;
-  updateCorners();
+  // Updating value
+  if (sub_dim_index < 0)
+  {
+    for (int sub_dim : {0,1})
+    {
+      current_limits(dim_index, sub_dim) += delta * ratio;
+    }
+  }
+  else
+  {
+    current_limits(dim_index, sub_dim_index) += delta * ratio;
+  }
+  // Ensuring that current_limits is a subspace of space_limits
+  if (current_limits(dim_index, 0) < min) current_limits(dim_index, 0) = min;
+  if (current_limits(dim_index, 1) > max) current_limits(dim_index, 1) = max;
+  // Ensure min <= max
+  if (current_limits(dim_index,0) > current_limits(dim_index,1))
+  {
+    if (sub_dim_index == 0)
+      current_limits(dim_index, 0) = current_limits(dim_index, 1);
+    else
+      current_limits(dim_index, 1) = current_limits(dim_index, 0);
+  }
+  // If there was effective change update corners
+  if (current_limits(dim_index, 0) != old_min ||
+      current_limits(dim_index, 1) != old_max)
+  {
+    updateCorners();
+  }
 }
 
 void Viewer::valueToMax()
 {
-  if (currentDim == -1) return;
-  lockValues(currentDim) = limits(currentDim, 1);
+  if (dim_index == -1) return;
+  double max = space_limits(dim_index, 1);
+  switch(sub_dim_index)
+  {
+    case -1:
+      current_limits(dim_index, 0) = max;
+      current_limits(dim_index, 1) = max;
+      break;
+    case 0:
+      current_limits(dim_index, 0) = current_limits(dim_index,1);
+      break;
+    case 1:
+      current_limits(dim_index, 1) = max;
+      break;
+    default:
+      throw std::logic_error("Invalid value for dim_index");
+  }
   updateCorners();
 }
 
 void Viewer::valueToMin()
 {
-  if (currentDim == -1) return;
-  lockValues(currentDim) = limits(currentDim, 0);
+  if (dim_index == -1) return;
+  double min = space_limits(dim_index, 0);
+  switch(sub_dim_index)
+  {
+    case -1:
+      current_limits(dim_index, 0) = min;
+      current_limits(dim_index, 1) = min;
+      break;
+    case 0:
+      current_limits(dim_index, 0) = min;
+      break;
+    case 1:
+      current_limits(dim_index, 1) = current_limits(dim_index, 0);
+      break;
+    default:
+      throw std::logic_error("Invalid value for dim_index");
+  }
   updateCorners();
 }
 
-void Viewer::lock()
+void Viewer::toggle()
 {
-  if (currentDim == -1) return;
-  locked[currentDim] = true;
-  updateCorners();
-}
-
-void Viewer::unlock()
-{
-  if (currentDim == -1) return;
-  locked[currentDim] = false;
+  // If no dim selected, do nothing
+  if (dim_index == -1) return;
+  // toggle locked status
+  locked[dim_index] = !locked[dim_index];
+  // If locked, set min and max to the middle value
+  if (locked[dim_index])
+  {
+    double mid_val = (space_limits(dim_index, 0) + space_limits(dim_index, 1)) / 2;
+    for (int sub_dim : {0,1})
+    {
+      current_limits(dim_index, sub_dim) = mid_val;
+    }
+    // Min and max cannot be selected since dim is locked
+    sub_dim_index = -1;
+  }
+  // If unlocked, set min and max to extremum values
+  else
+  {
+    for (int sub_dim : {0,1})
+    {
+      current_limits(dim_index, sub_dim) = space_limits(dim_index, sub_dim);
+    }
+  }
   updateCorners();
 }
 
 std::vector<int> Viewer::freeDimensions()
 {
   std::vector<int> result;
-  for (size_t d = 0; d < inputDim; d++) {
+  for (size_t d = 0; d < inputSize(); d++) {
     if (!locked[d]) {
       result.push_back(d);
     }
@@ -155,25 +236,18 @@ std::vector<int> Viewer::freeDimensions()
   return result;
 }
 
-Eigen::MatrixXd Viewer::getLocalLimits()
+const Eigen::MatrixXd & Viewer::getCurrentLimits() const
 {
-  Eigen::MatrixXd localLimits = limits.block(0,0,inputDim,2);
-  for (size_t dim = 0; dim < inputDim; dim++) {
-    if (locked[dim]) {
-      localLimits(dim,0) = lockValues[dim];
-      localLimits(dim,1) = lockValues[dim];
-    }
-  }
-  return localLimits;
+  return current_limits;
 }
 
 void Viewer::updateCorners()
 {
-  cornersPos.clear();
-  cornersColor.clear();
+  corners_pos.clear();
+  corners_color.clear();
 
   // Local limits
-  Eigen::MatrixXd localLimits = getLocalLimits();
+  Eigen::MatrixXd localLimits = getCurrentLimits();
 
   std::vector<int> freeDims = freeDimensions();
 
@@ -206,6 +280,13 @@ void Viewer::updateCorners()
   std::vector<std::vector<Eigen::VectorXd>> projectionTiles;
   projectionTiles = projectedTree->project(freeDims, localLimits);
   std::cout << "Filling structures" << std::endl;
+
+  // Auto mode, update current_limits for value according to content
+  if (locked[inputSize()])
+  {
+    current_limits(inputSize(), 0) = std::max(projectionMin.first, space_limits(inputSize(),0));
+    current_limits(inputSize(), 1) = std::min(projectionMax.first, space_limits(inputSize(),1));
+  }
   // Normalize and add color
   for (size_t tileId = 0; tileId < projectionTiles.size(); tileId++) {
     std::vector<Eigen::VectorXd>& projectedTile = projectionTiles[tileId];
@@ -214,29 +295,31 @@ void Viewer::updateCorners()
     for (size_t cornerId = 0; cornerId < projectedTile.size(); cornerId++) {
       Eigen::VectorXd corner(3);
       // Rescale x,y values
-      for (size_t freeDim = 0; freeDim < freeDims.size(); freeDim++) {
-        double rawVal = projectedTile[cornerId](freeDim);
-        corner(freeDim) = rescaleValue(rawVal, freeDims[freeDim]);
+      for (size_t corner_dim = 0; corner_dim < freeDims.size(); corner_dim++) {
+        int free_dim = freeDims[corner_dim];
+        double rawVal = projectedTile[cornerId](corner_dim);
+        // If min != max, just rescale values
+        if (localLimits(free_dim,0) != localLimits(free_dim,1))
+        {
+          corner(corner_dim) = rescaleValue(rawVal, free_dim);
+        }
+        // If min == max, select 0 or 1 depending on cornerId
+        else
+        {
+          bool is_min = (cornerId / (int)std::pow(2, corner_dim)) % 2;
+          corner(corner_dim) = is_min ? 0 : 1;
+        }
       }
       // Rescale z value (output)
       double rawOutput = projectedTile[cornerId](freeDims.size());
-      if (rawOutput > limits(inputDim,1)) rawOutput = limits(inputDim,1);
-      if (rawOutput < limits(inputDim,0)) rawOutput = limits(inputDim,0);
-      double output = rescaleValue(rawOutput, inputDim);
-      bool adjusted = true;//TODO: handle as a mode
-      if (adjusted)
+      // Bounding raw Output to acceptable values
+      //if (rawOutput > limits(inputSize(),1)) rawOutput = limits(inputSize(),1);
+      //if (rawOutput < limits(inputSize(),0)) rawOutput = limits(inputSize(),0);
+      double output = 0.5;
+      // If minValue != maxValue, update output
+      if (current_limits(inputSize(), 0) != current_limits(inputSize(), 1))
       {
-        double minVal = std::max(projectionMin.first, limits(inputDim,0));
-        double maxVal = std::min(projectionMax.first, limits(inputDim,1));
-        double diff =  maxVal - minVal;
-        if (diff == 0)
-        {
-          output = 0.5;
-        }
-        else
-        {
-          output = (rawOutput - minVal) / diff;
-        }
+        output = rescaleValue(rawOutput, inputSize());
       }
       corner(2) = output;
       Color color;
@@ -261,8 +344,8 @@ void Viewer::updateCorners()
         tileCornersColor.push_back(color);
       }
     }
-    cornersPos.push_back(tileCornersPos);
-    cornersColor.push_back(tileCornersColor);
+    corners_pos.push_back(tileCornersPos);
+    corners_color.push_back(tileCornersColor);
   }
 }
 
@@ -270,15 +353,42 @@ void Viewer::navigate()
 {
   //Shift-tab not handled in sfml 2.0
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl)) {
-    currentDim--;
-    if (currentDim == -2) {
-      currentDim = inputDim - 1;
+    // If we can jump to previous sub_dim, it is enough
+    if (sub_dim_index > -1)
+    {
+      sub_dim_index--;
+    }
+    // Jump to previous dimension
+    else
+    {
+      dim_index--;
+      // Circular list
+      if (dim_index == -2) {
+        dim_index = inputSize();
+      }
+      // If final dimension is not locked, use last sub_dim_index
+      if (dim_index >= 0 && !locked[dim_index])
+        sub_dim_index = 1;
+      else
+        sub_dim_index = -1;
     }
   }
+  // Forward case
   else {
-    currentDim++;
-    if ((size_t)currentDim == inputDim) {
-      currentDim = -1;
+    // If we can jump to next sub_dim, it is enough
+    if (dim_index >= 0 && !locked[dim_index] && sub_dim_index < 1)
+    {
+      sub_dim_index++;
+    }
+    // Jump to next dim
+    else
+    {
+      dim_index++;
+      // circular list
+      if (dim_index > inputSize()) {
+        dim_index = -1;
+      }
+      sub_dim_index = -1;
     }
   }
 }
@@ -286,9 +396,9 @@ void Viewer::navigate()
 void Viewer::drawTiles()
 {
   glBegin(GL_QUADS);
-  for (size_t tileId = 0; tileId < cornersPos.size(); tileId++) {
-    const std::vector<Eigen::VectorXd>& points = cornersPos[tileId];
-    const std::vector<Color>& colors = cornersColor[tileId];
+  for (size_t tileId = 0; tileId < corners_pos.size(); tileId++) {
+    const std::vector<Eigen::VectorXd>& points = corners_pos[tileId];
+    const std::vector<Color>& colors = corners_color[tileId];
     for (size_t pId : {0,1,3,2}) {//Ordering matters for opengl
       const Eigen::VectorXd& p = points[pId];
       const Color& c = colors[pId];
@@ -299,25 +409,63 @@ void Viewer::drawTiles()
   glEnd();
 }
 
+void Viewer::appendLimits(int dim, std::ostream &out) const
+{
+  std::vector<std::pair<std::string,int>> names = {{"min", 0}, {"max", 1}};
+  for (const auto & entry : names)
+  {
+    // Print selection indicator
+    if (dim == dim_index && sub_dim_index == entry.second)
+      out << "->    ";
+    else
+      out << "      ";
+    // Print limits itself
+    out << entry.first << ": " << current_limits(dim, entry.second) << std::endl;
+  }     
+}
+
+void Viewer::appendDim(int dim, std::ostream &out) const
+{
+  bool input = dim != inputSize();
+  // Printing selection indicator
+  if (dim_index == dim && sub_dim_index == -1)
+    out << "->";
+  else
+    out << "  ";
+  // Printing name and limits
+  out << dim_names[dim] << ": ";//Padding would be nice
+  out << " [" << space_limits(dim,0) << "," << space_limits(dim,1) << "] ";
+  // Status dependant message
+  if (locked[dim])
+  {
+    // Just print information on lock value
+    if (input)
+    {
+      out << "Locked at " << current_limits(dim,0) << ": " << std::endl;
+    }
+    // Print used bounds for output
+    else
+    {
+      out << "Auto" << std::endl;
+      appendLimits(dim, out);
+    }
+  }
+  // Dimension is free
+  else
+  {
+    // Just print information on lock value
+    out << "Manual" << std::endl;
+    appendLimits(dim, out);
+  }
+}
+
 void Viewer::updateStatus()
 {
   std::ostringstream oss;
-  for (size_t dim = 0; dim < inputDim; dim++) {
-    if (currentDim == (int) dim) {
-      oss << "->";
-    }
-    else {
-      oss << "  ";
-    }
-    if (locked[dim]) {
-      oss << "Locked at " << lockValues[dim] << ": "; 
-    }
-    else {
-      oss << "Free  : ";
-    }
-    oss << dimNames[dim];
-    oss << " [" << limits(dim,0) << "," << limits(dim,1) << "]";
-    oss << std::endl;
+  // Input:
+  for (size_t dim = 0; dim <= inputSize(); dim++)
+  {
+    appendDim(dim, oss);
   }
   rosban_viewer::Viewer::updateStatus(oss.str());
 }
