@@ -57,12 +57,15 @@ Viewer::Viewer(const std::string& forest_path,
   // Initially, all dimensions are locked on the middle value (special behavior for output)
   current_limits = Eigen::MatrixXd(dim_names.size(), 2);
   locked.clear();
-  for (size_t dim = 0; dim < inputSize(); dim++) {
+  for (size_t dim = 0; dim <= inputSize(); dim++) {
     locked.push_back(true);
     double mid_val = (space_limits(dim, 0) + space_limits(dim, 1)) / 2;
     for (int sub_dim : {0,1})
     {
-      current_limits(dim, sub_dim) = mid_val;
+      if (dim < inputSize())
+        current_limits(dim, sub_dim) = mid_val;
+      else
+        current_limits(dim, sub_dim) = space_limits(dim, sub_dim);
     }
   }
 
@@ -247,13 +250,13 @@ void Viewer::updateCorners()
   corners_color.clear();
 
   // Local limits
-  Eigen::MatrixXd localLimits = getCurrentLimits();
+  Eigen::MatrixXd input_limits = getCurrentLimits().block(0,0,inputSize(),2);
 
   std::vector<int> freeDims = freeDimensions();
 
   if (freeDims.size() > 2) { return;}
   if (freeDims.size() == 0) { // Special mode, print value of each tree
-    Eigen::VectorXd input = localLimits.col(0);
+    Eigen::VectorXd input = input_limits.col(0);
     std::cout << "Input: "  << input                   << std::endl;
     std::cout << "Output: " << forest->getValue(input) << std::endl;
     for (size_t treeId = 0; treeId < forest->nbTrees(); treeId++)
@@ -268,17 +271,17 @@ void Viewer::updateCorners()
 
   std::unique_ptr<Tree> projectedTree;
   std::cout << "Unifying projectTree" << std::endl;
-  projectedTree = forest->unifiedProjectedTree(localLimits, maxLeafs);
+  projectedTree = forest->unifiedProjectedTree(input_limits, maxLeafs);
   std::cout << "Finding max:" << std::endl;
-  std::pair<double, Eigen::VectorXd> projectionMax = projectedTree->getMaxPair(localLimits);
-  std::pair<double, Eigen::VectorXd> projectionMin = projectedTree->getMinPair(localLimits);
+  std::pair<double, Eigen::VectorXd> projectionMax = projectedTree->getMaxPair(input_limits);
+  std::pair<double, Eigen::VectorXd> projectionMin = projectedTree->getMinPair(input_limits);
   std::cout << "\tMin: " << projectionMin.first << " at "
             << projectionMin.second.transpose() << std::endl;
   std::cout << "\tMax: " << projectionMax.first << " at "
             << projectionMax.second.transpose() << std::endl;
   std::cout << "Projecting projectTree" << std::endl;
   std::vector<std::vector<Eigen::VectorXd>> projectionTiles;
-  projectionTiles = projectedTree->project(freeDims, localLimits);
+  projectionTiles = projectedTree->project(freeDims, input_limits);
   std::cout << "Filling structures" << std::endl;
 
   // Auto mode, update current_limits for value according to content
@@ -299,7 +302,7 @@ void Viewer::updateCorners()
         int free_dim = freeDims[corner_dim];
         double rawVal = projectedTile[cornerId](corner_dim);
         // If min != max, just rescale values
-        if (localLimits(free_dim,0) != localLimits(free_dim,1))
+        if (input_limits(free_dim,0) != input_limits(free_dim,1))
         {
           corner(corner_dim) = rescaleValue(rawVal, free_dim);
         }
@@ -313,8 +316,13 @@ void Viewer::updateCorners()
       // Rescale z value (output)
       double rawOutput = projectedTile[cornerId](freeDims.size());
       // Bounding raw Output to acceptable values
-      //if (rawOutput > limits(inputSize(),1)) rawOutput = limits(inputSize(),1);
-      //if (rawOutput < limits(inputSize(),0)) rawOutput = limits(inputSize(),0);
+      if (!locked[inputSize()])
+      {
+        if (rawOutput > current_limits(inputSize(),1))
+          rawOutput = current_limits(inputSize(),1);
+        if (rawOutput < current_limits(inputSize(),0))
+          rawOutput = current_limits(inputSize(),0);
+      }
       double output = 0.5;
       // If minValue != maxValue, update output
       if (current_limits(inputSize(), 0) != current_limits(inputSize(), 1))
