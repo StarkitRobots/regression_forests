@@ -32,6 +32,12 @@ public:
 
   void save(const std::string &path) const;
   static std::unique_ptr<Forest> loadFile(const std::string &path);
+
+  /// Apply the given function on every node of every tree
+  void apply(Eigen::MatrixXd &limits, Node::Function f);
+
+  /// Apply the given function on every leaf of every tree
+  void applyOnLeafs(Eigen::MatrixXd &limits, Node::Function f);
 };
 }
 

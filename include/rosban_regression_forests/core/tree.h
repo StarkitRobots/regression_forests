@@ -58,6 +58,12 @@ public:
                                                   double w2, const Eigen::MatrixXd &limits);
 
   std::unique_ptr<Tree> project(const Eigen::MatrixXd &limits) const;
+
+  /// Apply the given function on every node of the tree
+  void apply(Eigen::MatrixXd &limits, Node::Function f);
+
+  /// Apply the given function on every leaf of the tree
+  void applyOnLeafs(Eigen::MatrixXd &limits, Node::Function f);
 };
 }
 

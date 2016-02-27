@@ -196,7 +196,7 @@ void Node::updateMinPair(Eigen::MatrixXd &limits, std::pair<double, Eigen::Vecto
     lowerChild->updateMinPair(limits, best);
     limits(s.dim, 1) = oldMax;
   }
-  // If split is above limits min, search in lower child
+  // If split is below limits max, search in upper child
   if (oldMax > s.val)
   {
     limits(s.dim, 0) = s.val;
@@ -235,6 +235,38 @@ std::vector<Eigen::VectorXd> Node::project(const std::vector<int> &freeDimension
     result.push_back(corner);
   }
   return result;
+}
+
+void Node::apply(Eigen::MatrixXd &limits, Function f)
+{
+  // Start by applying function
+  f(this, limits);
+  // Then carry one to the childs
+  double oldMin = limits(s.dim, 0);
+  double oldMax = limits(s.dim, 1);
+  // If split is above limits min, apply on lower child
+  if (oldMin <= s.val)
+  {
+    limits(s.dim, 1) = s.val;
+    lowerChild->apply(limits, f);
+    limits(s.dim, 1) = oldMax;
+  }
+  // If split is below limits max, apply on upper child
+  if (oldMax > s.val)
+  {
+    limits(s.dim, 0) = s.val;
+    upperChild->apply(limits, f);
+    limits(s.dim, 0) = oldMin;
+  }
+}
+
+void Node::applyOnLeafs(Eigen::MatrixXd &limits, Function f)
+{
+  Function new_f = [f](Node* node, const Eigen::MatrixXd &limits)
+    {
+      if (node->isLeaf()) f(node, limits);
+    };
+  apply(limits, new_f);
 }
 
 Node *Node::clone() const

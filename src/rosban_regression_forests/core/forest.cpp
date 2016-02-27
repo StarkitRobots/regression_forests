@@ -98,6 +98,23 @@ std::unique_ptr<Forest> Forest::loadFile(const std::string &path)
   }
   throw std::runtime_error("Failed to open file '" + path + "'");
 }
+
+void Forest::apply(Eigen::MatrixXd &limits, Node::Function f)
+{
+  for (size_t i = 0; i < trees.size(); i++)
+  {
+    trees[i]->apply(limits, f);
+  }
+}
+
+void Forest::applyOnLeafs(Eigen::MatrixXd &limits, Node::Function f)
+{
+  for (size_t i = 0; i < trees.size(); i++)
+  {
+    trees[i]->applyOnLeafs(limits, f);
+  }
+}
+
 }
 
 std::ostream &operator<<(std::ostream &out, const regression_forests::Forest &forest)

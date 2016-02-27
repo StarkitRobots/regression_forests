@@ -194,6 +194,17 @@ std::unique_ptr<Tree> Tree::project(const Eigen::MatrixXd &limits) const
   t->addSubTree(t->root, localLimits, *this, 1.0);
   return t;
 }
+
+void Tree::apply(Eigen::MatrixXd &limits, Node::Function f)
+{
+  root->apply(limits, f);
+}
+
+void Tree::applyOnLeafs(Eigen::MatrixXd &limits, Node::Function f)
+{
+  root->applyOnLeafs(limits, f);
+}
+
 }
 
 std::ostream &operator<<(std::ostream &out, const regression_forests::Tree &tree)

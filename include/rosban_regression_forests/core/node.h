@@ -3,6 +3,8 @@
 #include "rosban_regression_forests/approximations/approximation.h"
 #include "rosban_regression_forests/core/orthogonal_split.h"
 
+#include <functional>
+
 namespace regression_forests
 {
 class Node
@@ -11,6 +13,10 @@ public:
   Approximation *a;
   Node *father, *upperChild, *lowerChild;
   OrthogonalSplit s;
+
+  /// Define functions which can be applied on every node
+  typedef std::function<void(Node *node,
+                             const Eigen::MatrixXd &space)> Function;
 
   /**
    * Regression Node takes in charge the destruction of both childs and of
@@ -60,7 +66,14 @@ public:
    * |freeDimensions|
    * - v(|freeDimensions|) is the evaluation of the value at this point
    */
-  std::vector<Eigen::VectorXd> project(const std::vector<int> &freeDimensions, const Eigen::MatrixXd &limits);
+  std::vector<Eigen::VectorXd> project(const std::vector<int> &freeDimensions,
+                                       const Eigen::MatrixXd &limits);
+
+  /// Apply the given function on every child of the given node
+  void apply(Eigen::MatrixXd &limits, Function f);
+
+  /// Apply the given function to each leaf among the child of the given node
+  void applyOnLeafs(Eigen::MatrixXd &limits, Function f);
 
   /**
    * Return a deepCopy of the current regressionNode.
