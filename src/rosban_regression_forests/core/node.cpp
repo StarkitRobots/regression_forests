@@ -241,7 +241,9 @@ void Node::apply(Eigen::MatrixXd &limits, Function f)
 {
   // Start by applying function
   f(this, limits);
-  // Then carry one to the childs
+  // If we reached a leaf, return
+  if (isLeaf()) return;
+  // Otherwise carry on to the childs
   double oldMin = limits(s.dim, 0);
   double oldMax = limits(s.dim, 1);
   // If split is above limits min, apply on lower child
