@@ -1,6 +1,7 @@
 #include "rosban_regression_forests/tools/random.h"
 
 #include <chrono>
+#include <stdexcept>
 
 namespace regression_forests
 {
@@ -14,6 +15,8 @@ std::default_random_engine get_random_engine()
 std::vector<size_t> getKDistinctFromN(size_t k, size_t n,
                                       std::default_random_engine * engine)
 {
+  if (k > n)
+    throw std::runtime_error("getKDistinctFromN: k is greater than n (forbidden)");
   bool cleanAtEnd = false;
   if (engine == NULL) {
     cleanAtEnd = true;
