@@ -177,7 +177,7 @@ void Tree::avgTree(const Tree &other, double otherWeight, const Eigen::MatrixXd 
 }
 
 std::unique_ptr<Tree> Tree::avgTrees(const Tree &t1, const Tree &t2, double w1,
-                                                         double w2, const Eigen::MatrixXd &limits)
+                                     double w2, const Eigen::MatrixXd &limits)
 {
   Eigen::MatrixXd localLimits = limits;
   std::unique_ptr<Tree> result(new Tree());

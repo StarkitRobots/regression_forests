@@ -9,9 +9,11 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <mutex>
 #include <sstream>
 #include <stack>
 #include <string>
+#include <thread>
 
 namespace regression_forests
 {
@@ -20,54 +22,11 @@ ExtraTrees::Config::Config()
   k = 1;
   n_min = 1;
   nb_trees = 1;
+  nb_threads = 1;
   min_var = 0;
   appr_type = ApproximationType::PWC;
   val_min = std::numeric_limits<double>::lowest();
   val_max = std::numeric_limits<double>::max();
-}
-
-std::vector<std::string> ExtraTrees::Config::names() const
-{
-  return {"k", "n_min", "nb_trees", "min_var", "appr_type"};
-}
-
-std::vector<std::string> ExtraTrees::Config::values() const
-{
-  std::vector<std::string> result;
-  result.push_back(std::to_string(k));
-  result.push_back(std::to_string(n_min));
-  result.push_back(std::to_string(nb_trees));
-  // Custom behavior for min_var due to rounding
-  std::ostringstream min_var_oss;
-  min_var_oss << std::setprecision(6) << min_var;
-  result.push_back(min_var_oss.str());
-  result.push_back(to_string(appr_type));
-  return result;
-}
-
-void ExtraTrees::Config::load(const std::vector<std::string> &col_names,
-                              const std::vector<std::string> &col_values)
-{
-  const std::vector<std::string> &expected_names = names();
-  if (col_names.size() != expected_names.size())
-  {
-    throw std::runtime_error("Failed to load extraTreesConfig, mismatch of vector size");
-  }
-  for (size_t col_no = 0; col_no < col_names.size(); col_no++)
-  {
-    auto given_name = col_names[col_no];
-    auto expected_name = expected_names[col_no];
-    if (given_name.find(expected_name) == std::string::npos)
-    {
-      throw std::runtime_error("Given name '" + given_name + "' does not match '"
-                               + expected_name + "'");
-    }
-  }
-  k         = std::stoi(col_values[0]);
-  n_min     = std::stoi(col_values[1]);
-  nb_trees  = std::stoi(col_values[2]);
-  min_var   = std::stod(col_values[3]);
-  appr_type = loadApproximationType(col_values[4]);
 }
 
 std::string ExtraTrees::Config::class_name() const
@@ -80,6 +39,7 @@ void ExtraTrees::Config::to_xml(std::ostream &out) const
   rosban_utils::xml_tools::write<int>("k", k, out);
   rosban_utils::xml_tools::write<int>("n_min", n_min, out);
   rosban_utils::xml_tools::write<int>("nb_trees", nb_trees, out);
+  rosban_utils::xml_tools::write<int>("nb_threads", nb_threads, out);
   rosban_utils::xml_tools::write<double>("min_var", min_var, out);
   rosban_utils::xml_tools::write<double>("val_min", val_min, out);
   rosban_utils::xml_tools::write<double>("val_max", val_max, out);
@@ -88,12 +48,13 @@ void ExtraTrees::Config::to_xml(std::ostream &out) const
 
 void ExtraTrees::Config::from_xml(TiXmlNode *node)
 {
-  k         = rosban_utils::xml_tools::read<int>(node, "k");
-  n_min     = rosban_utils::xml_tools::read<int>(node, "n_min");
-  nb_trees  = rosban_utils::xml_tools::read<int>(node, "nb_trees");
-  min_var   = rosban_utils::xml_tools::read<double>(node, "min_var");
-  val_min   = rosban_utils::xml_tools::read<double>(node, "val_min");
-  val_max   = rosban_utils::xml_tools::read<double>(node, "val_max");
+  k           = rosban_utils::xml_tools::read<int>(node, "k");
+  n_min       = rosban_utils::xml_tools::read<int>(node, "n_min");
+  nb_trees    = rosban_utils::xml_tools::read<int>(node, "nb_trees");
+  nb_threads  = rosban_utils::xml_tools::read<int>(node, "nb_threads");
+  min_var     = rosban_utils::xml_tools::read<double>(node, "min_var");
+  val_min     = rosban_utils::xml_tools::read<double>(node, "val_min");
+  val_max     = rosban_utils::xml_tools::read<double>(node, "val_max");
   std::string appr_type_str;
   appr_type_str =rosban_utils::xml_tools::read<std::string>(node, "appr_type");
   appr_type = loadApproximationType(appr_type_str);
@@ -302,10 +263,37 @@ std::unique_ptr<Forest> ExtraTrees::solve(const TrainingSet &ts,
                                           const Eigen::MatrixXd &limits)
 {
   std::unique_ptr<Forest> f(new Forest);
-  for (size_t i = 0; i < conf.nb_trees; i++)
+  std::vector<std::thread> threads;
+  std::mutex forest_mutex;
+  auto solver = [this, &forest_mutex, &f, &ts, &limits] (int nb_trees)
+    {
+      double solving_time = 0;
+      double waiting_time = 0;
+      double pushing_time = 0;
+      for (int i = 0; i < nb_trees; i++)
+      {
+        std::unique_ptr<Tree> tree = this->solveTree(ts, limits);
+        // Ensuring thread-safety when accessing the forest
+        forest_mutex.lock();
+        f->push(std::unique_ptr<Tree>(tree.release()));
+        forest_mutex.unlock();
+      }
+    };
+
+  double trees_by_thread = conf.nb_trees / (double)conf.nb_threads;
+  for (size_t thread_no = 0; thread_no < conf.nb_threads; thread_no++)
   {
-    f->push(solveTree(ts, limits));
+    // Compute trees in [start, end[
+    int start = std::floor(thread_no * trees_by_thread);
+    int end = std::floor((thread_no + 1) * trees_by_thread);
+    int nb_trees = end - start;
+    threads.push_back(std::thread(solver, nb_trees));
   }
+  for (std::thread & t : threads)
+  {
+    t.join();
+  }
+
   return f;
 }
 

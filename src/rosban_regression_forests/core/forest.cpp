@@ -63,10 +63,7 @@ std::unique_ptr<Tree> Forest::unifiedProjectedTree(const Eigen::MatrixXd &limits
   for (size_t treeId = 1; treeId < trees.size(); treeId++)
   {
     std::unique_ptr<Tree> tree;
-    tree = std::move(trees[treeId]);
-    result = Tree::avgTrees(*result, *tree, treeId, 1, limits);
-    // Give back property to the vector
-    trees[treeId] = std::move(tree);
+    result = Tree::avgTrees(*result, *(trees[treeId]), treeId, 1, limits);
     if (maxLeafs != 0)
     {
       result = pruneTree(std::move(result), limits, maxLeafs);

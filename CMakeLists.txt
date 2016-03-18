@@ -16,6 +16,8 @@ find_package(rosban_viewer)
 set(DELEG_INCLUDE_DIRS include)
 set(DELEG_LIBRARIES rosban_regression_forests)
 
+# Warning: Need to clean build in order to create the viewer if it was not
+#          available during the first build
 if (rosban_viewer_FOUND)
   message("rosban_viewer found, adding support for regression_forests viewer")
   set (EXTRA_LIBS ${rosban_viewer_LIBRARIES})

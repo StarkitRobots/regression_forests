@@ -36,11 +36,10 @@ public:
     double val_max;
     /// val_min: Approximations are not allowed to send a value below
     double val_min;
+    /// nb_threads: Number of threads used to compute the regression forest
+    int nb_threads;
 
     Config();
-    std::vector<std::string> names() const;
-    std::vector<std::string> values() const;
-    void load(const std::vector<std::string> &names, const std::vector<std::string> &values);
 
     // XML stuff
     virtual std::string class_name() const override;
