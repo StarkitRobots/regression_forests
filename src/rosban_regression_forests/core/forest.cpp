@@ -50,6 +50,25 @@ double Forest::getValue(const Eigen::VectorXd &input) const
   return sum / trees.size();
 }
 
+/// Return a randomized value based on the confidence interval
+double Forest::getRandomizedValue(const Eigen::VectorXd &input,
+                                  std::default_random_engine &engine) const
+{
+  double mean = getValue(input);
+  double var = 0;
+  for (const auto &t : trees)
+  {
+    double diff = t->getValue(input) - mean;
+    var += diff * diff;
+  }
+  var /= trees.size();
+  double std_dev = std::sqrt(var);
+  double std_err = std_dev / std::sqrt(trees.size());
+  std::normal_distribution<double> distrib(mean, std_err);
+  return distrib(engine);
+}
+
+
 std::unique_ptr<Tree> Forest::unifiedProjectedTree(const Eigen::MatrixXd &limits, size_t maxLeafs)
 {
   std::unique_ptr<Tree> result;

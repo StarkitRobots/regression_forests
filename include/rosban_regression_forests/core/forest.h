@@ -24,6 +24,10 @@ public:
 
   double getValue(const Eigen::VectorXd &input) const;
 
+  /// Return a randomized value based on the confidence interval
+  double getRandomizedValue(const Eigen::VectorXd &input,
+                            std::default_random_engine &engine) const;
+
   // maxLeafs is used to avoid growing an oversized tree. It is not activated by
   // default (0 value)
   // When preFilter is activated, each tree is projected before being merged
