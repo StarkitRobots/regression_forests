@@ -29,6 +29,7 @@ public:
     /// n_min: the minimal number of samples per leaf
     size_t n_min;
     /// min_var: if variance is lower than the given threshold, do not split any further
+    /// TODO: apply min_var after normalization
     double min_var;
     /// appr_type: which types of approximation should be used for the leafs
     ApproximationType appr_type;
@@ -45,6 +46,10 @@ public:
     virtual std::string class_name() const override;
     virtual void to_xml(std::ostream &out) const override;
     virtual void from_xml(TiXmlNode *node) override;
+
+    static Config generateAuto(const Eigen::MatrixXd &space_limits,
+                               int nb_samples,
+                               ApproximationType appr_type);
   };
 
   Config conf;

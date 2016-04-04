@@ -60,6 +60,29 @@ void ExtraTrees::Config::from_xml(TiXmlNode *node)
   appr_type = loadApproximationType(appr_type_str);
 }
 
+ExtraTrees::Config ExtraTrees::Config::generateAuto(const Eigen::MatrixXd &space_limits,
+                                                    int nb_samples,
+                                                    ApproximationType appr_type)
+{
+  ExtraTrees::Config conf;
+  conf.nb_trees = 25;// Widely accepted as high enough to bring satisfying results
+  conf.k = (int)std::sqrt(space_limits.rows());// Usual heuristic proposed in Ernst05
+  switch (appr_type)
+  {
+    case ApproximationType::PWC:
+      conf.n_min = (int)std::log(nb_samples);
+      break;
+    case ApproximationType::PWL:
+      // PWL requires at least a number of sample equal to the space dimension
+      conf.n_min = (int)(std::log(nb_samples) * space_limits.rows());
+      break;
+  }
+  conf.appr_type = appr_type;
+  conf.val_min = std::numeric_limits<double>::lowest();
+  conf.val_max = std::numeric_limits<double>::max();
+  return conf;
+}
+
 
 static double avgSquaredErrors(const TrainingSet &ts,
                                const TrainingSet::Subset &samples,
