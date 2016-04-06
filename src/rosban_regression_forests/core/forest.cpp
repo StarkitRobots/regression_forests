@@ -63,6 +63,9 @@ double Forest::getRandomizedValue(const Eigen::VectorXd &input,
   }
   var /= trees.size();
   double std_dev = std::sqrt(var);
+  // Special case which causes issue with the normal distribution
+  if (std_dev == 0) return mean;
+
   std::normal_distribution<double> distrib(mean, std_dev);
   return distrib(engine);
 }

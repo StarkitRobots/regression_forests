@@ -48,16 +48,19 @@ void ExtraTrees::Config::to_xml(std::ostream &out) const
 
 void ExtraTrees::Config::from_xml(TiXmlNode *node)
 {
-  k           = rosban_utils::xml_tools::read<int>(node, "k");
-  n_min       = rosban_utils::xml_tools::read<int>(node, "n_min");
-  nb_trees    = rosban_utils::xml_tools::read<int>(node, "nb_trees");
-  nb_threads  = rosban_utils::xml_tools::read<int>(node, "nb_threads");
-  min_var     = rosban_utils::xml_tools::read<double>(node, "min_var");
-  val_min     = rosban_utils::xml_tools::read<double>(node, "val_min");
-  val_max     = rosban_utils::xml_tools::read<double>(node, "val_max");
+  rosban_utils::xml_tools::try_read<int>   (node, "k"         , k         );
+  rosban_utils::xml_tools::try_read<int>   (node, "n_min"     , n_min     );
+  rosban_utils::xml_tools::try_read<int>   (node, "nb_trees"  , nb_trees  );
+  rosban_utils::xml_tools::try_read<int>   (node, "nb_threads", nb_threads);
+  rosban_utils::xml_tools::try_read<double>(node, "min_var"   , min_var   );
+  rosban_utils::xml_tools::try_read<double>(node, "val_min"   , val_min   );
+  rosban_utils::xml_tools::try_read<double>(node, "val_max"   , val_max   );
   std::string appr_type_str;
-  appr_type_str =rosban_utils::xml_tools::read<std::string>(node, "appr_type");
-  appr_type = loadApproximationType(appr_type_str);
+  rosban_utils::xml_tools::try_read<std::string>(node, "appr_type", appr_type_str);
+  if (appr_type_str != "")
+  {
+    appr_type = loadApproximationType(appr_type_str);
+  }
 }
 
 ExtraTrees::Config ExtraTrees::Config::generateAuto(const Eigen::MatrixXd &space_limits,
@@ -303,8 +306,10 @@ std::unique_ptr<Forest> ExtraTrees::solve(const TrainingSet &ts,
       }
     };
 
-  double trees_by_thread = conf.nb_trees / (double)conf.nb_threads;
-  for (size_t thread_no = 0; thread_no < conf.nb_threads; thread_no++)
+  int nb_threads = std::min(conf.nb_threads, conf.nb_trees);
+
+  double trees_by_thread = conf.nb_trees / (double)nb_threads;
+  for (size_t thread_no = 0; thread_no < nb_threads; thread_no++)
   {
     // Compute trees in [start, end[
     int start = std::floor(thread_no * trees_by_thread);

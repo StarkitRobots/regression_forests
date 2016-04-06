@@ -23,11 +23,11 @@ public:
   {
   public:
     /// nb_trees: the number of trees to grow
-    size_t nb_trees;
+    int nb_trees;
     /// k: the number of dimensions used for randomCut
-    size_t k;
+    int k;
     /// n_min: the minimal number of samples per leaf
-    size_t n_min;
+    int n_min;
     /// min_var: if variance is lower than the given threshold, do not split any further
     /// TODO: apply min_var after normalization
     double min_var;
