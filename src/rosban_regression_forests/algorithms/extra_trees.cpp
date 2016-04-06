@@ -67,17 +67,24 @@ ExtraTrees::Config ExtraTrees::Config::generateAuto(const Eigen::MatrixXd &space
                                                     int nb_samples,
                                                     ApproximationType appr_type)
 {
+  // Forbid PWL if nb_samples < space_limits
+  if (nb_samples < space_limits.rows())
+  {
+    appr_type = ApproximationType::PWC;
+  }
+
   ExtraTrees::Config conf;
   conf.nb_trees = 25;// Widely accepted as high enough to bring satisfying results
   conf.k = (int)std::sqrt(space_limits.rows());// Usual heuristic proposed in Ernst05
+  int n_min_base = std::max(1, (int)std::log(nb_samples));
   switch (appr_type)
   {
     case ApproximationType::PWC:
-      conf.n_min = (int)std::log(nb_samples);
+      conf.n_min = n_min_base;
       break;
     case ApproximationType::PWL:
       // PWL requires at least a number of sample equal to the space dimension
-      conf.n_min = (int)(std::log(nb_samples) * space_limits.rows());
+      conf.n_min = n_min_base * space_limits.rows();
       break;
   }
   conf.appr_type = appr_type;
