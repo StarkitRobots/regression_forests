@@ -75,7 +75,8 @@ ExtraTrees::Config ExtraTrees::Config::generateAuto(const Eigen::MatrixXd &space
 
   ExtraTrees::Config conf;
   conf.nb_trees = 25;// Widely accepted as high enough to bring satisfying results
-  conf.k = (int)std::sqrt(space_limits.rows());// Usual heuristic proposed in Ernst05
+  //conf.k = (int)std::sqrt(space_limits.rows());// Usual heuristic proposed in Ernst05
+  conf.k = space_limits.rows();
   int n_min_base = std::max(1, (int)std::log(nb_samples));
   switch (appr_type)
   {
