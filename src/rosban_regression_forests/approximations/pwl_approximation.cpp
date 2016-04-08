@@ -29,7 +29,10 @@ PWLApproximation::PWLApproximation(const std::vector<Eigen::VectorXd> &inputs,
   }
   if (inputDim >= (int)inputs.size())
   {
-    throw std::runtime_error("PWLApproximation: inputDim >= inputs.size() leastSquare impossible");
+    std::ostringstream oss;
+    oss << "PWLApproximation: inputsDim (" << inputDim
+        << ") >= inputs.size() (" << inputs.size() << ") leastSquare impossible";
+    throw std::runtime_error(oss.str());
   }
   // Solving ax = b to find the hyperplan
   Eigen::MatrixXd a(inputs.size(), inputDim + 1);
