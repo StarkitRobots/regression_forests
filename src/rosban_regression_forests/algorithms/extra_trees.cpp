@@ -21,6 +21,7 @@ ExtraTrees::Config::Config()
 {
   k = 1;
   n_min = 1;
+  max_samples = std::numeric_limits<int>::max();
   nb_trees = 1;
   nb_threads = 1;
   min_var = 0;
@@ -38,6 +39,7 @@ void ExtraTrees::Config::to_xml(std::ostream &out) const
 {
   rosban_utils::xml_tools::write<int>("k", k, out);
   rosban_utils::xml_tools::write<int>("n_min", n_min, out);
+  rosban_utils::xml_tools::write<int>("max_samples", max_samples, out);
   rosban_utils::xml_tools::write<int>("nb_trees", nb_trees, out);
   rosban_utils::xml_tools::write<int>("nb_threads", nb_threads, out);
   rosban_utils::xml_tools::write<double>("min_var", min_var, out);
@@ -48,13 +50,14 @@ void ExtraTrees::Config::to_xml(std::ostream &out) const
 
 void ExtraTrees::Config::from_xml(TiXmlNode *node)
 {
-  rosban_utils::xml_tools::try_read<int>   (node, "k"         , k         );
-  rosban_utils::xml_tools::try_read<int>   (node, "n_min"     , n_min     );
-  rosban_utils::xml_tools::try_read<int>   (node, "nb_trees"  , nb_trees  );
-  rosban_utils::xml_tools::try_read<int>   (node, "nb_threads", nb_threads);
-  rosban_utils::xml_tools::try_read<double>(node, "min_var"   , min_var   );
-  rosban_utils::xml_tools::try_read<double>(node, "val_min"   , val_min   );
-  rosban_utils::xml_tools::try_read<double>(node, "val_max"   , val_max   );
+  rosban_utils::xml_tools::try_read<int>   (node, "k"          , k          );
+  rosban_utils::xml_tools::try_read<int>   (node, "n_min"      , n_min      );
+  rosban_utils::xml_tools::try_read<int>   (node, "max_samples", max_samples);
+  rosban_utils::xml_tools::try_read<int>   (node, "nb_trees"   , nb_trees   );
+  rosban_utils::xml_tools::try_read<int>   (node, "nb_threads" , nb_threads );
+  rosban_utils::xml_tools::try_read<double>(node, "min_var"    , min_var    );
+  rosban_utils::xml_tools::try_read<double>(node, "val_min"    , val_min    );
+  rosban_utils::xml_tools::try_read<double>(node, "val_max"    , val_max    );
   std::string appr_type_str;
   rosban_utils::xml_tools::try_read<std::string>(node, "appr_type", appr_type_str);
   if (appr_type_str != "")
@@ -89,6 +92,8 @@ ExtraTrees::Config ExtraTrees::Config::generateAuto(const Eigen::MatrixXd &space
       conf.n_min = std::max((int)(space_limits.rows() + 1), conf.n_min);
       break;
   }
+  conf.max_samples = 4 * conf.n_min;
+  //conf.max_samples = std::numeric_limits<int>::max();
   conf.appr_type = appr_type;
   conf.val_min = std::numeric_limits<double>::lowest();
   conf.val_max = std::numeric_limits<double>::max();
@@ -209,6 +214,23 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
       node->a = approximateSamples(samples, limits);
       continue;
     }
+    // If there is too much samples, only use a subset
+    TrainingSet::Subset split_samples;
+    if (samples.size() > conf.max_samples)
+    {
+      std::vector<size_t> used_indices = regression_forests::getKDistinctFromN(conf.max_samples,
+                                                                               samples.size(),
+                                                                               &generator);
+      split_samples.reserve(conf.max_samples);
+      for (size_t idx : used_indices)
+      {
+        split_samples.push_back(samples[idx]);
+      }
+    }
+    else
+    {
+      split_samples = samples;
+    }
     // Find split candidates
     std::vector<size_t> dim_candidates;
     dim_candidates = regression_forests::getKDistinctFromN(conf.k, ts.getInputDim(), &generator);
@@ -217,9 +239,9 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
     for (size_t i = 0; i < conf.k; i++)
     {
       size_t dim = dim_candidates[i];
-      ts.sortSubset(samples, dim);
-      double s_val_min = ts(samples[conf.n_min - 1]).getInput(dim);
-      double s_val_max = ts(samples[samples.size() - conf.n_min]).getInput(dim);
+      ts.sortSubset(split_samples, dim);
+      double s_val_min = ts(split_samples[conf.n_min - 1]).getInput(dim);
+      double s_val_max = ts(split_samples[split_samples.size() - conf.n_min]).getInput(dim);
       if (s_val_min == s_val_max)
       {
         // If we cut on s_val_min, that would lead to having less than nmin
@@ -244,13 +266,13 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
       node->a = approximateSamples(samples, limits);
       continue;
     }
-    // Find best split candidate
+    // Find best split candidate (using only subset of all the samples)
     size_t best_split_idx = 0;
-    double best_split_score = evalSplitScore(ts, samples, split_candidates[0],
+    double best_split_score = evalSplitScore(ts, split_samples, split_candidates[0],
                                              approximateSamples, limits);
     for (size_t split_idx = 1; split_idx < split_candidates.size(); split_idx++)
     {
-      double splitScore = evalSplitScore(ts, samples, split_candidates[split_idx],
+      double splitScore = evalSplitScore(ts, split_samples, split_candidates[split_idx],
                                          approximateSamples, limits);
       if (splitScore > best_split_score)
       {
@@ -258,7 +280,7 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
         best_split_idx = split_idx;
       }
     }
-    // Apply best split
+    // Apply best split (this time use all the samples)
     node->s = split_candidates[best_split_idx];
     TrainingSet::Subset lower_samples, upper_samples;
     ts.applySplit(node->s, samples, lower_samples, upper_samples);

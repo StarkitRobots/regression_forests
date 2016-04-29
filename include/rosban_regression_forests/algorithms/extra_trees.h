@@ -28,6 +28,8 @@ public:
     int k;
     /// n_min: the minimal number of samples per leaf
     int n_min;
+    /// max_samples: the maximal number of samples considered when applying a split
+    int max_samples;
     /// min_var: if variance is lower than the given threshold, do not split any further
     /// TODO: apply min_var after normalization
     double min_var;

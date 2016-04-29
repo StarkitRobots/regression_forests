@@ -55,7 +55,7 @@ std::pair<double, Eigen::VectorXd> Tree::getMaxPair(const Eigen::MatrixXd &limit
 }
 
 void Tree::fillProjection(std::vector<std::vector<Eigen::VectorXd>> &out, Node *currentNode,
-                                    const std::vector<int> &freeDimensions, Eigen::MatrixXd &limits)
+                          const std::vector<int> &freeDimensions, Eigen::MatrixXd &limits)
 {
   // If leaf, fill vector and return
   if (currentNode->isLeaf())
@@ -90,7 +90,7 @@ void Tree::fillProjection(std::vector<std::vector<Eigen::VectorXd>> &out, Node *
 }
 
 std::vector<std::vector<Eigen::VectorXd>> Tree::project(const std::vector<int> &freeDimensions,
-                                                                  const Eigen::MatrixXd &limits)
+                                                        const Eigen::MatrixXd &limits)
 {
   std::vector<std::vector<Eigen::VectorXd>> out;
   Eigen::MatrixXd localLimits = limits;  // Copying to allow modification
