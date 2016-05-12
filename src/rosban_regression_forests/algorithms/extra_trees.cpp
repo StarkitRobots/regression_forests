@@ -3,7 +3,7 @@
 #include "rosban_regression_forests/approximations/pwc_approximation.h"
 #include "rosban_regression_forests/approximations/pwl_approximation.h"
 
-#include "rosban_regression_forests/tools/random.h"
+#include "rosban_random/tools.h"
 #include "rosban_regression_forests/tools/statistics.h"
 
 #include <iomanip>
@@ -184,7 +184,7 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
   }
 
   std::unique_ptr<Tree> t(new Tree);
-  auto generator = regression_forests::get_random_engine();
+  auto generator = rosban_random::getRandomEngine();
   // All along the resolution, we will stack samples
   std::stack<TrainingSet::Subset> samples_stack;
   std::stack<Node *> nodes_stack;
@@ -218,7 +218,7 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
     TrainingSet::Subset split_samples;
     if (samples.size() > conf.max_samples)
     {
-      std::vector<size_t> used_indices = regression_forests::getKDistinctFromN(conf.max_samples,
+      std::vector<size_t> used_indices = rosban_random::getKDistinctFromN(conf.max_samples,
                                                                                samples.size(),
                                                                                &generator);
       split_samples.reserve(conf.max_samples);
@@ -233,7 +233,7 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
     }
     // Find split candidates
     std::vector<size_t> dim_candidates;
-    dim_candidates = regression_forests::getKDistinctFromN(conf.k, ts.getInputDim(), &generator);
+    dim_candidates = rosban_random::getKDistinctFromN(conf.k, ts.getInputDim(), &generator);
     std::vector<OrthogonalSplit> split_candidates;
     split_candidates.reserve(conf.k);
     for (size_t i = 0; i < conf.k; i++)
