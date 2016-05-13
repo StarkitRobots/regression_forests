@@ -16,6 +16,10 @@ ApproximationType loadApproximationType(const std::string &s)
   {
     return ApproximationType::PWL;
   }
+  if (s == "GP")
+  {
+    return ApproximationType::GP;
+  }
   throw std::runtime_error("Unknown approximation description '" + s + "'");
 }
 
@@ -27,7 +31,9 @@ std::string to_string(regression_forests::ApproximationType at)
       return "PWC";
     case ApproximationType::PWL:
       return "PWL";
+    case ApproximationType::GP:
+      return "GP";
   }
-  throw std::runtime_error("Unkown ApproximationType");
+  throw std::runtime_error("Unknown ApproximationType");
 }
 }
