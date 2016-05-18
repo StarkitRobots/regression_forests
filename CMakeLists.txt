@@ -6,6 +6,7 @@ project(rosban_regression_forests)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED
   cmake_modules
+  rosban_gp
   rosban_random
   rosban_utils
 )
@@ -107,3 +108,10 @@ if (rosban_viewer_FOUND)
     ${DELEG_LIBRARIES}
     )
 endif(rosban_viewer_FOUND)
+
+#TODO make optional
+add_executable(test_gp_approximations src/experiments/test_gp_approximations.cpp)
+target_link_libraries(test_gp_approximations
+  ${catkin_LIBRARIES}
+  ${DELEG_LIBRARIES}
+  )
