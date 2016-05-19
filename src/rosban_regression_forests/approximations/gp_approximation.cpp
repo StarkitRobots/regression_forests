@@ -5,6 +5,8 @@
 
 #include <stdexcept>
 
+#include <iostream>
+
 using rosban_gp::CovarianceFunction;
 using rosban_gp::GaussianProcess;
 using rosban_gp::SquaredExponential;

@@ -2,11 +2,27 @@
 
 #include "rosban_random/tools.h"
 
+#include <stdexcept>
+
 namespace regression_forests
 {
+
 TrainingSet::TrainingSet(int inputDim_) : inputDim(inputDim_)
 {
 }
+
+TrainingSet::TrainingSet(const Eigen::MatrixXd & inputs,
+                         const Eigen::VectorXd & outputs)
+  : inputDim(inputs.rows())
+{
+  if (inputs.cols() != outputs.rows()) {
+    throw std::runtime_error("TrainingSet creation: inputs.cols() != outputs.rows()");
+  }
+  for (int sample_id = 0; sample_id < inputs.cols(); sample_id++) {
+    push(Sample(inputs.col(sample_id), outputs(sample_id)));
+  }
+}
+
 
 void TrainingSet::push(const Sample &s)
 {
