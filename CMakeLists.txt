@@ -15,8 +15,8 @@ find_package(Eigen REQUIRED)
 
 find_package(rosban_viewer)
 
-set(DELEG_INCLUDE_DIRS include)
-set(DELEG_LIBRARIES rosban_regression_forests)
+set(DELEG_INCLUDE_DIRS include ${catkin_INCLUDE_DIRS})
+set(DELEG_LIBRARIES rosban_regression_forests ${catkin_LIBRARIES})
 
 # Warning: Need to clean build in order to create the viewer if it was not
 #          available during the first build
@@ -108,10 +108,3 @@ if (rosban_viewer_FOUND)
     ${DELEG_LIBRARIES}
     )
 endif(rosban_viewer_FOUND)
-
-#TODO make optional
-add_executable(test_gp_approximations src/experiments/test_gp_approximations.cpp)
-target_link_libraries(test_gp_approximations
-  ${catkin_LIBRARIES}
-  ${DELEG_LIBRARIES}
-  )
