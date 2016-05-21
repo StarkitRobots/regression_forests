@@ -1,5 +1,6 @@
 #include "rosban_regression_forests/algorithms/extra_trees.h"
 
+#include "rosban_regression_forests/approximations/gp_approximation.h"
 #include "rosban_regression_forests/approximations/pwc_approximation.h"
 #include "rosban_regression_forests/approximations/pwl_approximation.h"
 
@@ -91,6 +92,9 @@ ExtraTrees::Config ExtraTrees::Config::generateAuto(const Eigen::MatrixXd &space
       // PWL requires a number of sample strictly greater than space dimension
       conf.n_min = std::max((int)(space_limits.rows() + 1), conf.n_min);
       break;
+    case ApproximationType::GP:
+      conf.n_min = std::ceil(std::sqrt(nb_samples));
+      conf.k = 1;
   }
   //conf.max_samples = 4 * conf.n_min;
   conf.max_samples = std::numeric_limits<int>::max();
@@ -149,8 +153,7 @@ double ExtraTrees::evalSplitScore(const TrainingSet &ts,
 std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
                                             const Eigen::MatrixXd &space)
 {
-  std::function<Approximation *(const TrainingSet::Subset &,
-                                const Eigen::MatrixXd &)> approximateSamples;
+  Approximator approximateSamples;
   switch (conf.appr_type)
   {
     case ApproximationType::PWC:
@@ -177,6 +180,14 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
         /// If not, delete it and return a PWC approximation
         delete(pwl_app);
         return (Approximation*)new PWCApproximation(Statistics::mean(ts.values(samples)));
+      };
+      break;
+    case ApproximationType::GP:
+      approximateSamples = [&ts](const TrainingSet::Subset &samples,
+                                 const Eigen::MatrixXd &limits)
+      {
+        (void) limits;
+        return new GPApproximation(ts.inputs(samples),ts.values(samples));
       };
       break;
     default:
@@ -268,10 +279,17 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
     }
     // Find best split candidate (using only subset of all the samples)
     size_t best_split_idx = 0;
-    double best_split_score = evalSplitScore(ts, split_samples, split_candidates[0],
-                                             approximateSamples, limits);
+    double best_split_score = 0;
+    // GP only uses 1 random split yet
+    if (conf.appr_type != ApproximationType::GP) {
+      best_split_score= evalSplitScore(ts, split_samples, split_candidates[0],
+                                       approximateSamples, limits);
+    }
     for (size_t split_idx = 1; split_idx < split_candidates.size(); split_idx++)
     {
+      if (conf.appr_type == ApproximationType::GP) {
+        throw std::runtime_error("Running ExtraTrees with GaussianProcesses and k > 1");
+      }
       double splitScore = evalSplitScore(ts, split_samples, split_candidates[split_idx],
                                          approximateSamples, limits);
       if (splitScore > best_split_score)

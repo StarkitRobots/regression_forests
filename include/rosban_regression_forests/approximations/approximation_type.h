@@ -7,8 +7,7 @@ namespace regression_forests
 {
 enum class ApproximationType
 {
-  PWC,
-  PWL
+  PWC, PWL, GP
 };
 
 ApproximationType loadApproximationType(const std::string &s);

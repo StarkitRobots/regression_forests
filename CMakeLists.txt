@@ -6,6 +6,7 @@ project(rosban_regression_forests)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED
   cmake_modules
+  rosban_gp
   rosban_random
   rosban_utils
 )
@@ -14,8 +15,8 @@ find_package(Eigen REQUIRED)
 
 find_package(rosban_viewer)
 
-set(DELEG_INCLUDE_DIRS include)
-set(DELEG_LIBRARIES rosban_regression_forests)
+set(DELEG_INCLUDE_DIRS include ${catkin_INCLUDE_DIRS})
+set(DELEG_LIBRARIES rosban_regression_forests ${catkin_LIBRARIES})
 
 # Warning: Need to clean build in order to create the viewer if it was not
 #          available during the first build

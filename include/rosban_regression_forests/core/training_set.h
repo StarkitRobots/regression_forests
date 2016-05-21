@@ -14,6 +14,15 @@ private:
 public:
   TrainingSet(int inputDim);
 
+  /// For inputs:
+  /// - Each row is a different dimension
+  /// - Each col is a different entries
+  /// For outputs:
+  /// - Each row is a different output
+  /// f(inputs.col(i)) = outputs(i)
+  TrainingSet(const Eigen::MatrixXd & inputs,
+              const Eigen::VectorXd & outputs);
+
   void push(const Sample &s);
 
   size_t size() const;
