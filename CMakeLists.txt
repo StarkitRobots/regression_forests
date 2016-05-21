@@ -6,6 +6,7 @@ project(rosban_regression_forests)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED
   cmake_modules
+  rosban_random
   rosban_utils
 )
 
@@ -42,7 +43,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 catkin_package(
   INCLUDE_DIRS ${DELEG_INCLUDE_DIRS}
   LIBRARIES ${DELEG_LIBRARIES}
-  CATKIN_DEPENDS rosban_utils
+  CATKIN_DEPENDS rosban_random rosban_utils
   DEPENDS Eigen
 )
 
