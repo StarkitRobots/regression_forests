@@ -92,8 +92,8 @@ ExtraTrees::Config ExtraTrees::Config::generateAuto(const Eigen::MatrixXd &space
       conf.n_min = std::max((int)(space_limits.rows() + 1), conf.n_min);
       break;
   }
-  conf.max_samples = 4 * conf.n_min;
-  //conf.max_samples = std::numeric_limits<int>::max();
+  //conf.max_samples = 4 * conf.n_min;
+  conf.max_samples = std::numeric_limits<int>::max();
   conf.appr_type = appr_type;
   conf.val_min = std::numeric_limits<double>::lowest();
   conf.val_max = std::numeric_limits<double>::max();
