@@ -65,6 +65,20 @@ double Forest::getVar(const Eigen::VectorXd &input) const
   return var / trees.size();
 }
 
+Eigen::VectorXd Forest::getGrad(const Eigen::VectorXd &input) const
+{
+  Eigen::VectorXd grad = Eigen::VectorXd::Zero(input.rows());
+
+  // Excluding case where forest is empty
+  if (trees.size() == 0) return grad;
+
+  for (const auto & tree : trees)
+  {
+    grad += tree->getGrad(input);
+  }
+  return grad / trees.size();
+}
+
 /// Return a randomized value based on the confidence interval
 double Forest::getRandomizedValue(const Eigen::VectorXd &input,
                                   std::default_random_engine &engine) const

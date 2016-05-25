@@ -20,6 +20,9 @@ public:
   const Eigen::VectorXd &getFactors() const;
 
   virtual double eval(const Eigen::VectorXd &state) const override;
+
+  virtual Eigen::VectorXd getGrad(const Eigen::VectorXd &input) const override;
+
   virtual void updateMinPair(const Eigen::MatrixXd &limits, std::pair<double, Eigen::VectorXd> &best) const override;
   virtual void updateMaxPair(const Eigen::MatrixXd &limits, std::pair<double, Eigen::VectorXd> &best) const override;
 

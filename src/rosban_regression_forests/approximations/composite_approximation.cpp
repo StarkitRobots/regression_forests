@@ -27,6 +27,11 @@ double CompositeApproximation::eval(const Eigen::VectorXd &state) const
   return sum / approximations.size();
 }
 
+Eigen::VectorXd CompositeApproximation::getGrad(const Eigen::VectorXd & state) const
+{
+  throw std::logic_error("CompositeApproximation::getGrad not implemented yet");
+}
+
 void CompositeApproximation::updateMinPair(const Eigen::MatrixXd &limits,
                                            std::pair<double, Eigen::VectorXd> &best) const
 {

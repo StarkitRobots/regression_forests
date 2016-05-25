@@ -76,6 +76,11 @@ double PWLApproximation::eval(const Eigen::VectorXd &state) const
   return value;
 }
 
+Eigen::VectorXd PWLApproximation::getGrad(const Eigen::VectorXd &input) const
+{
+  return factors.segment(0,factors.rows() - 1);
+}
+
 std::pair<double,Eigen::VectorXd> PWLApproximation::getMinPair(const Eigen::MatrixXd &limits) const
 {
   Eigen::VectorXd worst_state(factors.rows() - 1);

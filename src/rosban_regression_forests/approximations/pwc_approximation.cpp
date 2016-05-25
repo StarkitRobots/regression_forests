@@ -22,6 +22,11 @@ double PWCApproximation::eval(const Eigen::VectorXd &state) const
   return value;
 }
 
+Eigen::VectorXd PWCApproximation::getGrad(const Eigen::VectorXd &input) const
+{
+  return Eigen::VectorXd::Zero(input.rows());
+}
+
 void PWCApproximation::updateMaxPair(const Eigen::MatrixXd &limits, std::pair<double, Eigen::VectorXd> &best) const
 {
   if (best.first < value)
