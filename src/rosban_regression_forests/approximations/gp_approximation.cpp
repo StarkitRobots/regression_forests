@@ -55,6 +55,12 @@ double GPApproximation::eval(const Eigen::VectorXd & state) const
   return gp.getPrediction(state);
 }
 
+Eigen::VectorXd GPApproximation::getGrad(const Eigen::VectorXd & state) const
+{
+  throw std::logic_error("GPApproximation::getGrad not implemented yet");
+  //return gp.getPrediction(state);
+}
+
 Approximation * GPApproximation::clone() const
 {
   return new GPApproximation(*this);

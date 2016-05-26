@@ -25,6 +25,8 @@ public:
   size_t nbLeafs() const;
 
   double getValue(const Eigen::VectorXd &input) const;
+  /// Return the gradient of the value with respect to the input at the given input
+  Eigen::VectorXd getGrad(const Eigen::VectorXd &input) const;
 
   // Return max over all leafs
   double getMax(const Eigen::MatrixXd &limits) const;

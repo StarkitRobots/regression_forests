@@ -350,7 +350,7 @@ std::unique_ptr<Forest> ExtraTrees::solve(const TrainingSet &ts,
         std::unique_ptr<Tree> tree = this->solveTree(ts, limits);
         // Ensuring thread-safety when accessing the forest
         forest_mutex.lock();
-        f->push(std::unique_ptr<Tree>(tree.release()));
+        f->push(std::move(tree));
         forest_mutex.unlock();
       }
     };

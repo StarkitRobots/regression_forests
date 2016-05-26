@@ -127,6 +127,16 @@ double Node::getValue(const Eigen::VectorXd &state) const
   return a->eval(state);
 }
 
+Eigen::VectorXd Node::getGrad(const Eigen::VectorXd &input) const
+{
+  if (!isLeaf())
+  {
+    const Node *leaf = getLeaf(input);
+    return leaf->getGrad(input);
+  }
+  return a->getGrad(input);
+}
+
 double Node::getMax(Eigen::MatrixXd &limits) const
 {
   std::pair<double, Eigen::VectorXd> best;

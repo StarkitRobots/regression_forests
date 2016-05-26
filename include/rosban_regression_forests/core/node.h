@@ -43,6 +43,8 @@ public:
   void addApproximation(const Approximation *a, double weight);
 
   double getValue(const Eigen::VectorXd &state) const;
+  /// Return the gradient of the value with respect to the input at input
+  Eigen::VectorXd getGrad(const Eigen::VectorXd &input) const;
 
   /**
    * Return max over all leafs

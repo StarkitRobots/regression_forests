@@ -18,6 +18,8 @@ public:
   /// Throws an error if gp has not run its precomputations
   virtual double eval(const Eigen::VectorXd & state) const override;
 
+  virtual Eigen::VectorXd getGrad(const Eigen::VectorXd &input) const override;
+
   virtual Approximation * clone() const override;
 
   virtual void updateMinPair(const Eigen::MatrixXd &limits,

@@ -32,6 +32,11 @@ double Tree::getValue(const Eigen::VectorXd &input) const
   return root->getValue(input);
 }
 
+Eigen::VectorXd Tree::getGrad(const Eigen::VectorXd &input) const
+{
+  return root->getGrad(input);
+}
+
 double Tree::getMax(const Eigen::MatrixXd &limits) const
 {
   return getMaxPair(limits).first;
