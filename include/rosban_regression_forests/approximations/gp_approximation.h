@@ -29,8 +29,9 @@ public:
 
   virtual void print(std::ostream &out) const override;
 
-//private:
   rosban_gp::GaussianProcess gp;
+
+  static rosban_gp::RandomizedRProp::Config approximation_config;
 };
 
 }
