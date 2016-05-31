@@ -2,6 +2,8 @@
 
 #include "rosban_regression_forests/core/tree.h"
 
+#include <random>
+
 namespace regression_forests
 {
 class Forest

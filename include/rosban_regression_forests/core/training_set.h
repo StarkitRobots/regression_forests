@@ -3,6 +3,8 @@
 #include "rosban_regression_forests/core/orthogonal_split.h"
 #include "rosban_regression_forests/core/sample.h"
 
+#include <vector>
+
 namespace regression_forests
 {
 class TrainingSet

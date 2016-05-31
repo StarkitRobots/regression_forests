@@ -4,6 +4,7 @@
 #include "rosban_regression_forests/core/orthogonal_split.h"
 
 #include <functional>
+#include <vector>
 
 namespace regression_forests
 {
