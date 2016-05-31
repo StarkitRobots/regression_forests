@@ -14,6 +14,8 @@ using rosban_gp::SquaredExponential;
 namespace regression_forests
 {
 
+rosban_gp::RandomizedRProp::Config GPApproximation::approximation_config;
+
 GPApproximation::GPApproximation(const std::vector<Eigen::VectorXd> & inputs,
                                  const std::vector<double> & outputs)
 {
@@ -28,19 +30,16 @@ GPApproximation::GPApproximation(const std::vector<Eigen::VectorXd> & inputs,
     throw std::runtime_error(oss.str());
   }
   /// Converting data
-  Eigen::MatrixXd input_mat (inputs[0].cols(), inputs.size());
+  Eigen::MatrixXd input_mat (inputs[0].rows(), inputs.size());
   Eigen::VectorXd observations(outputs.size());
   for (int i = 0; i < inputs.size(); i++) {
     input_mat.col(i) = inputs[i];
     observations(i) = outputs[i];
   }
   /// Creating GP
-  std::unique_ptr<CovarianceFunction> cov_func(new SquaredExponential());
+  std::unique_ptr<CovarianceFunction> cov_func(new SquaredExponential(input_mat.rows()));
   gp = GaussianProcess(input_mat, observations, std::move(cov_func));
-  // Run gradient optimization
-  double epsilon = std::pow(10,-6);
-  rProp(gp, gp.getParametersGuess(), gp.getParametersStep(), gp.getParametersLimits(), epsilon);
-  gp.updateInternal();
+  gp.autoTune(approximation_config);
 }
 
 GPApproximation::GPApproximation(const GPApproximation & other)
@@ -57,8 +56,7 @@ double GPApproximation::eval(const Eigen::VectorXd & state) const
 
 Eigen::VectorXd GPApproximation::getGrad(const Eigen::VectorXd & state) const
 {
-  throw std::logic_error("GPApproximation::getGrad not implemented yet");
-  //return gp.getPrediction(state);
+  return gp.getGradient(state);
 }
 
 Approximation * GPApproximation::clone() const

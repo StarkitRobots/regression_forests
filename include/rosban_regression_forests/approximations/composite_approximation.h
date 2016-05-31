@@ -45,6 +45,7 @@ public:
    */
   static Approximation *weightedMerge(Approximation *a1, double weight1, Approximation *a2, double weight2);
 
-  static double difference(const Approximation *a1, const Approximation *a2);
+  static double avgDifference(const Approximation *a1, const Approximation *a2,
+                              const Eigen::MatrixXd & limits);
 };
 }

@@ -63,8 +63,10 @@ std::pair<Approximation *, double> getSplitData(Node *node, const Eigen::MatrixX
                                                        node->upperChild->a->clone(), upperRatio);
   double lowerSize = upperRatio * nodeSize;
   double upperSize = upperRatio * nodeSize;
-  double upperDiff = std::fabs(CompositeApproximation::difference(node->upperChild->a, result.first));
-  double lowerDiff = std::fabs(CompositeApproximation::difference(node->upperChild->a, result.first));
+  double upperDiff = CompositeApproximation::avgDifference(node->upperChild->a, result.first,
+                                                           nodeSpace);
+  double lowerDiff = CompositeApproximation::avgDifference(node->upperChild->a, result.first,
+                                                           nodeSpace);
   result.second = lowerSize * lowerDiff + upperSize * upperDiff;
   return result;
 }

@@ -144,15 +144,30 @@ Approximation *CompositeApproximation::weightedMerge(Approximation *a1, double w
   return result;
 }
 
-double CompositeApproximation::difference(const Approximation *a1, const Approximation *a2)
+double CompositeApproximation::avgDifference(const Approximation *a1, const Approximation *a2,
+                                             const Eigen::MatrixXd & limits)
 {
   const PWCApproximation *pwc1 = dynamic_cast<const PWCApproximation *>(a1);
   const PWCApproximation *pwc2 = dynamic_cast<const PWCApproximation *>(a2);
-  // Unsupported operation
-  if (pwc1 == NULL || pwc2 == NULL)
+  if (pwc1 != NULL || pwc2 != NULL)
   {
-    throw std::runtime_error("difference is only implemented for PWCApproximations yet");
+    return std::fabs(pwc1->getValue() - pwc2->getValue());
   }
-  return pwc1->getValue() - pwc2->getValue();
+  const PWLApproximation *pwl1 = dynamic_cast<const PWLApproximation *>(a1);
+  const PWLApproximation *pwl2 = dynamic_cast<const PWLApproximation *>(a2);
+  if (pwl1 != NULL || pwl2 != NULL)
+  {
+    Eigen::VectorXd center = (limits.col(0) + limits.col(1)) / 2;
+    // Difference in average
+    double avg_diff = std::fabs(pwl1->eval(center) - pwl2->eval(center));
+    Eigen::VectorXd gradient = (pwl1->getGrad(center) - pwl2->getGrad(center)).cwiseAbs();
+    // Computing average difference of gradient
+    double grad_diff = gradient.dot(limits.col(1) - limits.col(0));
+    for (int dim = 0; dim < limits.rows(); dim++) {
+      grad_diff /= (limits(dim,1) - limits(dim,0));
+    }
+    return avg_diff + grad_diff;
+  }
+  throw std::runtime_error("difference is only implemented for PWCApproximations or PWLApproximations yet");
 }
 }

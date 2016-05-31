@@ -65,7 +65,7 @@ double Forest::getVar(const Eigen::VectorXd &input) const
   return var / trees.size();
 }
 
-Eigen::VectorXd Forest::getGrad(const Eigen::VectorXd &input) const
+Eigen::VectorXd Forest::getGradient(const Eigen::VectorXd &input) const
 {
   Eigen::VectorXd grad = Eigen::VectorXd::Zero(input.rows());
 
