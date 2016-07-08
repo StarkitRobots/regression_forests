@@ -93,7 +93,7 @@ ExtraTrees::Config ExtraTrees::Config::generateAuto(const Eigen::MatrixXd &space
       conf.n_min = std::max((int)(space_limits.rows() + 1), conf.n_min);
       break;
     case ApproximationType::GP:
-      conf.n_min = std::ceil(std::sqrt(nb_samples));
+      conf.n_min = std::ceil(std::log2(nb_samples));
       conf.k = 1;
   }
   //conf.max_samples = 4 * conf.n_min;
