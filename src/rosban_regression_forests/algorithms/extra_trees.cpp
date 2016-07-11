@@ -94,7 +94,6 @@ ExtraTrees::Config ExtraTrees::Config::generateAuto(const Eigen::MatrixXd &space
       break;
     case ApproximationType::GP:
       conf.n_min = std::ceil(std::log2(nb_samples));
-      conf.k = 1;
   }
   //conf.max_samples = 4 * conf.n_min;
   conf.max_samples = std::numeric_limits<int>::max();
@@ -268,6 +267,9 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
       // square
       if (split_value == s_val_max) continue;
       split_candidates.push_back(OrthogonalSplit(dim, split_value));
+
+      // When using GP approximations, use the first available split
+      if (conf.appr_type == ApproximationType::GP) break;
     }
     // If no splits are available do not split node
     if (split_candidates.size() == 0)
