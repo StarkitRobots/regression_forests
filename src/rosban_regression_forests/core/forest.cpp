@@ -124,8 +124,7 @@ std::unique_ptr<Tree> Forest::unifiedProjectedTree(const Eigen::MatrixXd &limits
 
 void Forest::save(const std::string &path) const
 {
-  std::ofstream ofs;
-  ofs.open(path);
+  std::ofstream ofs(path, std::ios::binary);
   ofs << *this;
   ofs.close();
 }

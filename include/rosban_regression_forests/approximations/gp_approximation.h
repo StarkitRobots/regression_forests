@@ -10,6 +10,7 @@ namespace regression_forests
 class GPApproximation : public Approximation
 {
 public:
+  GPApproximation();
   GPApproximation(const std::vector<Eigen::VectorXd> & inputs,
                   const std::vector<double> & outputs);
   GPApproximation(const GPApproximation & other);

@@ -16,6 +16,8 @@ namespace regression_forests
 
 rosban_gp::RandomizedRProp::Config GPApproximation::approximation_config;
 
+GPApproximation::GPApproximation() {}
+
 GPApproximation::GPApproximation(const std::vector<Eigen::VectorXd> & inputs,
                                  const std::vector<double> & outputs)
 {
@@ -78,7 +80,9 @@ void GPApproximation::updateMaxPair(const Eigen::MatrixXd &limits,
 
 void GPApproximation::print(std::ostream &out) const
 {
-  out << "GPApproximation" << std::endl;
+  out << "agp";
+  gp.write(out);
+  out << "$";
 }
 
 

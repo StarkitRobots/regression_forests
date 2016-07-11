@@ -1,6 +1,7 @@
 #include "rosban_regression_forests/tools/parser.h"
 
 #include "rosban_regression_forests/approximations/composite_approximation.h"
+#include "rosban_regression_forests/approximations/gp_approximation.h"
 #include "rosban_regression_forests/approximations/pwc_approximation.h"
 #include "rosban_regression_forests/approximations/pwl_approximation.h"
 
@@ -54,6 +55,24 @@ Approximation *approximation(const std::string &s, size_t *index)
     idx++;
     // Create PWLApproximation
     result = new PWLApproximation(factors);
+  }
+  // Read GPApproximation
+  else if (s.compare(idx, 2, "gp") == 0)
+  {
+    // Consuming gp characters
+    idx += 2;
+    // Quite dirty and not efficient, but the whole save system need to be
+    // updated to a binary format
+    std::istringstream iss(s.substr(idx), std::ios::binary);
+    GPApproximation * gpa  = new GPApproximation();
+    int bytes_consumed = gpa->gp.read(iss);
+    idx += bytes_consumed;
+    if (idx >= s.size() || s[idx] != '$')
+    {
+      throw std::runtime_error("Expecting a '$' at end of PWLApproximation");
+    }
+    idx++;
+    result = gpa;
   }
   // Read CompositeApproximation
   else if (s.compare(idx, 1, "c") == 0)
