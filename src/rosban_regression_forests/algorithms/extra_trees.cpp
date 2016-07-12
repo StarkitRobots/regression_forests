@@ -188,11 +188,12 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
       };
       break;
     case ApproximationType::GP:
-      approximateSamples = [&ts](const TrainingSet::Subset &samples,
-                                 const Eigen::MatrixXd &limits)
+      approximateSamples = [this,&ts](const TrainingSet::Subset &samples,
+                                      const Eigen::MatrixXd &limits)
       {
         (void) limits;
-        return new GPApproximation(ts.inputs(samples),ts.values(samples));
+        return new GPApproximation(ts.inputs(samples),ts.values(samples),
+                                   this->conf.gp_conf);
       };
       break;
     default:
