@@ -5,6 +5,8 @@
 #include "rosban_regression_forests/core/tree.h"
 #include "rosban_regression_forests/core/forest.h"
 
+#include "rosban_gp/gradient_ascent/randomized_rprop.h"
+
 #include <rosban_utils/serializable.h>
 
 /**
@@ -41,6 +43,8 @@ public:
     double val_min;
     /// nb_threads: Number of threads used to compute the regression forest
     int nb_threads;
+    /// gp_conf: Parameters for auto-tuning of Gaussian Processes when used
+    rosban_gp::RandomizedRProp::Config gp_conf;
 
     Config();
 

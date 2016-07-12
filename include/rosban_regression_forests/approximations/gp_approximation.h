@@ -10,9 +10,15 @@ namespace regression_forests
 class GPApproximation : public Approximation
 {
 public:
+  /// Internal approximation is set to default
   GPApproximation();
+  /// Gaussian Process hyperParameters are tuned automatically with default conf
   GPApproximation(const std::vector<Eigen::VectorXd> & inputs,
                   const std::vector<double> & outputs);
+  /// Gaussian Process hyperParameters are tuned automatically with chosen conf
+  GPApproximation(const std::vector<Eigen::VectorXd> & inputs,
+                  const std::vector<double> & outputs,
+                  const rosban_gp::RandomizedRProp::Config & conf);
   GPApproximation(const GPApproximation & other);
   virtual ~GPApproximation();
 
@@ -31,8 +37,6 @@ public:
   virtual void print(std::ostream &out) const override;
 
   rosban_gp::GaussianProcess gp;
-
-  static rosban_gp::RandomizedRProp::Config approximation_config;
 };
 
 }

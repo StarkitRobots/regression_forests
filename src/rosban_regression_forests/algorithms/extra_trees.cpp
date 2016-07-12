@@ -47,6 +47,9 @@ void ExtraTrees::Config::to_xml(std::ostream &out) const
   rosban_utils::xml_tools::write<double>("val_min", val_min, out);
   rosban_utils::xml_tools::write<double>("val_max", val_max, out);
   rosban_utils::xml_tools::write<std::string>("appr_type", to_string(appr_type), out);
+  if (appr_type == ApproximationType::GP) {
+    gp_conf.write("gp_conf", out);
+  }
 }
 
 void ExtraTrees::Config::from_xml(TiXmlNode *node)
@@ -64,6 +67,9 @@ void ExtraTrees::Config::from_xml(TiXmlNode *node)
   if (appr_type_str != "")
   {
     appr_type = loadApproximationType(appr_type_str);
+  }
+  if (appr_type == ApproximationType::GP) {
+    gp_conf.read(node, "gp_conf");
   }
 }
 

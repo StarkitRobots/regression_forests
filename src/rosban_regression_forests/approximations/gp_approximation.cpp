@@ -14,12 +14,16 @@ using rosban_gp::SquaredExponential;
 namespace regression_forests
 {
 
-rosban_gp::RandomizedRProp::Config GPApproximation::approximation_config;
-
 GPApproximation::GPApproximation() {}
 
 GPApproximation::GPApproximation(const std::vector<Eigen::VectorXd> & inputs,
                                  const std::vector<double> & outputs)
+  : GPApproximation(inputs, outputs, rosban_gp::RandomizedRProp::Config())
+{}
+
+GPApproximation::GPApproximation(const std::vector<Eigen::VectorXd> & inputs,
+                                 const std::vector<double> & outputs,
+                                 const rosban_gp::RandomizedRProp::Config & conf)
 {
   /// Checking conditions
   if (inputs.size() == 0) throw std::runtime_error("GPApproximation: inputs.size() == 0");
@@ -41,7 +45,7 @@ GPApproximation::GPApproximation(const std::vector<Eigen::VectorXd> & inputs,
   /// Creating GP
   std::unique_ptr<CovarianceFunction> cov_func(new SquaredExponential(input_mat.rows()));
   gp = GaussianProcess(input_mat, observations, std::move(cov_func));
-  gp.autoTune(approximation_config);
+  gp.autoTune(conf);
 }
 
 GPApproximation::GPApproximation(const GPApproximation & other)
