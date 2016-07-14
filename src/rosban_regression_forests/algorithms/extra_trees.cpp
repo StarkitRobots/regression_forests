@@ -100,6 +100,9 @@ ExtraTrees::Config ExtraTrees::Config::generateAuto(const Eigen::MatrixXd &space
       break;
     case ApproximationType::GP:
       conf.n_min = std::ceil(std::log2(nb_samples));
+      // Setting a minimal value for conf.n_min when using Gaussian Processes
+      conf.n_min = std::max(10, conf.n_min);
+      break;
   }
   //conf.max_samples = 4 * conf.n_min;
   conf.max_samples = std::numeric_limits<int>::max();
