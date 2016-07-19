@@ -101,7 +101,7 @@ ExtraTrees::Config ExtraTrees::Config::generateAuto(const Eigen::MatrixXd &space
     case ApproximationType::GP:
       conf.n_min = std::ceil(std::log2(nb_samples));
       // Setting a minimal value for conf.n_min when using Gaussian Processes
-      conf.n_min = std::max(10, conf.n_min);
+      conf.n_min = std::max(5, conf.n_min);
       break;
   }
   //conf.max_samples = 4 * conf.n_min;
@@ -195,6 +195,13 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
                                       const Eigen::MatrixXd &limits)
       {
         (void) limits;
+        if (samples.size() > 2 * this->conf.n_min) {
+          std::ostringstream oss;
+          oss << "Warning: large number of samples used for approximation: "
+              << samples.size() << " samples with n_min = " << this->conf.n_min
+              << std::endl;
+          std::cout << oss.str();
+        }
         return new GPApproximation(ts.inputs(samples),ts.values(samples),
                                    this->conf.gp_conf);
       };
