@@ -1,6 +1,11 @@
 #include "rosban_regression_forests/core/node.h"
 
+#include "rosban_regression_forests/approximations/approximation_factory.h"
 #include "rosban_regression_forests/approximations/composite_approximation.h"
+
+#include "rosban_utils/io_tools.h"
+
+static regression_forests::ApproximationFactory approximation_factory;
 
 namespace regression_forests
 {
@@ -404,6 +409,55 @@ void Node::parallelMerge(Node &node, const Node &t1, const Node &t2, double w1,
     }
   }
 }
+
+int Node::write(std::ostream & out) const
+{
+  int bytes_written = 0;
+  if (isLeaf()) {
+    bytes_written += rosban_utils::write<char>(out, 1);
+    bytes_written += a->write(out);
+  }
+  else {
+    bytes_written += rosban_utils::write<char>(out, 0);
+    bytes_written += rosban_utils::write<int>(out, s.dim);
+    bytes_written += rosban_utils::write<double>(out, s.val);
+    bytes_written += lowerChild->write(out);
+    bytes_written += upperChild->write(out);
+  }
+  return bytes_written;
+}
+
+int Node::read(std::istream & in)
+{
+  // start by removing eventual subtree / approximation
+  if (a != nullptr) delete(a);
+  if (upperChild != nullptr) delete(upperChild);
+  if (lowerChild != nullptr) delete(lowerChild);
+  // Then read data
+  int bytes_read;
+  char is_leaf;
+  bytes_read += rosban_utils::read<char>(in, &is_leaf);
+  if (is_leaf == 1) {
+    std::unique_ptr<Approximation> approximation;
+    bytes_read += approximation_factory.read(in, approximation);
+    a = approximation.release();
+  }
+  else if (is_leaf == 0) {
+    // Read split
+    bytes_read += rosban_utils::read<int>(in, &s.dim);
+    bytes_read += rosban_utils::read<double>(in, &s.val);
+    // Read childs
+    lowerChild = new Node();
+    bytes_read += lowerChild->read(in);
+    upperChild = new Node();
+    bytes_read += upperChild->read(in);
+  }
+  else {
+    throw std::runtime_error("Unexpected byte value when reading regression_forests::Node");
+  }
+  return bytes_read;
+}
+
 }
 
 std::ostream &operator<<(std::ostream &out, const regression_forests::Node &node)

@@ -110,6 +110,13 @@ public:
    */
   static void parallelMerge(Node &node, const Node &t1, const Node &t2, double w1,
                             double w2, Eigen::MatrixXd &limits);
+
+  /// Write a binary stream saving the configuration of the node and all its children
+  /// Return the number of bytes written
+  int write(std::ostream & out) const;
+  /// Read the configuration of the node and all its children from the provided binary stream
+  /// Return the number of bytes read
+  int read(std::istream & in);
 };
 }
 

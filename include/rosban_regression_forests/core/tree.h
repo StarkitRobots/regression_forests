@@ -66,6 +66,13 @@ public:
 
   /// Apply the given function on every leaf of the tree
   void applyOnLeafs(Eigen::MatrixXd &limits, Node::Function f);
+
+  /// Write a binary stream saving the configuration of the node and all its children
+  /// Return the number of bytes written
+  int write(std::ostream & out) const;
+  /// Read the configuration of the node and all its children from the provided binary stream
+  /// Return the number of bytes read
+  int read(std::istream & in);
 };
 }
 

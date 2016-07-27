@@ -3,6 +3,8 @@
 #include "rosban_regression_forests/tools/parser.h"
 #include "rosban_regression_forests/core/pruning.h"
 
+#include "rosban_utils/io_tools.h"
+
 #include <fstream>
 
 namespace regression_forests
@@ -159,6 +161,32 @@ void Forest::applyOnLeafs(Eigen::MatrixXd &limits, Node::Function f)
   {
     trees[i]->applyOnLeafs(limits, f);
   }
+}
+
+int Forest::write(std::ostream & out) const
+{
+  int bytes_written = 0;
+  bytes_written += rosban_utils::write<int>(out, trees.size());
+  for (int i = 0; i < trees.size(); i++) {
+    bytes_written += trees[i]->write(out);
+  }
+  return bytes_written;  
+}
+
+int Forest::read(std::istream & in)
+{
+  // Fist clean used ressources
+  trees.clear();
+  // Then read
+  int bytes_read = 0;
+  int nb_trees;
+  bytes_read += rosban_utils::read<int>(in, &nb_trees);
+  for (int i = 0; i < nb_trees; i++) {
+    std::unique_ptr<Tree> tree(new Tree);
+    bytes_read += tree->read(in);
+    trees.push_back(std::move(tree));
+  }
+  return bytes_read;
 }
 
 }

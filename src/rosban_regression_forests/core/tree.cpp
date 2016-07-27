@@ -1,5 +1,7 @@
 #include "rosban_regression_forests/core/tree.h"
 
+#include "rosban_utils/io_tools.h"
+
 #include <limits>
 #include <iostream>
 
@@ -208,6 +210,33 @@ void Tree::apply(Eigen::MatrixXd &limits, Node::Function f)
 void Tree::applyOnLeafs(Eigen::MatrixXd &limits, Node::Function f)
 {
   root->applyOnLeafs(limits, f);
+}
+
+int Tree::write(std::ostream & out) const
+{
+  char has_root = 1;
+  if (root == nullptr) has_root = 0;
+  int bytes_written = 0;
+  bytes_written += rosban_utils::write<char>(out, has_root);
+  if (has_root) {
+    bytes_written += root->write(out);
+  }
+  return bytes_written;  
+}
+
+int Tree::read(std::istream & in)
+{
+  // First free currently used data
+  if (root != nullptr) delete(root);
+  // Then read
+  char has_root;
+  int bytes_read = 0;
+  bytes_read += rosban_utils::read<char>(in, &has_root);
+  if (has_root) {
+    root = new Node();
+    bytes_read += root->read(in);
+  }
+  return bytes_read;  
 }
 
 }
