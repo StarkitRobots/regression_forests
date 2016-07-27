@@ -5,17 +5,17 @@
 
 namespace regression_forests
 {
-CompositeApproximation::CompositeApproximation()
-{
-}
-
-CompositeApproximation::~CompositeApproximation()
-{
-  for (Approximation *a : approximations)
-  {
-    delete (a);
-  }
-}
+//CompositeApproximation::CompositeApproximation()
+//{
+//}
+//
+//CompositeApproximation::~CompositeApproximation()
+//{
+//  for (Approximation *a : approximations)
+//  {
+//    delete (a);
+//  }
+//}
 
 double CompositeApproximation::eval(const Eigen::VectorXd &state) const
 {
@@ -87,15 +87,15 @@ void CompositeApproximation::push(Approximation *a)
   approximations.push_back(a);
 }
 
-Approximation *CompositeApproximation::clone() const
-{
-  CompositeApproximation *copy = new CompositeApproximation();
-  for (Approximation *a : approximations)
-  {
-    copy->push(a->clone());
-  }
-  return copy;
-}
+//Approximation *CompositeApproximation::clone() const
+//{
+//  CompositeApproximation *copy = new CompositeApproximation();
+//  for (Approximation *a : approximations)
+//  {
+//    copy->push(a->clone());
+//  }
+//  return copy;
+//}
 
 void CompositeApproximation::print(std::ostream &out) const
 {

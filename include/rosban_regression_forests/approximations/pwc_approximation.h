@@ -10,6 +10,7 @@ private:
   double value;
 
 public:
+  PWCApproximation();
   PWCApproximation(double value);
   virtual ~PWCApproximation();
 
@@ -25,5 +26,9 @@ public:
   virtual Approximation *clone() const override;
 
   virtual void print(std::ostream &out) const override;
+
+  virtual int getClassID() const override;
+  virtual int writeInternal(std::ostream & out) const override;
+  virtual int read(std::istream & in) override;
 };
 }

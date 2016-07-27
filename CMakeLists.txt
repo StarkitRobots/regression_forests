@@ -99,6 +99,11 @@ target_link_libraries(rosban_regression_forests
   ${EXTRA_LIBS}
   )
 
+
+# Testing input output functions
+add_executable(test_io src/test_io.cpp)
+target_link_libraries(test_io ${catkin_LIBRARIES} ${DELEG_LIBRARIES} )
+
 # if rosban_viewer is found, then add the viewer executable as target
 if (rosban_viewer_FOUND)
   add_executable(viewer src/viewer.cpp)

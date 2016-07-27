@@ -12,6 +12,7 @@ private:
   Eigen::VectorXd factors;
 
 public:
+  PWLApproximation();
   PWLApproximation(const Eigen::VectorXd &factors);
   PWLApproximation(const std::vector<Eigen::VectorXd> &inputs,
                    const std::vector<double> &outputs);
@@ -32,5 +33,9 @@ public:
   virtual Approximation *clone() const override;
 
   virtual void print(std::ostream &out) const override;
+
+  virtual int getClassID() const override;
+  virtual int writeInternal(std::ostream & out) const override;
+  virtual int read(std::istream & in) override;
 };
 }

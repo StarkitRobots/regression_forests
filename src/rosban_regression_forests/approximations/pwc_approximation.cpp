@@ -1,7 +1,12 @@
 #include "rosban_regression_forests/approximations/pwc_approximation.h"
 
+#include "rosban_utils/io_tools.h"
+
 namespace regression_forests
 {
+
+PWCApproximation::PWCApproximation() : value(0) {}
+
 PWCApproximation::PWCApproximation(double value_) : value(value_)
 {
 }
@@ -61,4 +66,20 @@ void PWCApproximation::print(std::ostream &out) const
 {
   out << "apwc" << value << "$";
 }
+
+int PWCApproximation::getClassID() const
+{
+  return Approximation::PWC;
+}
+
+int PWCApproximation::writeInternal(std::ostream & out) const
+{
+  return rosban_utils::write<double>(out, value);
+}
+
+int PWCApproximation::read(std::istream & in)
+{
+  return rosban_utils::read<double>(in, &value);
+}
+
 }

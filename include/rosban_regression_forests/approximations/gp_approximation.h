@@ -36,6 +36,10 @@ public:
 
   virtual void print(std::ostream &out) const override;
 
+  virtual int getClassID() const override;
+  virtual int writeInternal(std::ostream & out) const override;
+  virtual int read(std::istream & in) override;
+
   rosban_gp::GaussianProcess gp;
 };
 

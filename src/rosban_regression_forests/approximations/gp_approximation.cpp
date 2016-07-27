@@ -89,5 +89,19 @@ void GPApproximation::print(std::ostream &out) const
   out << "$";
 }
 
+int GPApproximation::getClassID() const
+{
+  return Approximation::GP;
+}
+
+int GPApproximation::writeInternal(std::ostream & out) const
+{
+  return gp.write(out);
+}
+
+int GPApproximation::read(std::istream & in)
+{
+  return gp.read(in);
+}
 
 }

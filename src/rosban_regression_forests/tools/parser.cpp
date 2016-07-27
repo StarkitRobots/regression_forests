@@ -74,28 +74,28 @@ Approximation *approximation(const std::string &s, size_t *index)
     idx++;
     result = gpa;
   }
-  // Read CompositeApproximation
-  else if (s.compare(idx, 1, "c") == 0)
-  {
-    CompositeApproximation *ca = new CompositeApproximation();
-    idx++;
-    while (idx < s.size() && s[idx] == 'a')
-    {
-      ca->push(approximation(s, &idx));
-    }
-    if (idx >= s.size())
-    {
-      delete (ca);
-      throw std::runtime_error("Reached end of string while parsing a compositeApproximation");
-    }
-    if (s[idx] != '$')
-    {
-      delete (ca);
-      throw std::runtime_error("Expecting a '$' at end of compositeApproximation");
-    }
-    idx++;
-    result = ca;
-  }
+//  // Read CompositeApproximation
+//  else if (s.compare(idx, 1, "c") == 0)
+//  {
+//    CompositeApproximation *ca = new CompositeApproximation();
+//    idx++;
+//    while (idx < s.size() && s[idx] == 'a')
+//    {
+//      ca->push(approximation(s, &idx));
+//    }
+//    if (idx >= s.size())
+//    {
+//      delete (ca);
+//      throw std::runtime_error("Reached end of string while parsing a compositeApproximation");
+//    }
+//    if (s[idx] != '$')
+//    {
+//      delete (ca);
+//      throw std::runtime_error("Expecting a '$' at end of compositeApproximation");
+//    }
+//    idx++;
+//    result = ca;
+//  }
   else
   {
     throw std::runtime_error("Unexpected description of action near: " + s.substr(idx, 5));

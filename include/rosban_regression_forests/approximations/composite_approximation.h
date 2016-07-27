@@ -12,8 +12,8 @@ private:
   std::vector<Approximation *> approximations;
 
 public:
-  CompositeApproximation();
-  CompositeApproximation(const CompositeApproximation &other) = delete;
+//  CompositeApproximation();
+//  CompositeApproximation(const CompositeApproximation &other) = delete;
   virtual ~CompositeApproximation();
 
   virtual double eval(const Eigen::VectorXd &state) const override;
@@ -27,7 +27,7 @@ public:
    */
   void push(Approximation *approximation);
 
-  virtual Approximation *clone() const override;
+//  virtual Approximation *clone() const override;
 
   virtual void print(std::ostream &out) const override;
 
