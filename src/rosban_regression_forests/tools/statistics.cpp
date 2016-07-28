@@ -1,6 +1,7 @@
 #include "rosban_regression_forests/tools/statistics.h"
 
 #include <algorithm>
+#include <cmath>
 #include <stdexcept>
 
 namespace regression_forests

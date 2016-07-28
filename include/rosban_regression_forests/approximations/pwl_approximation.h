@@ -2,6 +2,8 @@
 
 #include "rosban_regression_forests/approximations/approximation.h"
 
+#include <vector>
+
 namespace regression_forests
 {
 class PWLApproximation : public Approximation
