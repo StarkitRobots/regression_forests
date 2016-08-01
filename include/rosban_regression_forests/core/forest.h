@@ -33,7 +33,7 @@ public:
   /// Return the average gradient at the given input
   Eigen::VectorXd getGradient(const Eigen::VectorXd & input) const;
 
-  /// Return a randomized value based on the confidence interval
+  /// Return a randomized value based on the standard deviation
   double getRandomizedValue(const Eigen::VectorXd &input,
                             std::default_random_engine &engine) const;
 
