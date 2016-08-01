@@ -5,6 +5,7 @@
 
 #include "rosban_utils/io_tools.h"
 
+#include <algorithm>
 #include <fstream>
 
 namespace regression_forests
@@ -42,29 +43,64 @@ size_t Forest::maxSplitDim() const
   return max;
 }
 
-double Forest::getValue(const Eigen::VectorXd &input) const
+double Forest::getValue(const Eigen::VectorXd &input,
+                        AggregationMethod method) const
 {
-  double sum = 0.0;
-  for (const auto &t : trees)
+  double sum = 0;
+  std::vector<double> values = getValues(input, method);
+  for (double val : values)
   {
-    sum += t->getValue(input);
+    sum += val;
   }
-  return sum / trees.size();
+  return sum / values.size();
 }
 
-double Forest::getVar(const Eigen::VectorXd &input) const
+std::vector<double> Forest::getValues(const Eigen::VectorXd &input,
+                                      AggregationMethod method) const
 {
-  // Excluding case where forest is empty
-  if (trees.size() == 0) return 0;
-
-  double mean = getValue(input);
-  double var = 0;
+  std::vector<double> raw_values;
+  raw_values.reserve(trees.size());
   for (const auto &t : trees)
   {
-    double diff = t->getValue(input) - mean;
+    raw_values.push_back(t->getValue(input));
+  }
+  switch (method)
+  {
+    case AggregationMethod::All: return raw_values;
+    case AggregationMethod::AutoCut:
+    {
+      int tail_size = std::ceil(trees.size() * 0.1);
+      std::sort(raw_values.begin(), raw_values.end());
+      std::vector<double> filtered_values;
+      filtered_values.reserve(trees.size() - 2 * tail_size);
+      for (int i = tail_size; i < raw_values.size() - tail_size; i++) {
+        filtered_values.push_back(raw_values[i]);
+      }
+      return filtered_values;
+    }
+    default:
+      throw std::logic_error("Forest::getAggregatedValues: unknown aggregation method");
+  }
+}
+
+
+double Forest::getVar(const Eigen::VectorXd &input,
+                      AggregationMethod method) const
+{
+  double sum = 0;
+  std::vector<double> values = getValues(input, method);
+  for (double val : values)
+  {
+    sum += val;
+  }
+  double mean = sum / values.size();
+  double var = 0;
+  for (double val : values)
+  {
+    double diff = val - mean;
     var += diff * diff;
   }
-  return var / trees.size();
+  return var / values.size();
 }
 
 Eigen::VectorXd Forest::getGradient(const Eigen::VectorXd &input) const

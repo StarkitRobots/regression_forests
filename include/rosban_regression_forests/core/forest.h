@@ -12,6 +12,10 @@ private:
   std::vector<std::unique_ptr<Tree>> trees;
 
 public:
+  /// All: values from all the trees are considered
+  /// AutoCut: the 10 % tail and 10 % bottom of the distribution are removed
+  enum AggregationMethod {All, AutoCut};
+
   Forest();
   Forest(const Forest &other) = delete;
   virtual ~Forest();
@@ -25,10 +29,16 @@ public:
   size_t maxSplitDim() const;
 
   /// Return the average value for the given input
-  double getValue(const Eigen::VectorXd &input) const;
+  double getValue(const Eigen::VectorXd &input,
+                  AggregationMethod method = AggregationMethod::All) const;
+
+  /// Return the aggregated values provided by each tree
+  std::vector<double> getValues(const Eigen::VectorXd &input,
+                                AggregationMethod method = AggregationMethod::All) const;
 
   /// Return the variance of the estimation according to the trees for the given input
-  double getVar(const Eigen::VectorXd &input) const;
+  double getVar(const Eigen::VectorXd &input,
+                AggregationMethod method = AggregationMethod::All) const;
 
   /// Return the average gradient at the given input
   Eigen::VectorXd getGradient(const Eigen::VectorXd & input) const;
