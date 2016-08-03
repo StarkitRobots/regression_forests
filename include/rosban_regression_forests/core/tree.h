@@ -73,6 +73,8 @@ public:
   /// Read the configuration of the node and all its children from the provided binary stream
   /// Return the number of bytes read
   int read(std::istream & in);
+
+  Tree * clone() const;
 };
 }
 

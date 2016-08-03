@@ -239,6 +239,13 @@ int Tree::read(std::istream & in)
   return bytes_read;  
 }
 
+Tree * Tree::clone() const
+{
+  Tree * copy = new Tree();
+  copy->root = root->clone();
+  return copy;
+}
+
 }
 
 std::ostream &operator<<(std::ostream &out, const regression_forests::Tree &tree)

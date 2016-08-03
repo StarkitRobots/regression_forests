@@ -216,6 +216,16 @@ int Forest::read(std::istream & in)
   return bytes_read;
 }
 
+Forest * Forest::clone() const
+{
+  Forest * copy = new Forest();
+  for (int i = 0; i < trees.size(); i++) {
+    std::unique_ptr<Tree> tree_copy(trees[i]->clone());
+    copy->push(std::move(tree_copy));
+  }
+  return copy;
+}
+
 }
 
 std::ostream &operator<<(std::ostream &out, const regression_forests::Forest &forest)
