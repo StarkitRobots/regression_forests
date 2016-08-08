@@ -9,6 +9,7 @@
 namespace regression_forests
 {
 typedef std::pair<Node *, double> EvaluatedNode;
+typedef std::pair<std::shared_ptr<const Approximation>, double> EvaluatedApproximation;
 
 static double spaceSize(const Eigen::MatrixXd &space)
 {
@@ -48,9 +49,9 @@ void pushLastSplitNodes(Node *node, std::list<Node *> &splitNodes)
   }
 }
 
-std::pair<Approximation *, double> getSplitData(Node *node, const Eigen::MatrixXd &limits)
+EvaluatedApproximation getSplitData(Node *node, const Eigen::MatrixXd &limits)
 {
-  std::pair<Approximation *, double> result;
+  EvaluatedApproximation result;
   Eigen::MatrixXd nodeSpace = node->getSubSpace(limits);
   size_t sDim = node->s.dim;
   double sVal = node->s.val;
@@ -58,14 +59,13 @@ std::pair<Approximation *, double> getSplitData(Node *node, const Eigen::MatrixX
   double sDimSize = nodeSpace(sDim, 1) - nodeSpace(sDim, 0);
   double lowerRatio = (sVal - nodeSpace(sDim, 0)) / sDimSize;
   double upperRatio = (nodeSpace(sDim, 1) - sVal) / sDimSize;
-  ;
   result.first = CompositeApproximation::weightedMerge(node->lowerChild->a->clone(), lowerRatio,
                                                        node->upperChild->a->clone(), upperRatio);
   double lowerSize = upperRatio * nodeSize;
   double upperSize = upperRatio * nodeSize;
   double upperDiff = CompositeApproximation::avgDifference(node->upperChild->a, result.first,
                                                            nodeSpace);
-  double lowerDiff = CompositeApproximation::avgDifference(node->upperChild->a, result.first,
+  double lowerDiff = CompositeApproximation::avgDifference(node->lowerChild->a, result.first,
                                                            nodeSpace);
   result.second = lowerSize * lowerDiff + upperSize * upperDiff;
   return result;
@@ -90,7 +90,7 @@ std::unique_ptr<Tree> pruneTree(std::unique_ptr<Tree> tree, const Eigen::MatrixX
     }
     return a.second < b.second;
   };
-  std::map<EvaluatedNode, Approximation *, decltype(nodeComp)> splits(nodeComp);
+  std::map<EvaluatedNode, std::shared_ptr<const Approximation>, decltype(nodeComp)> splits(nodeComp);
   for (Node *node : splitNodes)
   {
     auto splitData = getSplitData(node, limits);
@@ -102,14 +102,10 @@ std::unique_ptr<Tree> pruneTree(std::unique_ptr<Tree> tree, const Eigen::MatrixX
   {
     // Retrieving node which bring the lowest quality improvement
     Node *current = splits.begin()->first.first;
-    Approximation *app = splits.begin()->second;
+    std::shared_ptr<const Approximation> app = splits.begin()->second;
     auto second = ++splits.begin();
     splits.erase(splits.begin(), second);
-    // Split node effectively
-    if (current->a != NULL)
-    {
-      delete (current->a);
-    }
+    // Destroy children effectively
     current->a = app;
     delete (current->lowerChild);
     delete (current->upperChild);
@@ -124,10 +120,6 @@ std::unique_ptr<Tree> pruneTree(std::unique_ptr<Tree> tree, const Eigen::MatrixX
       EvaluatedNode key(father, splitData.second);
       splits[key] = splitData.first;
     }
-  }
-  for (auto &entry : splits)
-  {
-    delete (entry.second);
   }
   return tree;
 }

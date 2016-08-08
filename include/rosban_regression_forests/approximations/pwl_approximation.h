@@ -32,9 +32,7 @@ public:
   std::pair<double, Eigen::VectorXd> getMinPair(const Eigen::MatrixXd &limits) const;
   std::pair<double, Eigen::VectorXd> getMaxPair(const Eigen::MatrixXd &limits) const;
 
-  virtual Approximation *clone() const override;
-
-  virtual void print(std::ostream &out) const override;
+  virtual std::unique_ptr<Approximation> clone() const override;
 
   virtual int getClassID() const override;
   virtual int writeInternal(std::ostream & out) const override;

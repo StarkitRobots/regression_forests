@@ -77,5 +77,3 @@ public:
   Tree * clone() const;
 };
 }
-
-std::ostream &operator<<(std::ostream &out, const regression_forests::Tree &tree);

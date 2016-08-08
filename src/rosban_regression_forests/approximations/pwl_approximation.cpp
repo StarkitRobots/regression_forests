@@ -151,19 +151,9 @@ void PWLApproximation::updateMaxPair(const Eigen::MatrixXd &limits,
   }
 }
 
-Approximation *PWLApproximation::clone() const
+std::unique_ptr<Approximation>PWLApproximation::clone() const
 {
-  return new PWLApproximation(factors);
-}
-
-void PWLApproximation::print(std::ostream &out) const
-{
-  out << "apwl" << factors.rows() << "|";
-  for (int dim = 0; dim < factors.rows(); dim++)
-  {
-    out << factors(dim) << "|";
-  }
-  out << "$";
+  return std::unique_ptr<Approximation>(new PWLApproximation(factors));
 }
 
 int PWLApproximation::getClassID() const

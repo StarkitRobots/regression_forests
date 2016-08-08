@@ -18,8 +18,8 @@ class ExtraTrees
 {
 public:
 
-  typedef std::function<Approximation *(const TrainingSet::Subset &,
-                                        const Eigen::MatrixXd &)> Approximator;
+  typedef std::function<std::unique_ptr<Approximation> (const TrainingSet::Subset &,
+                                                        const Eigen::MatrixXd &)> Approximator;
 
   class Config : public rosban_utils::Serializable
   {
@@ -37,10 +37,6 @@ public:
     double min_var;
     /// appr_type: which types of approximation should be used for the leafs
     ApproximationType appr_type;
-    /// val_max: Approximations are not allowed to send a value above
-    double val_max;
-    /// val_min: Approximations are not allowed to send a value below
-    double val_min;
     /// nb_threads: Number of threads used to compute the regression forest
     int nb_threads;
     /// gp_conf: Parameters for auto-tuning of Gaussian Processes when used

@@ -4,6 +4,7 @@
 #include "rosban_regression_forests/core/orthogonal_split.h"
 
 #include <functional>
+#include <memory>
 #include <vector>
 
 namespace regression_forests
@@ -11,7 +12,7 @@ namespace regression_forests
 class Node
 {
 public:
-  Approximation *a;
+  std::shared_ptr<const Approximation> a;
   Node *father, *upperChild, *lowerChild;
   OrthogonalSplit s;
 
@@ -26,7 +27,7 @@ public:
   Node();
   Node(const Node &other) = delete;
   Node(Node *father);
-  Node(Node *father, Approximation *a);
+  Node(Node *father, std::shared_ptr<const Approximation> a);
   virtual ~Node();
 
   size_t maxSplitDim() const;
@@ -39,9 +40,8 @@ public:
   // the node by iterating on all the father
   Eigen::MatrixXd getSubSpace(const Eigen::MatrixXd &space) const;
 
-  // Add a cloned version of the approximation on all the leafs with a given
-  // weight
-  void addApproximation(const Approximation *a, double weight);
+  // Add the provided approximation on all the leafs with a given weight
+  void addApproximation(std::shared_ptr<const Approximation> a, double weight);
 
   double getValue(const Eigen::VectorXd &state) const;
   /// Return the gradient of the value with respect to the input at input
@@ -119,5 +119,3 @@ public:
   int read(std::istream & in);
 };
 }
-
-std::ostream &operator<<(std::ostream &out, const regression_forests::Node &node);

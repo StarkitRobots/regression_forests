@@ -9,15 +9,15 @@ static regression_forests::ApproximationFactory approximation_factory;
 
 namespace regression_forests
 {
-Node::Node() : a(NULL), father(NULL), upperChild(NULL), lowerChild(NULL)
+Node::Node() : father(NULL), upperChild(NULL), lowerChild(NULL)
 {
 }
 
-Node::Node(Node *father_) : a(NULL), father(father_), upperChild(NULL), lowerChild(NULL)
+Node::Node(Node *father_) : father(father_), upperChild(NULL), lowerChild(NULL)
 {
 }
 
-Node::Node(Node *father_, Approximation *a_)
+Node::Node(Node *father_, std::shared_ptr<const Approximation> a_)
   : a(a_), father(father_), upperChild(NULL), lowerChild(NULL)
 {
 }
@@ -31,10 +31,6 @@ Node::~Node()
   if (lowerChild != NULL)
   {
     delete (lowerChild);
-  }
-  if (a != NULL)
-  {
-    delete (a);
   }
 }
 
@@ -105,16 +101,16 @@ Eigen::MatrixXd Node::getSubSpace(const Eigen::MatrixXd &space) const
   return subSpace;
 }
 
-void Node::addApproximation(const Approximation *newApproximation, double newWeight)
+void Node::addApproximation(std::shared_ptr<const Approximation> newApproximation, double newWeight)
 {
   if (!isLeaf())
   {
     lowerChild->addApproximation(newApproximation, newWeight);
     upperChild->addApproximation(newApproximation, newWeight);
   }
-  if (a == NULL)
+  if (!a)
   {
-    a = newApproximation->clone();
+    a = newApproximation;
   }
   else
   {
@@ -223,7 +219,7 @@ void Node::updateMinPair(Eigen::MatrixXd &limits, std::pair<double, Eigen::Vecto
 std::vector<Eigen::VectorXd> Node::project(const std::vector<int> &freeDimensions,
                                                      const Eigen::MatrixXd &limits)
 {
-  if (a == NULL)
+  if (!a)
   {
     throw std::runtime_error("Node::project: no approximation "
                              "available on the current node");
@@ -305,10 +301,6 @@ Node *Node::clone() const
 
 void Node::copyContent(const Node *other)
 {
-  if (a != NULL)
-  {
-    delete (a);
-  }
   if (other->a != NULL)
   {
     a = other->a->clone();
@@ -430,17 +422,17 @@ int Node::write(std::ostream & out) const
 int Node::read(std::istream & in)
 {
   // start by removing eventual subtree / approximation
-  if (a != nullptr) delete(a);
+  a.reset();
   if (upperChild != nullptr) delete(upperChild);
   if (lowerChild != nullptr) delete(lowerChild);
   // Then read data
-  int bytes_read;
+  int bytes_read = 0;
   char is_leaf;
   bytes_read += rosban_utils::read<char>(in, &is_leaf);
   if (is_leaf == 1) {
     std::unique_ptr<Approximation> approximation;
     bytes_read += approximation_factory.read(in, approximation);
-    a = approximation.release();
+    a = std::move(approximation);
   }
   else if (is_leaf == 0) {
     // Read split
@@ -458,19 +450,4 @@ int Node::read(std::istream & in)
   return bytes_read;
 }
 
-}
-
-std::ostream &operator<<(std::ostream &out, const regression_forests::Node &node)
-{
-  out << "n";
-  if (node.isLeaf())
-  {
-    out << *node.a;
-  }
-  else
-  {
-    out << node.s << *node.lowerChild << *node.upperChild;
-  }
-  out << "$";
-  return out;
 }

@@ -122,10 +122,9 @@ void Tree::addSubTree(Node *node, Eigen::MatrixXd &limits, const Tree &other,
       return;
     }
     // Add current approximation to all leafs of the subTree and then delete it
-    if (node->a != NULL)
+    if (node->a)
     {
       subTreeRoot->addApproximation(node->a, 1.0 / otherWeight);
-      delete (node->a);
     }
     // Import approximation and childs with subTreeRoot
     node->a = subTreeRoot->a;
@@ -246,13 +245,4 @@ Tree * Tree::clone() const
   return copy;
 }
 
-}
-
-std::ostream &operator<<(std::ostream &out, const regression_forests::Tree &tree)
-{
-  if (tree.root != NULL)
-  {
-    return out << *tree.root;
-  }
-  return out;
 }

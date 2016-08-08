@@ -116,23 +116,27 @@ static void populate(TrainingSet &ts,
   }
 }
 
-static Approximation * getApproximation(const TrainingSet &ts,
-                                        const TrainingSet::Subset &samples,
-                                        ApproximationType apprType)
+static std::shared_ptr<const Approximation> getApproximation(const TrainingSet &ts,
+                                                             const TrainingSet::Subset &samples,
+                                                             ApproximationType apprType)
 {
+  std::shared_ptr<const Approximation> result;
   switch (apprType)
   {
     case ApproximationType::PWC:
-      return new PWCApproximation(Statistics::mean(ts.values(samples)));
+      result.reset(new PWCApproximation(Statistics::mean(ts.values(samples))));
+      break;
     case ApproximationType::PWL:
-      return new PWLApproximation(ts.inputs(samples), ts.values(samples));
+      result.reset(new PWLApproximation(ts.inputs(samples), ts.values(samples)));
+      break;
   }
-  throw std::runtime_error("Unknown approximation type in getApproximation");
+  if (!result) throw std::runtime_error("Unknown approximation type in getApproximation");
+  return result;
 }
 
 static double potentialGain(const TrainingSet &ts,
                             const TrainingSet::Subset &samples,
-                            Approximation *a,
+                            std::shared_ptr<const Approximation> a,
                             const Eigen::MatrixXd &space)
 {
   double squaredSum = 0;
@@ -310,8 +314,7 @@ std::unique_ptr<Tree> BB2Tree::bb2Tree(const BB2Tree::BB2TreeConfig &config)
     TrainingSet::Subset lSamples, uSamples;
     ts.applySplit(entry.split, entry.samples, lSamples, uSamples);
     // Modifying node
-    delete (node->a);
-    node->a = NULL;
+    node->a.reset();
     node->s = entry.split;
     node->lowerChild = new Node();
     node->upperChild = new Node();

@@ -2,9 +2,10 @@
 
 #include "rosban_utils/stream_serializable.h"
 
-#include <ostream>
-
 #include <Eigen/Core>
+
+#include <ostream>
+#include <memory>
 
 namespace regression_forests
 {
@@ -23,9 +24,7 @@ public:
   virtual void updateMinPair(const Eigen::MatrixXd &limits, std::pair<double, Eigen::VectorXd> &best) const = 0;
   virtual void updateMaxPair(const Eigen::MatrixXd &limits, std::pair<double, Eigen::VectorXd> &best) const = 0;
 
-  virtual Approximation *clone() const = 0;
-
-  virtual void print(std::ostream &out) const = 0;
+  virtual std::unique_ptr<Approximation> clone() const = 0;
 
   // TODO: make a fusion with ApproximationType
   enum ID : int
@@ -36,5 +35,3 @@ public:
       };
 };
 }
-
-std::ostream &operator<<(std::ostream &out, const regression_forests::Approximation &a);

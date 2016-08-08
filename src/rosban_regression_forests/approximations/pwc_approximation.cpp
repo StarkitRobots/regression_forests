@@ -57,14 +57,9 @@ void PWCApproximation::updateMinPair(const Eigen::MatrixXd &limits,
   }
 }
 
-Approximation *PWCApproximation::clone() const
+std::unique_ptr<Approximation> PWCApproximation::clone() const
 {
-  return new PWCApproximation(value);
-}
-
-void PWCApproximation::print(std::ostream &out) const
-{
-  out << "apwc" << value << "$";
+  return std::unique_ptr<Approximation>(new PWCApproximation(value));
 }
 
 int PWCApproximation::getClassID() const

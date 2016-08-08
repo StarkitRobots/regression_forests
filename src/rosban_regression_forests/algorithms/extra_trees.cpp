@@ -27,8 +27,6 @@ ExtraTrees::Config::Config()
   nb_threads = 1;
   min_var = 0;
   appr_type = ApproximationType::PWC;
-  val_min = std::numeric_limits<double>::lowest();
-  val_max = std::numeric_limits<double>::max();
 }
 
 std::string ExtraTrees::Config::class_name() const
@@ -44,8 +42,6 @@ void ExtraTrees::Config::to_xml(std::ostream &out) const
   rosban_utils::xml_tools::write<int>("nb_trees", nb_trees, out);
   rosban_utils::xml_tools::write<int>("nb_threads", nb_threads, out);
   rosban_utils::xml_tools::write<double>("min_var", min_var, out);
-  rosban_utils::xml_tools::write<double>("val_min", val_min, out);
-  rosban_utils::xml_tools::write<double>("val_max", val_max, out);
   rosban_utils::xml_tools::write<std::string>("appr_type", to_string(appr_type), out);
   if (appr_type == ApproximationType::GP) {
     gp_conf.write("gp_conf", out);
@@ -60,8 +56,6 @@ void ExtraTrees::Config::from_xml(TiXmlNode *node)
   rosban_utils::xml_tools::try_read<int>   (node, "nb_trees"   , nb_trees   );
   rosban_utils::xml_tools::try_read<int>   (node, "nb_threads" , nb_threads );
   rosban_utils::xml_tools::try_read<double>(node, "min_var"    , min_var    );
-  rosban_utils::xml_tools::try_read<double>(node, "val_min"    , val_min    );
-  rosban_utils::xml_tools::try_read<double>(node, "val_max"    , val_max    );
   std::string appr_type_str;
   rosban_utils::xml_tools::try_read<std::string>(node, "appr_type", appr_type_str);
   if (appr_type_str != "")
@@ -107,15 +101,13 @@ ExtraTrees::Config ExtraTrees::Config::generateAuto(const Eigen::MatrixXd &space
   //conf.max_samples = 4 * conf.n_min;
   conf.max_samples = std::numeric_limits<int>::max();
   conf.appr_type = appr_type;
-  conf.val_min = std::numeric_limits<double>::lowest();
-  conf.val_max = std::numeric_limits<double>::max();
   return conf;
 }
 
 
 static double avgSquaredErrors(const TrainingSet &ts,
                                const TrainingSet::Subset &samples,
-                               Approximation * a)
+                               std::shared_ptr<const Approximation> a)
 {
   std::vector<Eigen::VectorXd> inputs = ts.inputs(samples);
   std::vector<double> outputs = ts.values(samples);
@@ -141,9 +133,9 @@ double ExtraTrees::evalSplitScore(const TrainingSet &ts,
   limits_lower(split.dim, 1) = split.val;
   limits_upper(split.dim, 0) = split.val;
   // Computing approximations
-  Approximation * approx       = approximator(samples      , limits      );
-  Approximation * approx_lower = approximator(samples_lower, limits_lower);
-  Approximation * approx_upper = approximator(samples_upper, limits_upper);
+  std::shared_ptr<Approximation> approx       = approximator(samples      , limits      );
+  std::shared_ptr<Approximation> approx_lower = approximator(samples_lower, limits_lower);
+  std::shared_ptr<Approximation> approx_upper = approximator(samples_upper, limits_upper);
   // Computing variances
   double nb_samples = samples.size();
   double varAll   = avgSquaredErrors(ts, samples      , approx);
@@ -151,10 +143,6 @@ double ExtraTrees::evalSplitScore(const TrainingSet &ts,
   double varUpper = avgSquaredErrors(ts, samples_upper, approx_upper);
   double weightedNewVar = (varLower * samples_lower.size()
                            + varUpper * samples_upper.size()) / nb_samples;
-  // Avoid memory leaks
-  delete(approx);
-  delete(approx_lower);
-  delete(approx_upper);
   return (varAll - weightedNewVar) / varAll;
 }
 
@@ -169,25 +157,16 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
                                  const Eigen::MatrixXd &limits)
       {
         (void) limits;
-        return new PWCApproximation(Statistics::mean(ts.values(samples)));
+        double mean = Statistics::mean(ts.values(samples));
+        return std::unique_ptr<Approximation>(new PWCApproximation(mean));
       };
       break;
     case ApproximationType::PWL:
       approximateSamples = [this,&ts](const TrainingSet::Subset &samples,
                                       const Eigen::MatrixXd &limits)
       {
-        PWLApproximation * pwl_app = new PWLApproximation(ts.inputs(samples), ts.values(samples));
-        /// if PWL is valid, return it
-        if (pwl_app->getMaxPair(limits).first <= this->conf.val_max &&
-            pwl_app->getMinPair(limits).first >= this->conf.val_min)
-        {
-          return (Approximation*)pwl_app;
-        }
-        /// Shunting the PWC approximation (test)
-        return (Approximation*)pwl_app;
-        /// If not, delete it and return a PWC approximation
-        delete(pwl_app);
-        return (Approximation*)new PWCApproximation(Statistics::mean(ts.values(samples)));
+        return std::unique_ptr<Approximation>(new PWLApproximation(ts.inputs(samples),
+                                                                   ts.values(samples)));
       };
       break;
     case ApproximationType::GP:
@@ -202,8 +181,9 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
               << std::endl;
           std::cout << oss.str();
         }
-        return new GPApproximation(ts.inputs(samples),ts.values(samples),
-                                   this->conf.gp_conf);
+        return std::unique_ptr<Approximation>(new GPApproximation(ts.inputs(samples),
+                                                                  ts.values(samples),
+                                                                  this->conf.gp_conf));
       };
       break;
     default:

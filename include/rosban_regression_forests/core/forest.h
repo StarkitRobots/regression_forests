@@ -2,11 +2,13 @@
 
 #include "rosban_regression_forests/core/tree.h"
 
+#include "rosban_utils/stream_serializable.h"
+
 #include <random>
 
 namespace regression_forests
 {
-class Forest
+class Forest : public rosban_utils::StreamSerializable
 {
 private:
   std::vector<std::unique_ptr<Tree>> trees;
@@ -53,24 +55,21 @@ public:
   // in the final result
   std::unique_ptr<Tree> unifiedProjectedTree(const Eigen::MatrixXd &limits, size_t maxLeafs = 0);
 
-  void save(const std::string &path) const;
-  static std::unique_ptr<Forest> loadFile(const std::string &path);
-
   /// Apply the given function on every node of every tree
   void apply(Eigen::MatrixXd &limits, Node::Function f);
 
   /// Apply the given function on every leaf of every tree
   void applyOnLeafs(Eigen::MatrixXd &limits, Node::Function f);
 
+  /// Return 0 since there is no need to have several types in the same factory
+  int getClassID() const override;
   /// Write a binary stream saving the configuration of the node and all its children
   /// Return the number of bytes written
-  int write(std::ostream & out) const;
+  int writeInternal(std::ostream & out) const override;
   /// Read the configuration of the node and all its children from the provided binary stream
   /// Return the number of bytes read
-  int read(std::istream & in);
+  int read(std::istream & in) override;
 
   Forest * clone() const;
 };
 }
-
-std::ostream &operator<<(std::ostream &out, const regression_forests::Forest &forest);

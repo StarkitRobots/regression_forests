@@ -1,6 +1,5 @@
 #include "rosban_regression_forests/core/forest.h"
 
-#include "rosban_regression_forests/tools/parser.h"
 #include "rosban_regression_forests/core/pruning.h"
 
 #include "rosban_utils/io_tools.h"
@@ -151,29 +150,6 @@ std::unique_ptr<Tree> Forest::unifiedProjectedTree(const Eigen::MatrixXd &limits
   return result;
 }
 
-void Forest::save(const std::string &path) const
-{
-  std::ofstream ofs(path, std::ios::binary);
-  ofs << *this;
-  ofs.close();
-}
-
-std::unique_ptr<Forest> Forest::loadFile(const std::string &path)
-{
-  std::ifstream in(path, std::ios::in | std::ios::binary);
-  if (in)
-  {
-    std::string contents;
-    in.seekg(0, std::ios::end);
-    contents.resize(in.tellg());
-    in.seekg(0, std::ios::beg);
-    in.read(&contents[0], contents.size());
-    in.close();
-    return Parser::regressionForest(contents);
-  }
-  throw std::runtime_error("Failed to open file '" + path + "'");
-}
-
 void Forest::apply(Eigen::MatrixXd &limits, Node::Function f)
 {
   for (size_t i = 0; i < trees.size(); i++)
@@ -190,7 +166,9 @@ void Forest::applyOnLeafs(Eigen::MatrixXd &limits, Node::Function f)
   }
 }
 
-int Forest::write(std::ostream & out) const
+int Forest::getClassID() const { return 0; }
+
+int Forest::writeInternal(std::ostream & out) const
 {
   int bytes_written = 0;
   bytes_written += rosban_utils::write<int>(out, trees.size());
@@ -226,15 +204,4 @@ Forest * Forest::clone() const
   return copy;
 }
 
-}
-
-std::ostream &operator<<(std::ostream &out, const regression_forests::Forest &forest)
-{
-  out << 'f';
-  for (size_t treeId = 0; treeId < forest.nbTrees(); treeId++)
-  {
-    out << forest.getTree(treeId);
-  }
-  out << '$';
-  return out;
 }

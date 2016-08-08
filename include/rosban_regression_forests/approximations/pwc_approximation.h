@@ -23,9 +23,7 @@ public:
   virtual void updateMinPair(const Eigen::MatrixXd &limits, std::pair<double, Eigen::VectorXd> &best) const override;
   virtual void updateMaxPair(const Eigen::MatrixXd &limits, std::pair<double, Eigen::VectorXd> &best) const override;
 
-  virtual Approximation *clone() const override;
-
-  virtual void print(std::ostream &out) const override;
+  virtual std::unique_ptr<Approximation> clone() const override;
 
   virtual int getClassID() const override;
   virtual int writeInternal(std::ostream & out) const override;

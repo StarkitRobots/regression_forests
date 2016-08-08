@@ -1,5 +1,4 @@
 set(SOURCES
-  approximation.cpp
   approximation_factory.cpp
   approximation_type.cpp
   composite_approximation.cpp

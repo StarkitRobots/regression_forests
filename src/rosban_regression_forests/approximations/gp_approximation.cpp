@@ -65,9 +65,9 @@ Eigen::VectorXd GPApproximation::getGrad(const Eigen::VectorXd & state) const
   return gp.getGradient(state);
 }
 
-Approximation * GPApproximation::clone() const
+std::unique_ptr<Approximation> GPApproximation::clone() const
 {
-  return new GPApproximation(*this);
+  return std::unique_ptr<Approximation>(new GPApproximation(*this));
 }
 
 
@@ -80,13 +80,6 @@ void GPApproximation::updateMaxPair(const Eigen::MatrixXd &limits,
                                     std::pair<double, Eigen::VectorXd> &best) const
 {
   throw std::logic_error("GPApproximation::updateMaxPair: not implemented");
-}
-
-void GPApproximation::print(std::ostream &out) const
-{
-  out << "agp";
-  gp.write(out);
-  out << "$";
 }
 
 int GPApproximation::getClassID() const

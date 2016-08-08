@@ -29,7 +29,7 @@ void testApproximations()
   std::vector<std::unique_ptr<Approximation>> approximations;
   approximations.push_back(std::unique_ptr<Approximation>(new GPApproximation(inputs,
                                                                               observations)));
-  approximations.push_back(std::unique_ptr<Approximation>(new PWCApproximation(3)));
+  approximations.push_back(std::unique_ptr<Approximation>(new PWCApproximation(-3.5)));
   approximations.push_back(std::unique_ptr<Approximation>(new PWLApproximation(inputs,
                                                                                observations)));
   ApproximationFactory approximation_factory;

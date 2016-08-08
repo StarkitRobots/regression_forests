@@ -1,7 +1,5 @@
 #include "rosban_regression_forests/tools/viewer.h"
 
-#include "rosban_regression_forests/tools/parser.h"
-
 #include <rosban_utils/string_tools.h>
 
 #include <fstream>
@@ -18,11 +16,12 @@ Viewer::Viewer(const std::string& forest_path,
                unsigned int width,
                unsigned int height)
   : rosban_viewer::Viewer(width, height),
+    forest(new Forest()),
     dim_index(-1),
     sub_dim_index(-1)
 {
   std::cout << "Loading file '" << forest_path << "' as a forest" << std::endl;
-  forest = Forest::loadFile(forest_path);
+  forest->load(forest_path);
 
   // Read config
   std::ifstream configStream;

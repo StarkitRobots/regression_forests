@@ -5,157 +5,57 @@
 
 namespace regression_forests
 {
-//CompositeApproximation::CompositeApproximation()
-//{
-//}
-//
-//CompositeApproximation::~CompositeApproximation()
-//{
-//  for (Approximation *a : approximations)
-//  {
-//    delete (a);
-//  }
-//}
 
-double CompositeApproximation::eval(const Eigen::VectorXd &state) const
+std::unique_ptr<Approximation>
+CompositeApproximation::weightedMerge(std::shared_ptr<const Approximation> a1, double weight1,
+                                      std::shared_ptr<const Approximation> a2, double weight2)
 {
-  double sum = 0.0;
-  for (Approximation *a : approximations)
-  {
-    sum += a->eval(state);
-  }
-  return sum / approximations.size();
-}
-
-Eigen::VectorXd CompositeApproximation::getGrad(const Eigen::VectorXd & state) const
-{
-  throw std::logic_error("CompositeApproximation::getGrad not implemented yet");
-}
-
-void CompositeApproximation::updateMinPair(const Eigen::MatrixXd &limits,
-                                           std::pair<double, Eigen::VectorXd> &best) const
-{
-  double sum = 0.0;
-  for (Approximation *a : approximations)
-  {
-    PWCApproximation *pwcA = dynamic_cast<PWCApproximation *>(a);
-    if (pwcA == NULL)
-    {
-      throw std::runtime_error("CompositeApproximation: getMin of node is only "
-                               "implemented for PWCApproximation yet");
-    }
-    sum += pwcA->eval(Eigen::VectorXd());
-  }
-  double value = sum / approximations.size();
-  if (best.first > value)
-  {
-    best.first = value;
-    for (int row = 0; row < limits.rows(); row++)
-    {
-      best.second(row) = (limits(row, 0) + limits(row, 1)) / 2;
-    }
-  }
-}
-
-void CompositeApproximation::updateMaxPair(const Eigen::MatrixXd &limits,
-                                           std::pair<double, Eigen::VectorXd> &best) const
-{
-  double sum = 0.0;
-  for (Approximation *a : approximations)
-  {
-    PWCApproximation *pwcA = dynamic_cast<PWCApproximation *>(a);
-    if (pwcA == NULL)
-    {
-      throw std::runtime_error("CompositeApproximation: getMax of node is only "
-                               "implemented for PWCApproximation yet");
-    }
-    sum += pwcA->eval(Eigen::VectorXd());
-  }
-  double value = sum / approximations.size();
-  if (best.first < value)
-  {
-    best.first = value;
-    for (int row = 0; row < limits.rows(); row++)
-    {
-      best.second(row) = (limits(row, 0) + limits(row, 1)) / 2;
-    }
-  }
-}
-
-void CompositeApproximation::push(Approximation *a)
-{
-  approximations.push_back(a);
-}
-
-//Approximation *CompositeApproximation::clone() const
-//{
-//  CompositeApproximation *copy = new CompositeApproximation();
-//  for (Approximation *a : approximations)
-//  {
-//    copy->push(a->clone());
-//  }
-//  return copy;
-//}
-
-void CompositeApproximation::print(std::ostream &out) const
-{
-  out << "ac";
-  for (Approximation *a : approximations)
-  {
-    out << *a;
-  }
-  out << "$";
-}
-
-Approximation *CompositeApproximation::weightedMerge(Approximation *a1, double weight1, Approximation *a2,
-                                                     double weight2)
-{
-  // Catching types
-  PWCApproximation *pwc1 = dynamic_cast<PWCApproximation *>(a1);
-  PWCApproximation *pwc2 = dynamic_cast<PWCApproximation *>(a2);
-  PWLApproximation *pwl1 = dynamic_cast<PWLApproximation *>(a1);
-  PWLApproximation *pwl2 = dynamic_cast<PWLApproximation *>(a2);
+  // Catching type
+  std::shared_ptr<const PWCApproximation> pwc1, pwc2;
+  std::shared_ptr<const PWLApproximation> pwl1, pwl2;
+  pwc1 = std::dynamic_pointer_cast<const PWCApproximation>(a1);
+  pwc2 = std::dynamic_pointer_cast<const PWCApproximation>(a2);
+  pwl1 = std::dynamic_pointer_cast<const PWLApproximation>(a1);
+  pwl2 = std::dynamic_pointer_cast<const PWLApproximation>(a2);
   // Solving weighted merge
-  Approximation *result;
+  std::unique_ptr<Approximation> result;
   // Two PWC case
-  if (pwc1 != NULL && pwc2 != NULL)
+  if (pwc1 && pwc2)
   {
     double meanValue = (pwc1->getValue() * weight1 + pwc2->getValue() * weight2) / (weight1 + weight2);
-    result = new PWCApproximation(meanValue);
-    delete (pwc1);
-    delete (pwc2);
+    result = std::unique_ptr<Approximation>(new PWCApproximation(meanValue));
   }
   // Two PWL case
-  else if (pwl1 != NULL && pwl2 != NULL)
+  else if (pwl1 && pwl2)
   {
     Eigen::VectorXd factors1 = pwl1->getFactors();
     Eigen::VectorXd factors2 = pwl2->getFactors();
-    result = new PWLApproximation((factors1 * weight1 + factors2 * weight2) / (weight1 + weight2));
-    delete (pwl1);
-    delete (pwl2);
+    Eigen::VectorXd mean_factors = (factors1 * weight1 + factors2 * weight2) / (weight1 + weight2);
+    result = std::unique_ptr<Approximation>(new PWLApproximation(mean_factors));
   }
   // Unknown case
   else
   {
-    delete (a1);
-    delete (a2);
     throw std::runtime_error("WeightedMerge does not implement merge for the given types yet");
   }
   return result;
 }
 
-double CompositeApproximation::avgDifference(const Approximation *a1, const Approximation *a2,
+double CompositeApproximation::avgDifference(std::shared_ptr<const Approximation> a1,
+                                             std::shared_ptr<const Approximation> a2,
                                              const Eigen::MatrixXd & limits)
 {
-  const PWCApproximation *pwc1 = dynamic_cast<const PWCApproximation *>(a1);
-  const PWCApproximation *pwc2 = dynamic_cast<const PWCApproximation *>(a2);
-  if (pwc1 != NULL || pwc2 != NULL)
+  std::shared_ptr<const PWCApproximation> pwc1, pwc2;
+  pwc1 = std::dynamic_pointer_cast<const PWCApproximation>(a1);
+  pwc2 = std::dynamic_pointer_cast<const PWCApproximation>(a2);
+  if (pwc1 && pwc2)
   {
     return std::fabs(pwc1->getValue() - pwc2->getValue());
   }
-  const PWLApproximation *pwl1 = dynamic_cast<const PWLApproximation *>(a1);
-  const PWLApproximation *pwl2 = dynamic_cast<const PWLApproximation *>(a2);
-  if (pwl1 != NULL || pwl2 != NULL)
+  std::shared_ptr<const PWLApproximation> pwl1, pwl2;
+  pwl1 = std::dynamic_pointer_cast<const PWLApproximation>(a1);
+  pwl2 = std::dynamic_pointer_cast<const PWLApproximation>(a2);
+  if (pwl1 && pwl2)
   {
     Eigen::VectorXd center = (limits.col(0) + limits.col(1)) / 2;
     // Difference in average
