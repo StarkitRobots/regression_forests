@@ -1,6 +1,5 @@
 #pragma once
 
-#include "rosban_regression_forests/approximations/approximation_type.h"
 #include "rosban_regression_forests/core/training_set.h"
 #include "rosban_regression_forests/core/tree.h"
 #include "rosban_regression_forests/core/forest.h"
@@ -36,7 +35,7 @@ public:
     /// TODO: apply min_var after normalization
     double min_var;
     /// appr_type: which types of approximation should be used for the leafs
-    ApproximationType appr_type;
+    Approximation::ID appr_type;
     /// nb_threads: Number of threads used to compute the regression forest
     int nb_threads;
     /// gp_conf: Parameters for auto-tuning of Gaussian Processes when used
@@ -51,7 +50,7 @@ public:
 
     static Config generateAuto(const Eigen::MatrixXd &space_limits,
                                int nb_samples,
-                               ApproximationType appr_type);
+                               Approximation::ID appr_type);
   };
 
   Config conf;

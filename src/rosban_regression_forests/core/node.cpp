@@ -114,7 +114,7 @@ void Node::addApproximation(std::shared_ptr<const Approximation> newApproximatio
   }
   else
   {
-    a = CompositeApproximation::weightedMerge(a, 1, newApproximation->clone(), newWeight);
+    a = CompositeApproximation::weightedMerge(a, 1, newApproximation, newWeight);
   }
 }
 

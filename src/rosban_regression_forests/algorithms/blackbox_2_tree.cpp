@@ -20,7 +20,7 @@ bool BB2Tree::SplitEntry::operator<(const SplitEntry &other) const
 }
 
 BB2Tree::BB2TreeConfig::BB2TreeConfig()
-  : apprType(ApproximationType::PWC),
+  : apprType(Approximation::ID::PWC),
     k(1),
     minPotGain(0),
     maxLeafs(0),
@@ -39,7 +39,7 @@ std::vector<std::string> BB2Tree::BB2TreeConfig::names() const
 std::vector<std::string> BB2Tree::BB2TreeConfig::values() const
 {
   std::vector<std::string> result;
-  result.push_back(to_string(apprType));
+  result.push_back(Approximation::idToString(apprType));
   result.push_back(std::to_string(k));
   result.push_back(std::to_string(minPotGain));
   result.push_back(std::to_string(maxLeafs));
@@ -66,7 +66,7 @@ void BB2Tree::BB2TreeConfig::load(const std::vector<std::string> &colNames,
       throw std::runtime_error("Given name '" + givenName + "' does not match '" + expectedName + "'");
     }
   }
-  apprType = loadApproximationType(colValues[0]);
+  apprType = Approximation::loadID(colValues[0]);
   k = std::stoi(colValues[1]);
   minPotGain = std::stod(colValues[2]);
   maxLeafs = std::stoi(colValues[3]);
@@ -118,15 +118,15 @@ static void populate(TrainingSet &ts,
 
 static std::shared_ptr<const Approximation> getApproximation(const TrainingSet &ts,
                                                              const TrainingSet::Subset &samples,
-                                                             ApproximationType apprType)
+                                                             Approximation::ID apprType)
 {
   std::shared_ptr<const Approximation> result;
   switch (apprType)
   {
-    case ApproximationType::PWC:
+    case Approximation::ID::PWC:
       result.reset(new PWCApproximation(Statistics::mean(ts.values(samples))));
       break;
-    case ApproximationType::PWL:
+    case Approximation::ID::PWL:
       result.reset(new PWLApproximation(ts.inputs(samples), ts.values(samples)));
       break;
   }
@@ -152,13 +152,13 @@ static double potentialGain(const TrainingSet &ts,
 
 static double avgSquaredErrors(const TrainingSet &ls,
                                const TrainingSet::Subset &samples,
-                               ApproximationType apprType)
+                               Approximation::ID apprType)
 {
   switch (apprType)
   {
-    case ApproximationType::PWC:
+    case Approximation::ID::PWC:
       return Statistics::variance(ls.values(samples));
-    case ApproximationType::PWL:
+    case Approximation::ID::PWL:
     {
       std::vector<Eigen::VectorXd> inputs = ls.inputs(samples);
       std::vector<double> outputs = ls.values(samples);
@@ -178,7 +178,7 @@ static double avgSquaredErrors(const TrainingSet &ls,
 static double evalSplitScore(const TrainingSet &ls,
                              const TrainingSet::Subset &samples,
                              const OrthogonalSplit &split,
-                             enum ApproximationType apprType)
+                             enum Approximation::ID apprType)
 {
   std::vector<int> samplesUpper, samplesLower;
   ls.applySplit(split, samples, samplesLower, samplesUpper);
@@ -217,7 +217,7 @@ static BB2Tree::SplitEntry getBestSplitEntry(Node *node,
                                              const Eigen::MatrixXd &space,
                                              int k,
                                              int nMin,
-                                             ApproximationType apprType)
+                                             Approximation::ID apprType)
 {
   auto generator = rosban_random::getRandomEngine();
   std::vector<size_t> dimCandidates = rosban_random::getKDistinctFromN(k, ts.getInputDim(),

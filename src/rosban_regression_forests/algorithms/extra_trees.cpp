@@ -26,7 +26,7 @@ ExtraTrees::Config::Config()
   nb_trees = 1;
   nb_threads = 1;
   min_var = 0;
-  appr_type = ApproximationType::PWC;
+  appr_type = Approximation::ID::PWC;
 }
 
 std::string ExtraTrees::Config::class_name() const
@@ -42,8 +42,9 @@ void ExtraTrees::Config::to_xml(std::ostream &out) const
   rosban_utils::xml_tools::write<int>("nb_trees", nb_trees, out);
   rosban_utils::xml_tools::write<int>("nb_threads", nb_threads, out);
   rosban_utils::xml_tools::write<double>("min_var", min_var, out);
-  rosban_utils::xml_tools::write<std::string>("appr_type", to_string(appr_type), out);
-  if (appr_type == ApproximationType::GP) {
+  rosban_utils::xml_tools::write<std::string>("appr_type",
+                                              Approximation::idToString(appr_type), out);
+  if (appr_type == Approximation::ID::GP) {
     gp_conf.write("gp_conf", out);
   }
 }
@@ -60,21 +61,21 @@ void ExtraTrees::Config::from_xml(TiXmlNode *node)
   rosban_utils::xml_tools::try_read<std::string>(node, "appr_type", appr_type_str);
   if (appr_type_str != "")
   {
-    appr_type = loadApproximationType(appr_type_str);
+    appr_type = Approximation::loadID(appr_type_str);
   }
-  if (appr_type == ApproximationType::GP) {
+  if (appr_type == Approximation::ID::GP) {
     gp_conf.read(node, "gp_conf");
   }
 }
 
 ExtraTrees::Config ExtraTrees::Config::generateAuto(const Eigen::MatrixXd &space_limits,
                                                     int nb_samples,
-                                                    ApproximationType appr_type)
+                                                    Approximation::ID appr_type)
 {
   // Forbid PWL if nb_samples < 1 + space_limits.rows
   if (nb_samples < 1 + space_limits.rows())
   {
-    appr_type = ApproximationType::PWC;
+    appr_type = Approximation::ID::PWC;
   }
 
   ExtraTrees::Config conf;
@@ -84,15 +85,15 @@ ExtraTrees::Config ExtraTrees::Config::generateAuto(const Eigen::MatrixXd &space
   int n_min_base = std::max(1, (int)std::log(nb_samples));
   switch (appr_type)
   {
-    case ApproximationType::PWC:
+    case Approximation::ID::PWC:
       conf.n_min = n_min_base;
       break;
-    case ApproximationType::PWL:
+    case Approximation::ID::PWL:
       conf.n_min = n_min_base * space_limits.rows();
       // PWL requires a number of sample strictly greater than space dimension
       conf.n_min = std::max((int)(space_limits.rows() + 1), conf.n_min);
       break;
-    case ApproximationType::GP:
+    case Approximation::ID::GP:
       conf.n_min = std::ceil(std::log2(nb_samples));
       // Setting a minimal value for conf.n_min when using Gaussian Processes
       conf.n_min = std::max(5, conf.n_min);
@@ -152,7 +153,7 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
   Approximator approximateSamples;
   switch (conf.appr_type)
   {
-    case ApproximationType::PWC:
+    case Approximation::ID::PWC:
       approximateSamples = [&ts](const TrainingSet::Subset &samples,
                                  const Eigen::MatrixXd &limits)
       {
@@ -161,7 +162,7 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
         return std::unique_ptr<Approximation>(new PWCApproximation(mean));
       };
       break;
-    case ApproximationType::PWL:
+    case Approximation::ID::PWL:
       approximateSamples = [this,&ts](const TrainingSet::Subset &samples,
                                       const Eigen::MatrixXd &limits)
       {
@@ -169,7 +170,7 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
                                                                    ts.values(samples)));
       };
       break;
-    case ApproximationType::GP:
+    case Approximation::ID::GP:
       approximateSamples = [this,&ts](const TrainingSet::Subset &samples,
                                       const Eigen::MatrixXd &limits)
       {
@@ -266,7 +267,7 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
       split_candidates.push_back(OrthogonalSplit(dim, split_value));
 
       // When using GP approximations, use the first available split
-      if (conf.appr_type == ApproximationType::GP) break;
+      if (conf.appr_type == Approximation::ID::GP) break;
     }
     // If no splits are available do not split node
     if (split_candidates.size() == 0)
@@ -280,13 +281,13 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
     size_t best_split_idx = 0;
     double best_split_score = 0;
     // GP only uses 1 random split yet
-    if (conf.appr_type != ApproximationType::GP) {
+    if (conf.appr_type != Approximation::ID::GP) {
       best_split_score= evalSplitScore(ts, split_samples, split_candidates[0],
                                        approximateSamples, limits);
     }
     for (size_t split_idx = 1; split_idx < split_candidates.size(); split_idx++)
     {
-      if (conf.appr_type == ApproximationType::GP) {
+      if (conf.appr_type == Approximation::ID::GP) {
         throw std::runtime_error("Running ExtraTrees with GaussianProcesses and k > 1");
       }
       double splitScore = evalSplitScore(ts, split_samples, split_candidates[split_idx],

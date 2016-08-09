@@ -26,12 +26,14 @@ public:
 
   virtual std::unique_ptr<Approximation> clone() const = 0;
 
-  // TODO: make a fusion with ApproximationType
   enum ID : int
   {
     PWC = 1,
       PWL = 2,
       GP = 3
       };
+
+  static ID loadID(const std::string & str);
+  static std::string idToString(ID id);
 };
 }

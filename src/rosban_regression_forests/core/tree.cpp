@@ -121,12 +121,12 @@ void Tree::addSubTree(Node *node, Eigen::MatrixXd &limits, const Tree &other,
     {
       return;
     }
-    // Add current approximation to all leafs of the subTree and then delete it
+    // Add current approximation to all leafs of the subTree
     if (node->a)
     {
       subTreeRoot->addApproximation(node->a, 1.0 / otherWeight);
     }
-    // Import approximation and childs with subTreeRoot
+    // Replace approximation, split and childs by subTreeRoot values
     node->a = subTreeRoot->a;
     node->s = subTreeRoot->s;
     node->lowerChild = subTreeRoot->lowerChild;
@@ -138,7 +138,6 @@ void Tree::addSubTree(Node *node, Eigen::MatrixXd &limits, const Tree &other,
       node->upperChild->father = node;
     }
     // Set pointers to NULL and delete subTreeRoot
-    subTreeRoot->a = NULL;
     subTreeRoot->lowerChild = NULL;
     subTreeRoot->upperChild = NULL;
     delete (subTreeRoot);
@@ -235,7 +234,7 @@ int Tree::read(std::istream & in)
     root = new Node();
     bytes_read += root->read(in);
   }
-  return bytes_read;  
+  return bytes_read;
 }
 
 Tree * Tree::clone() const

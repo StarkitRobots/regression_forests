@@ -1,6 +1,5 @@
 #pragma once
 
-#include "rosban_regression_forests/approximations/approximation_type.h"
 #include "rosban_regression_forests/core/training_set.h"
 #include "rosban_regression_forests/core/tree.h"
 #include "rosban_regression_forests/core/forest.h"
@@ -31,7 +30,7 @@ public:
   class BB2TreeConfig
   {
   public:
-    ApproximationType apprType;  // Which approximation for leafs?
+    Approximation::ID apprType;  // Which approximation for leafs?
     int k;                       // Number of dimensions used at each split choice
     // End condition
     double minPotGain;
