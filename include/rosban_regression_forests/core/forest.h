@@ -72,4 +72,8 @@ public:
 
   Forest * clone() const;
 };
+
+Forest::AggregationMethod loadAggregationMethod(const std::string & str);
+std::string aggregationMethod2Str(Forest::AggregationMethod method);
+
 }

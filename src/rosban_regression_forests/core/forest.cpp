@@ -204,4 +204,28 @@ Forest * Forest::clone() const
   return copy;
 }
 
+Forest::AggregationMethod loadAggregationMethod(const std::string & str)
+{
+  if (str == "All") return Forest::AggregationMethod::All;
+  if (str == "AutoCut") return Forest::AggregationMethod::AutoCut;
+  std::ostringstream oss;
+  oss << "In loadAggregationMethod: unknown aggregation method: " << str;
+  throw std::runtime_error(oss.str());
+}
+
+std::string aggregationMethod2Str(Forest::AggregationMethod method)
+{
+  switch(method)
+  {
+    case Forest::AggregationMethod::All: return "All";
+    case Forest::AggregationMethod::AutoCut: return "AutoCut";
+    default:
+    {
+      std::ostringstream oss;
+      oss << "In aggregationMethod2Str: unknown aggregation method: " << method;
+      throw std::runtime_error(oss.str());
+    }
+  }
+}
+
 }
