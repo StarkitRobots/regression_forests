@@ -1,5 +1,7 @@
 #include "rosban_regression_forests/core/orthogonal_split.h"
 
+#include <vector>
+
 namespace regression_forests
 {
 OrthogonalSplit::OrthogonalSplit() : dim(-1), val(0)
