@@ -16,18 +16,11 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>rosban_gp</build_depend>
-  <build_depend>rosban_random</build_depend>
-  <build_depend>rosban_utils</build_depend>
-  <build_depend>rosban_viewer</build_depend>
-  <build_depend>cmake_modules</build_depend>
+  <build_depend>rosban_gp</build_depend> <!-- git@bitbucket.org:rhoban/rosban_gp.git -->
+  <build_depend>rosban_viewer</build_depend> <!--optional git@bitbucket.org:rhoban/rosban_viewer.git -->
+
   <run_depend>rosban_gp</run_depend>
   <run_depend>rosban_utils</run_depend>
   <run_depend>rosban_random</run_depend>
 
-
-  <!-- The export tag contains other, unspecified, tags -->
-  <export>
-    <!-- Other tools can request additional information be placed here -->
-  </export>
 </package>
