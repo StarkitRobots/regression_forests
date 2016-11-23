@@ -5,11 +5,8 @@ project(rosban_regression_forests)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED
-  cmake_modules
   rosban_gp
 )
-
-find_package(Eigen REQUIRED)
 
 find_package(rosban_viewer)
 
@@ -43,7 +40,6 @@ catkin_package(
   INCLUDE_DIRS ${DELEG_INCLUDE_DIRS}
   LIBRARIES ${DELEG_LIBRARIES}
   CATKIN_DEPENDS rosban_gp
-  DEPENDS Eigen
 )
 
 ###########
@@ -53,7 +49,6 @@ catkin_package(
 include_directories(
   ${DELEG_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
-  ${EIGEN_INCLUDE_DIR}
   )
 
 # Directories containing sources files
