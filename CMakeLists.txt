@@ -9,9 +9,7 @@ find_package(catkin REQUIRED
   rosban_gp
 )
 
-find_package(Eigen REQUIRED)
-
-find_package(rosban_viewer)
+find_package(rosban_viewer QUIET)
 
 set(DELEG_INCLUDE_DIRS include ${catkin_INCLUDE_DIRS})
 set(DELEG_LIBRARIES rosban_regression_forests ${catkin_LIBRARIES})
@@ -43,7 +41,6 @@ catkin_package(
   INCLUDE_DIRS ${DELEG_INCLUDE_DIRS}
   LIBRARIES ${DELEG_LIBRARIES}
   CATKIN_DEPENDS rosban_gp
-  DEPENDS Eigen
 )
 
 ###########
