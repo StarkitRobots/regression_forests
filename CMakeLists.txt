@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(rosban_regression_forests)
 
+# Build options
+option(BUILD_VIEWER "Build regression forests Viewer (require SFML)" OFF)
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -8,21 +11,15 @@ find_package(catkin REQUIRED
   rosban_gp
 )
 
-find_package(rosban_viewer QUIET)
-
 set(DELEG_INCLUDE_DIRS include ${catkin_INCLUDE_DIRS})
 set(DELEG_LIBRARIES rosban_regression_forests ${catkin_LIBRARIES})
 
-# Warning: Need to clean build in order to create the viewer if it was not
-#          available during the first build
-if (rosban_viewer_FOUND)
-  message("rosban_viewer found, adding support for regression_forests viewer")
-  set (EXTRA_LIBS ${rosban_viewer_LIBRARIES})
-  list(APPEND DELEG_INCLUDE_DIRS ${rosban_viewer_INCLUDE_DIRS})
-  list(APPEND DELEG_LIBRARIES ${rosban_viewer_LIBRARIES})
-else()
-  message("rosban_viewer was not found, no support for regression_forests viewer")
-endif(rosban_viewer_FOUND)
+if (BUILD_VIEWER)
+  find_package(rosban_viewer REQUIRED)
+  if (not rosban_viewer_FOUND)
+    message("rosban_viewer was not found, impossible to build viewer")
+  endif(not rosban_viewer_FOUND)
+endif(BUILD_VIEWER)
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -75,12 +72,12 @@ foreach (DIRECTORY ${DIRECTORIES})
 endforeach (DIRECTORY)
 
 # if rosban_viewer is found, then add the support for viewers
-if (rosban_viewer_FOUND)
+if (BUILD_VIEWER)
   set (ALL_SOURCES
     ${ALL_SOURCES}
     src/rosban_regression_forests/tools/viewer.cpp
     )
-endif(rosban_viewer_FOUND)
+endif(BUILD_VIEWER)
 
 # Declare a C++ library
 add_library(rosban_regression_forests
@@ -98,11 +95,11 @@ add_executable(test_rf_io src/test_io.cpp)
 target_link_libraries(test_rf_io ${catkin_LIBRARIES} ${DELEG_LIBRARIES} )
 
 # if rosban_viewer is found, then add the viewer executable as target
-if (rosban_viewer_FOUND)
+if (BUILD_VIEWER)
   add_executable(viewer src/viewer.cpp)
 
   target_link_libraries(viewer
     ${catkin_LIBRARIES}
     ${DELEG_LIBRARIES}
     )
-endif(rosban_viewer_FOUND)
+endif(BUILD_VIEWER)
