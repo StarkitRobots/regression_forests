@@ -216,8 +216,9 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
     nodes_stack.pop();
     samples_stack.pop();
     limits_stack.pop();
-    // Test if there is enough sample to split, the approximate the node
-    if (samples.size() < 2 * conf.n_min || Statistics::variance(ts.values(samples)) < conf.min_var)
+    // Test if there is not enough samples to split or if variance is too low,
+    // then approximate the node
+    if (samples.size() < 2 * conf.n_min || Statistics::variance(ts.values(samples)) <= conf.min_var)
     {
       node->a = approximateSamples(samples, limits);
       continue;
@@ -280,7 +281,7 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
     // Find best split candidate (using only subset of all the samples)
     size_t best_split_idx = 0;
     double best_split_score = 0;
-    // GP only uses 1 random split yet
+    // GP only uses 1 random split yet so no need to score them
     if (conf.appr_type != Approximation::ID::GP) {
       best_split_score= evalSplitScore(ts, split_samples, split_candidates[0],
                                        approximateSamples, limits);
