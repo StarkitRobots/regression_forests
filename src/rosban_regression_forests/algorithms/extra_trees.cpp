@@ -121,6 +121,8 @@ static double avgSquaredErrors(const TrainingSet &ts,
   return sumSquaredError / inputs.size();
 }
 
+// Here, scorecould be simplified: no real need to use varAll
+// no need to normalize by number of samples, we only want the lowest squaredError split
 double ExtraTrees::evalSplitScore(const TrainingSet &ts,
                                   const TrainingSet::Subset &samples,
                                   const OrthogonalSplit &split,
@@ -218,6 +220,8 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
     limits_stack.pop();
     // Test if there is not enough samples to split or if variance is too low,
     // then approximate the node
+    // TODO: here we check variances of samples, before making use of max_samples,
+    //       this makes max_samples pretty useless
     if (samples.size() < 2 * conf.n_min || Statistics::variance(ts.values(samples)) <= conf.min_var)
     {
       node->a = approximateSamples(samples, limits);
