@@ -2,12 +2,12 @@
 
 #include "rosban_regression_forests/approximations/approximation.h"
 
-#include "rosban_utils/factory.h"
+#include "rhoban_utils/serialization/factory.h"
 
 namespace regression_forests
 {
 
-class ApproximationFactory : public rosban_utils::Factory<Approximation>
+class ApproximationFactory : public rhoban_utils::Factory<Approximation>
 {
 public:
   ApproximationFactory();

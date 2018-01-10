@@ -2,7 +2,7 @@
 
 #include "rosban_regression_forests/core/pruning.h"
 
-#include "rosban_utils/io_tools.h"
+#include "rhoban_utils/io_tools.h"
 
 #include <algorithm>
 #include <fstream>
@@ -171,7 +171,7 @@ int Forest::getClassID() const { return 0; }
 int Forest::writeInternal(std::ostream & out) const
 {
   int bytes_written = 0;
-  bytes_written += rosban_utils::write<int>(out, trees.size());
+  bytes_written += rhoban_utils::write<int>(out, trees.size());
   for (int i = 0; i < trees.size(); i++) {
     bytes_written += trees[i]->write(out);
   }
@@ -185,7 +185,7 @@ int Forest::read(std::istream & in)
   // Then read
   int bytes_read = 0;
   int nb_trees;
-  bytes_read += rosban_utils::read<int>(in, &nb_trees);
+  bytes_read += rhoban_utils::read<int>(in, &nb_trees);
   for (int i = 0; i < nb_trees; i++) {
     std::unique_ptr<Tree> tree(new Tree);
     bytes_read += tree->read(in);

@@ -29,42 +29,44 @@ ExtraTrees::Config::Config()
   appr_type = Approximation::ID::PWC;
 }
 
-std::string ExtraTrees::Config::class_name() const
+std::string ExtraTrees::Config::getClassName() const
 {
   return "ExtraTreesConfig";
 }
 
-void ExtraTrees::Config::to_xml(std::ostream &out) const
+Json::Value ExtraTrees::Config::toJson() const
 {
-  rosban_utils::xml_tools::write<int>("k", k, out);
-  rosban_utils::xml_tools::write<int>("n_min", n_min, out);
-  rosban_utils::xml_tools::write<int>("max_samples", max_samples, out);
-  rosban_utils::xml_tools::write<int>("nb_trees", nb_trees, out);
-  rosban_utils::xml_tools::write<int>("nb_threads", nb_threads, out);
-  rosban_utils::xml_tools::write<double>("min_var", min_var, out);
-  rosban_utils::xml_tools::write<std::string>("appr_type",
-                                              Approximation::idToString(appr_type), out);
+  Json::Value v;
+  v["k"          ] = k          ;
+  v["n_min"      ] = n_min      ;
+  v["max_samples"] = max_samples;
+  v["nb_trees"   ] = nb_trees   ;
+  v["nb_threads" ] = nb_threads ;
+  v["min_var"    ] = min_var    ;
+  v["appr_type"  ] = Approximation::idToString(appr_type);
   if (appr_type == Approximation::ID::GP) {
-    gp_conf.write("gp_conf", out);
+    v["gp_conf"] = gp_conf.toJson();
   }
+  return v;
 }
 
-void ExtraTrees::Config::from_xml(TiXmlNode *node)
+void ExtraTrees::Config::fromJson(const Json::Value & v, const std::string & dir_name)
 {
-  rosban_utils::xml_tools::try_read<int>   (node, "k"          , k          );
-  rosban_utils::xml_tools::try_read<int>   (node, "n_min"      , n_min      );
-  rosban_utils::xml_tools::try_read<int>   (node, "max_samples", max_samples);
-  rosban_utils::xml_tools::try_read<int>   (node, "nb_trees"   , nb_trees   );
-  rosban_utils::xml_tools::try_read<int>   (node, "nb_threads" , nb_threads );
-  rosban_utils::xml_tools::try_read<double>(node, "min_var"    , min_var    );
+  (void)dir_name;
   std::string appr_type_str;
-  rosban_utils::xml_tools::try_read<std::string>(node, "appr_type", appr_type_str);
+  rhoban_utils::tryRead(v, "k"          , &k          );
+  rhoban_utils::tryRead(v, "n_min"      , &n_min      );
+  rhoban_utils::tryRead(v, "max_samples", &max_samples);
+  rhoban_utils::tryRead(v, "nb_trees"   , &nb_trees   );
+  rhoban_utils::tryRead(v, "nb_threads" , &nb_threads );
+  rhoban_utils::tryRead(v, "min_var"    , &min_var    );
+  rhoban_utils::tryRead(v, "appr_type"  , &appr_type_str);
   if (appr_type_str != "")
   {
     appr_type = Approximation::loadID(appr_type_str);
   }
   if (appr_type == Approximation::ID::GP) {
-    gp_conf.read(node, "gp_conf");
+    gp_conf.read(v, "gp_conf");
   }
 }
 

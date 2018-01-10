@@ -3,7 +3,7 @@
 #include "rosban_regression_forests/approximations/approximation_factory.h"
 #include "rosban_regression_forests/approximations/composite_approximation.h"
 
-#include "rosban_utils/io_tools.h"
+#include "rhoban_utils/io_tools.h"
 
 static regression_forests::ApproximationFactory approximation_factory;
 
@@ -406,13 +406,13 @@ int Node::write(std::ostream & out) const
 {
   int bytes_written = 0;
   if (isLeaf()) {
-    bytes_written += rosban_utils::write<char>(out, 1);
+    bytes_written += rhoban_utils::write<char>(out, 1);
     bytes_written += a->write(out);
   }
   else {
-    bytes_written += rosban_utils::write<char>(out, 0);
-    bytes_written += rosban_utils::write<int>(out, s.dim);
-    bytes_written += rosban_utils::write<double>(out, s.val);
+    bytes_written += rhoban_utils::write<char>(out, 0);
+    bytes_written += rhoban_utils::write<int>(out, s.dim);
+    bytes_written += rhoban_utils::write<double>(out, s.val);
     bytes_written += lowerChild->write(out);
     bytes_written += upperChild->write(out);
   }
@@ -428,7 +428,7 @@ int Node::read(std::istream & in)
   // Then read data
   int bytes_read = 0;
   char is_leaf;
-  bytes_read += rosban_utils::read<char>(in, &is_leaf);
+  bytes_read += rhoban_utils::read<char>(in, &is_leaf);
   if (is_leaf == 1) {
     std::unique_ptr<Approximation> approximation;
     bytes_read += approximation_factory.read(in, approximation);
@@ -436,8 +436,8 @@ int Node::read(std::istream & in)
   }
   else if (is_leaf == 0) {
     // Read split
-    bytes_read += rosban_utils::read<int>(in, &s.dim);
-    bytes_read += rosban_utils::read<double>(in, &s.val);
+    bytes_read += rhoban_utils::read<int>(in, &s.dim);
+    bytes_read += rhoban_utils::read<double>(in, &s.val);
     // Read childs
     lowerChild = new Node();
     bytes_read += lowerChild->read(in);

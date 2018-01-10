@@ -1,6 +1,6 @@
 #include "rosban_regression_forests/approximations/pwc_approximation.h"
 
-#include "rosban_utils/io_tools.h"
+#include "rhoban_utils/io_tools.h"
 
 namespace regression_forests
 {
@@ -69,12 +69,12 @@ int PWCApproximation::getClassID() const
 
 int PWCApproximation::writeInternal(std::ostream & out) const
 {
-  return rosban_utils::write<double>(out, value);
+  return rhoban_utils::write<double>(out, value);
 }
 
 int PWCApproximation::read(std::istream & in)
 {
-  return rosban_utils::read<double>(in, &value);
+  return rhoban_utils::read<double>(in, &value);
 }
 
 }

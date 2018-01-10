@@ -1,6 +1,6 @@
 #include "rosban_regression_forests/approximations/pwl_approximation.h"
 
-#include "rosban_utils/io_tools.h"
+#include "rhoban_utils/io_tools.h"
 
 #include <Eigen/SVD>
 
@@ -164,8 +164,8 @@ int PWLApproximation::getClassID() const
 int PWLApproximation::writeInternal(std::ostream & out) const
 {
   int bytes_written = 0;
-  bytes_written += rosban_utils::write<int>(out, factors.rows());
-  bytes_written += rosban_utils::writeArray<double>(out, factors.rows(), factors.data());
+  bytes_written += rhoban_utils::write<int>(out, factors.rows());
+  bytes_written += rhoban_utils::writeArray<double>(out, factors.rows(), factors.data());
   return bytes_written;
 }
 
@@ -173,9 +173,9 @@ int PWLApproximation::read(std::istream & in)
 {
   int bytes_read = 0;
   int nb_factors;
-  bytes_read += rosban_utils::read<int>(in, &nb_factors);
+  bytes_read += rhoban_utils::read<int>(in, &nb_factors);
   factors = Eigen::VectorXd(nb_factors);
-  bytes_read += rosban_utils::readArray<double>(in, nb_factors, factors.data());
+  bytes_read += rhoban_utils::readArray<double>(in, nb_factors, factors.data());
   return bytes_read;
 }
 

@@ -2,13 +2,13 @@
 
 #include "rosban_regression_forests/core/tree.h"
 
-#include "rosban_utils/stream_serializable.h"
+#include "rhoban_utils/serialization/stream_serializable.h"
 
 #include <random>
 
 namespace regression_forests
 {
-class Forest : public rosban_utils::StreamSerializable
+class Forest : public rhoban_utils::StreamSerializable
 {
 private:
   std::vector<std::unique_ptr<Tree>> trees;

@@ -1,6 +1,6 @@
 #include "rosban_regression_forests/core/tree.h"
 
-#include "rosban_utils/io_tools.h"
+#include "rhoban_utils/io_tools.h"
 
 #include <limits>
 #include <iostream>
@@ -215,7 +215,7 @@ int Tree::write(std::ostream & out) const
   char has_root = 1;
   if (root == nullptr) has_root = 0;
   int bytes_written = 0;
-  bytes_written += rosban_utils::write<char>(out, has_root);
+  bytes_written += rhoban_utils::write<char>(out, has_root);
   if (has_root) {
     bytes_written += root->write(out);
   }
@@ -229,7 +229,7 @@ int Tree::read(std::istream & in)
   // Then read
   char has_root;
   int bytes_read = 0;
-  bytes_read += rosban_utils::read<char>(in, &has_root);
+  bytes_read += rhoban_utils::read<char>(in, &has_root);
   if (has_root) {
     root = new Node();
     bytes_read += root->read(in);

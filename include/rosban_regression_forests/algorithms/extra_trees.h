@@ -6,7 +6,7 @@
 
 #include "rosban_gp/gradient_ascent/randomized_rprop.h"
 
-#include <rosban_utils/serializable.h>
+#include <rhoban_utils/serialization/json_serializable.h>
 
 /**
  * Based on 'Extremely Randomized Trees' (Geurts06)
@@ -20,7 +20,7 @@ public:
   typedef std::function<std::unique_ptr<Approximation> (const TrainingSet::Subset &,
                                                         const Eigen::MatrixXd &)> Approximator;
 
-  class Config : public rosban_utils::Serializable
+  class Config : public rhoban_utils::JsonSerializable
   {
   public:
     /// nb_trees: the number of trees to grow
@@ -44,9 +44,9 @@ public:
     Config();
 
     // XML stuff
-    virtual std::string class_name() const override;
-    virtual void to_xml(std::ostream &out) const override;
-    virtual void from_xml(TiXmlNode *node) override;
+    virtual std::string getClassName() const override;
+    virtual Json::Value toJson() const override;
+    virtual void fromJson(const Json::Value & v, const std::string & dir_name) override;
 
     static Config generateAuto(const Eigen::MatrixXd &space_limits,
                                int nb_samples,

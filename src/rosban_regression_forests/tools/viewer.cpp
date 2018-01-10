@@ -1,6 +1,6 @@
 #include "rosban_regression_forests/tools/viewer.h"
 
-#include <rosban_utils/string_tools.h>
+#include <rhoban_utils/string_tools.h>
 
 #include <fstream>
 #include <iostream>
@@ -37,9 +37,9 @@ Viewer::Viewer(const std::string& forest_path,
     throw std::runtime_error("Expecting 3 lines in config file: (header, mins, maxs)");
   }
   std::vector<std::string> mins, maxs;
-  dim_names = rosban_utils::split_string(lines[0], ',');
-  mins     = rosban_utils::split_string(lines[1], ',');
-  maxs     = rosban_utils::split_string(lines[2], ',');
+  dim_names = rhoban_utils::split_string(lines[0], ',');
+  mins     = rhoban_utils::split_string(lines[1], ',');
+  maxs     = rhoban_utils::split_string(lines[2], ',');
   if (dim_names.size() != mins.size() || dim_names.size() != maxs.size()) {
     throw std::runtime_error("Inconsistent config file");
   }

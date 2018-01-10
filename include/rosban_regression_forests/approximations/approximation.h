@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rosban_utils/stream_serializable.h"
+#include "rhoban_utils/serialization/stream_serializable.h"
 
 #include <Eigen/Core>
 
@@ -10,7 +10,7 @@
 namespace regression_forests
 {
 
-class Approximation: public rosban_utils::StreamSerializable
+class Approximation: public rhoban_utils::StreamSerializable
 {
 public:
   virtual ~Approximation()
