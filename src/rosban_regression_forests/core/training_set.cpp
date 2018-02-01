@@ -1,6 +1,6 @@
 #include "rosban_regression_forests/core/training_set.h"
 
-#include "rosban_random/tools.h"
+#include "rhoban_random/tools.h"
 
 #include <stdexcept>
 
@@ -122,7 +122,7 @@ TrainingSet TrainingSet::buildBootstrap() const
 TrainingSet TrainingSet::buildBootstrap(size_t nbSamples) const
 {
   TrainingSet bootstrap(inputDim);
-  auto engine = rosban_random::getRandomEngine();
+  auto engine = rhoban_random::getRandomEngine();
   std::uniform_int_distribution<size_t> indexDistrib(0, size() - 1);
   for (size_t i = 0; i < nbSamples; i++)
   {

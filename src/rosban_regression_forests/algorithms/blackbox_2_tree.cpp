@@ -2,7 +2,7 @@
 #include "rosban_regression_forests/approximations/pwc_approximation.h"
 #include "rosban_regression_forests/approximations/pwl_approximation.h"
 
-#include "rosban_random/tools.h"
+#include "rhoban_random/tools.h"
 #include "rosban_regression_forests/tools/statistics.h"
 
 #include <iostream>
@@ -108,7 +108,7 @@ static void populate(TrainingSet &ts,
   {
     return;
   }
-  std::vector<Eigen::VectorXd> inputs = rosban_random::getUniformSamples(space, wishedSamples);
+  std::vector<Eigen::VectorXd> inputs = rhoban_random::getUniformSamples(space, wishedSamples);
   for (const Eigen::VectorXd &i : inputs)
   {
     samples.push_back(ts.size());
@@ -219,8 +219,8 @@ static BB2Tree::SplitEntry getBestSplitEntry(Node *node,
                                              int nMin,
                                              Approximation::ID apprType)
 {
-  auto generator = rosban_random::getRandomEngine();
-  std::vector<size_t> dimCandidates = rosban_random::getKDistinctFromN(k, ts.getInputDim(),
+  auto generator = rhoban_random::getRandomEngine();
+  std::vector<size_t> dimCandidates = rhoban_random::getKDistinctFromN(k, ts.getInputDim(),
                                                                        &generator);
   std::vector<OrthogonalSplit> splitCandidates;
   splitCandidates.reserve(k);
