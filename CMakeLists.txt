@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(rosban_regression_forests)
+project(rhoban_regression_forests)
 
 # Build options
 option(BUILD_VIEWER "Build regression forests Viewer (require SFML)" OFF)
@@ -8,17 +8,17 @@ option(BUILD_VIEWER "Build regression forests Viewer (require SFML)" OFF)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED
-  rosban_gp
+  rhoban_gp
 )
 
 set(DELEG_INCLUDE_DIRS include ${catkin_INCLUDE_DIRS})
-set(DELEG_LIBRARIES rosban_regression_forests ${catkin_LIBRARIES})
+set(DELEG_LIBRARIES rhoban_regression_forests ${catkin_LIBRARIES})
 
 if (BUILD_VIEWER)
-  find_package(rosban_viewer REQUIRED)
-  if (not rosban_viewer_FOUND)
-    message("rosban_viewer was not found, impossible to build viewer")
-  endif(not rosban_viewer_FOUND)
+  find_package(rhoban_viewer REQUIRED)
+  if (not rhoban_viewer_FOUND)
+    message("rhoban_viewer was not found, impossible to build viewer")
+  endif(not rhoban_viewer_FOUND)
 endif(BUILD_VIEWER)
 
 
@@ -36,7 +36,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 catkin_package(
   INCLUDE_DIRS ${DELEG_INCLUDE_DIRS}
   LIBRARIES ${DELEG_LIBRARIES}
-  CATKIN_DEPENDS rosban_gp
+  CATKIN_DEPENDS rhoban_gp
 )
 
 ###########
@@ -50,10 +50,10 @@ include_directories(
 
 # Directories containing sources files
 set(DIRECTORIES
-  src/rosban_regression_forests/algorithms
-  src/rosban_regression_forests/approximations
-  src/rosban_regression_forests/core
-  src/rosban_regression_forests/tools
+  src/rhoban_regression_forests/algorithms
+  src/rhoban_regression_forests/approximations
+  src/rhoban_regression_forests/core
+  src/rhoban_regression_forests/tools
   )
 
 # Build ALL_SOURCES
@@ -71,20 +71,20 @@ foreach (DIRECTORY ${DIRECTORIES})
     set (ALL_SOURCES ${ALL_SOURCES} ${PREFIXED_SOURCES})
 endforeach (DIRECTORY)
 
-# if rosban_viewer is found, then add the support for viewers
+# if rhoban_viewer is found, then add the support for viewers
 if (BUILD_VIEWER)
   set (ALL_SOURCES
     ${ALL_SOURCES}
-    src/rosban_regression_forests/tools/viewer.cpp
+    src/rhoban_regression_forests/tools/viewer.cpp
     )
 endif(BUILD_VIEWER)
 
 # Declare a C++ library
-add_library(rosban_regression_forests
+add_library(rhoban_regression_forests
   ${ALL_SOURCES}
 )
 
-target_link_libraries(rosban_regression_forests
+target_link_libraries(rhoban_regression_forests
   ${catkin_LIBRARIES}
   ${EXTRA_LIBS}
   )
@@ -94,7 +94,7 @@ target_link_libraries(rosban_regression_forests
 add_executable(test_rf_io src/test_io.cpp)
 target_link_libraries(test_rf_io ${catkin_LIBRARIES} ${DELEG_LIBRARIES} )
 
-# if rosban_viewer is found, then add the viewer executable as target
+# if rhoban_viewer is found, then add the viewer executable as target
 if (BUILD_VIEWER)
   add_executable(viewer src/viewer.cpp)
 

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>rosban_regression_forests</name>
+  <name>rhoban_regression_forests</name>
   <version>0.0.0</version>
   <description>A package containing tools to work with regression forests</description>
 
@@ -16,11 +16,11 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>rosban_gp</build_depend> <!-- rhoban/rosban_gp.git -->
-  <build_depend>rosban_viewer</build_depend> <!--optional rhoban/rosban_viewer.git -->
+  <build_depend>rhoban_gp</build_depend> <!-- rhoban/gp.git -->
+  <build_depend>rhoban_viewer</build_depend> <!--optional rhoban/rhoban_viewer.git -->
 
-  <run_depend>rosban_gp</run_depend>
-  <run_depend>rosban_utils</run_depend>
-  <run_depend>rosban_random</run_depend>
+  <run_depend>rhoban_gp</run_depend>
+  <run_depend>rhoban_utils</run_depend>
+  <run_depend>rhoban_random</run_depend>
 
 </package>

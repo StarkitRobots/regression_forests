@@ -1,4 +1,4 @@
-#include "rosban_regression_forests/tools/viewer.h"
+#include "rhoban_regression_forests/tools/viewer.h"
 
 #include <iostream>
 
