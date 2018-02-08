@@ -1,6 +1,10 @@
 #include "rhoban_regression_forests/algorithms/extra_trees.h"
 
+#ifdef RHOBAN_RF_USES_GP
 #include "rhoban_regression_forests/approximations/gp_approximation.h"
+#endif
+
+
 #include "rhoban_regression_forests/approximations/pwc_approximation.h"
 #include "rhoban_regression_forests/approximations/pwl_approximation.h"
 
@@ -44,9 +48,11 @@ Json::Value ExtraTrees::Config::toJson() const
   v["nb_threads" ] = nb_threads ;
   v["min_var"    ] = min_var    ;
   v["appr_type"  ] = Approximation::idToString(appr_type);
+#ifdef RHOBAN_RF_USES_GP
   if (appr_type == Approximation::ID::GP) {
     v["gp_conf"] = gp_conf.toJson();
   }
+#endif
   return v;
 }
 
@@ -65,9 +71,11 @@ void ExtraTrees::Config::fromJson(const Json::Value & v, const std::string & dir
   {
     appr_type = Approximation::loadID(appr_type_str);
   }
+#ifdef RHOBAN_RF_USES_GP
   if (appr_type == Approximation::ID::GP) {
     gp_conf.read(v, "gp_conf");
   }
+#endif
 }
 
 ExtraTrees::Config ExtraTrees::Config::generateAuto(const Eigen::MatrixXd &space_limits,
@@ -95,11 +103,13 @@ ExtraTrees::Config ExtraTrees::Config::generateAuto(const Eigen::MatrixXd &space
       // PWL requires a number of sample strictly greater than space dimension
       conf.n_min = std::max((int)(space_limits.rows() + 1), conf.n_min);
       break;
+#ifdef RHOBAN_RF_USES_GP
     case Approximation::ID::GP:
       conf.n_min = std::ceil(std::log2(nb_samples));
       // Setting a minimal value for conf.n_min when using Gaussian Processes
       conf.n_min = std::max(5, conf.n_min);
       break;
+#endif
   }
   //conf.max_samples = 4 * conf.n_min;
   conf.max_samples = std::numeric_limits<int>::max();
@@ -174,6 +184,7 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
                                                                    ts.values(samples)));
       };
       break;
+#ifdef RHOBAN_RF_USES_GP
     case Approximation::ID::GP:
       approximateSamples = [this,&ts](const TrainingSet::Subset &samples,
                                       const Eigen::MatrixXd &limits)
@@ -191,6 +202,7 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
                                                                   this->conf.gp_conf));
       };
       break;
+#endif
     default:
       throw std::runtime_error("Unknown approximation type in ExtraTrees::solveTree()");
   }
@@ -273,8 +285,10 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
       if (split_value == s_val_max) continue;
       split_candidates.push_back(OrthogonalSplit(dim, split_value));
 
+#ifdef RHOBAN_RF_USES_GP
       // When using GP approximations, use the first available split
       if (conf.appr_type == Approximation::ID::GP) break;
+#endif
     }
     // If no splits are available do not split node
     if (split_candidates.size() == 0)
@@ -287,16 +301,20 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
     // Find best split candidate (using only subset of all the samples)
     size_t best_split_idx = 0;
     double best_split_score = 0;
+#ifdef RHOBAN_RF_USES_GP
     // GP only uses 1 random split yet so no need to score them
     if (conf.appr_type != Approximation::ID::GP) {
       best_split_score= evalSplitScore(ts, split_samples, split_candidates[0],
                                        approximateSamples, limits);
     }
+#endif
     for (size_t split_idx = 1; split_idx < split_candidates.size(); split_idx++)
     {
+#ifdef RHOBAN_RF_USES_GP
       if (conf.appr_type == Approximation::ID::GP) {
         throw std::runtime_error("Running ExtraTrees with GaussianProcesses and k > 1");
       }
+#endif
       double splitScore = evalSplitScore(ts, split_samples, split_candidates[split_idx],
                                          approximateSamples, limits);
       if (splitScore > best_split_score)

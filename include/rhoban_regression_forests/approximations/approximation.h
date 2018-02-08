@@ -30,7 +30,9 @@ public:
   {
     PWC = 1,
       PWL = 2,
+#ifdef RHOBAN_RF_USES_GP
       GP = 3
+#endif
       };
 
   static ID loadID(const std::string & str);

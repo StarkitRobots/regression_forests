@@ -7,7 +7,9 @@ Approximation::ID Approximation::loadID(const std::string & str)
 {
   if (str == "PWC") return Approximation::ID::PWC;
   if (str == "PWL") return Approximation::ID::PWL;
+#ifdef RHOBAN_RF_USES_GP
   if (str == "GP" ) return Approximation::ID::GP ;
+#endif
   throw std::runtime_error("Unknown string for loadID" + str);
 }
 
@@ -17,7 +19,9 @@ std::string Approximation::idToString(ID id)
   {
     case PWC: return "PWC";
     case PWL: return "PWL";
+#ifdef RHOBAN_RF_USES_GP
     case GP : return "GP";
+#endif
   }
   std::ostringstream oss;
   oss << "Unknown id for idToString" << id;

@@ -4,7 +4,9 @@
 #include "rhoban_regression_forests/core/tree.h"
 #include "rhoban_regression_forests/core/forest.h"
 
+#ifdef RHOBAN_RF_USES_GP
 #include "rhoban_gp/gradient_ascent/randomized_rprop.h"
+#endif
 
 #include <rhoban_utils/serialization/json_serializable.h>
 
@@ -38,8 +40,11 @@ public:
     Approximation::ID appr_type;
     /// nb_threads: Number of threads used to compute the regression forest
     int nb_threads;
+
+#ifdef RHOBAN_RF_USES_GP
     /// gp_conf: Parameters for auto-tuning of Gaussian Processes when used
     rhoban_gp::RandomizedRProp::Config gp_conf;
+#endif
 
     Config();
 
