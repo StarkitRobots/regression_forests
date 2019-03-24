@@ -15,27 +15,26 @@ private:
 
 public:
   PWLApproximation();
-  PWLApproximation(const Eigen::VectorXd &factors);
-  PWLApproximation(const std::vector<Eigen::VectorXd> &inputs,
-                   const std::vector<double> &outputs);
+  PWLApproximation(const Eigen::VectorXd& factors);
+  PWLApproximation(const std::vector<Eigen::VectorXd>& inputs, const std::vector<double>& outputs);
   virtual ~PWLApproximation();
 
-  const Eigen::VectorXd &getFactors() const;
+  const Eigen::VectorXd& getFactors() const;
 
-  virtual double eval(const Eigen::VectorXd &state) const override;
+  virtual double eval(const Eigen::VectorXd& state) const override;
 
-  virtual Eigen::VectorXd getGrad(const Eigen::VectorXd &input) const override;
+  virtual Eigen::VectorXd getGrad(const Eigen::VectorXd& input) const override;
 
-  virtual void updateMinPair(const Eigen::MatrixXd &limits, std::pair<double, Eigen::VectorXd> &best) const override;
-  virtual void updateMaxPair(const Eigen::MatrixXd &limits, std::pair<double, Eigen::VectorXd> &best) const override;
+  virtual void updateMinPair(const Eigen::MatrixXd& limits, std::pair<double, Eigen::VectorXd>& best) const override;
+  virtual void updateMaxPair(const Eigen::MatrixXd& limits, std::pair<double, Eigen::VectorXd>& best) const override;
 
-  std::pair<double, Eigen::VectorXd> getMinPair(const Eigen::MatrixXd &limits) const;
-  std::pair<double, Eigen::VectorXd> getMaxPair(const Eigen::MatrixXd &limits) const;
+  std::pair<double, Eigen::VectorXd> getMinPair(const Eigen::MatrixXd& limits) const;
+  std::pair<double, Eigen::VectorXd> getMaxPair(const Eigen::MatrixXd& limits) const;
 
   virtual std::unique_ptr<Approximation> clone() const override;
 
   virtual int getClassID() const override;
-  virtual int writeInternal(std::ostream & out) const override;
-  virtual int read(std::istream & in) override;
+  virtual int writeInternal(std::ostream& out) const override;
+  virtual int read(std::istream& in) override;
 };
-}
+}  // namespace regression_forests

@@ -13,18 +13,18 @@ namespace regression_forests
 class BB2Tree
 {
 public:
-  typedef std::function<double(const Eigen::VectorXd &)> EvalFunc;
+  typedef std::function<double(const Eigen::VectorXd&)> EvalFunc;
 
   class SplitEntry
   {
   public:
-    Node *node;
+    Node* node;
     double gain;
     OrthogonalSplit split;
     TrainingSet::Subset samples;
     Eigen::MatrixXd space;
 
-    bool operator<(const SplitEntry &other) const;
+    bool operator<(const SplitEntry& other) const;
   };
 
   class BB2TreeConfig
@@ -48,13 +48,12 @@ public:
     BB2TreeConfig();
     std::vector<std::string> names() const;
     std::vector<std::string> values() const;
-    void load(const std::vector<std::string> &names, const std::vector<std::string> &values);
+    void load(const std::vector<std::string>& names, const std::vector<std::string>& values);
   };
 
-  static std::unique_ptr<Tree> bb2Tree(const BB2TreeConfig &config);
-  static std::unique_ptr<Forest> bb2Forest(const BB2TreeConfig &config);
+  static std::unique_ptr<Tree> bb2Tree(const BB2TreeConfig& config);
+  static std::unique_ptr<Forest> bb2Forest(const BB2TreeConfig& config);
 };
-}
+}  // namespace regression_forests
 
-bool operator<(const regression_forests::BB2Tree::SplitEntry &se1,
-               const regression_forests::BB2Tree::SplitEntry &se2);
+bool operator<(const regression_forests::BB2Tree::SplitEntry& se1, const regression_forests::BB2Tree::SplitEntry& se2);

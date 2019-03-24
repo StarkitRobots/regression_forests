@@ -9,17 +9,13 @@
 
 namespace regression_forests
 {
-
 ApproximationFactory::ApproximationFactory()
 {
-  registerBuilder(Approximation::PWC,
-                  [](){return std::unique_ptr<Approximation>(new PWCApproximation);});
-  registerBuilder(Approximation::PWL,
-                  [](){return std::unique_ptr<Approximation>(new PWLApproximation);});
+  registerBuilder(Approximation::PWC, []() { return std::unique_ptr<Approximation>(new PWCApproximation); });
+  registerBuilder(Approximation::PWL, []() { return std::unique_ptr<Approximation>(new PWLApproximation); });
 #ifdef RHOBAN_RF_USES_GP
-  registerBuilder(Approximation::GP,
-                  [](){return std::unique_ptr<Approximation>(new GPApproximation);});
+  registerBuilder(Approximation::GP, []() { return std::unique_ptr<Approximation>(new GPApproximation); });
 #endif
 }
 
-}
+}  // namespace regression_forests

@@ -5,10 +5,10 @@
 
 namespace regression_forests
 {
-
-std::unique_ptr<Approximation>
-CompositeApproximation::weightedMerge(std::shared_ptr<const Approximation> a1, double weight1,
-                                      std::shared_ptr<const Approximation> a2, double weight2)
+std::unique_ptr<Approximation> CompositeApproximation::weightedMerge(std::shared_ptr<const Approximation> a1,
+                                                                     double weight1,
+                                                                     std::shared_ptr<const Approximation> a2,
+                                                                     double weight2)
 {
   // Catching type
   std::shared_ptr<const PWCApproximation> pwc1, pwc2;
@@ -42,8 +42,7 @@ CompositeApproximation::weightedMerge(std::shared_ptr<const Approximation> a1, d
 }
 
 double CompositeApproximation::avgDifference(std::shared_ptr<const Approximation> a1,
-                                             std::shared_ptr<const Approximation> a2,
-                                             const Eigen::MatrixXd & limits)
+                                             std::shared_ptr<const Approximation> a2, const Eigen::MatrixXd& limits)
 {
   std::shared_ptr<const PWCApproximation> pwc1, pwc2;
   pwc1 = std::dynamic_pointer_cast<const PWCApproximation>(a1);
@@ -63,11 +62,12 @@ double CompositeApproximation::avgDifference(std::shared_ptr<const Approximation
     Eigen::VectorXd gradient = (pwl1->getGrad(center) - pwl2->getGrad(center)).cwiseAbs();
     // Computing average difference of gradient
     double grad_diff = gradient.dot(limits.col(1) - limits.col(0));
-    for (int dim = 0; dim < limits.rows(); dim++) {
-      grad_diff /= (limits(dim,1) - limits(dim,0));
+    for (int dim = 0; dim < limits.rows(); dim++)
+    {
+      grad_diff /= (limits(dim, 1) - limits(dim, 0));
     }
     return avg_diff + grad_diff;
   }
   throw std::runtime_error("difference is only implemented for PWCApproximations or PWLApproximations yet");
 }
-}
+}  // namespace regression_forests

@@ -4,7 +4,6 @@
 #include "rhoban_regression_forests/approximations/gp_approximation.h"
 #endif
 
-
 #include "rhoban_regression_forests/approximations/pwc_approximation.h"
 #include "rhoban_regression_forests/approximations/pwl_approximation.h"
 
@@ -41,45 +40,46 @@ std::string ExtraTrees::Config::getClassName() const
 Json::Value ExtraTrees::Config::toJson() const
 {
   Json::Value v;
-  v["k"          ] = k          ;
-  v["n_min"      ] = n_min      ;
+  v["k"] = k;
+  v["n_min"] = n_min;
   v["max_samples"] = max_samples;
-  v["nb_trees"   ] = nb_trees   ;
-  v["nb_threads" ] = nb_threads ;
-  v["min_var"    ] = min_var    ;
-  v["appr_type"  ] = Approximation::idToString(appr_type);
+  v["nb_trees"] = nb_trees;
+  v["nb_threads"] = nb_threads;
+  v["min_var"] = min_var;
+  v["appr_type"] = Approximation::idToString(appr_type);
 #ifdef RHOBAN_RF_USES_GP
-  if (appr_type == Approximation::ID::GP) {
+  if (appr_type == Approximation::ID::GP)
+  {
     v["gp_conf"] = gp_conf.toJson();
   }
 #endif
   return v;
 }
 
-void ExtraTrees::Config::fromJson(const Json::Value & v, const std::string & dir_name)
+void ExtraTrees::Config::fromJson(const Json::Value& v, const std::string& dir_name)
 {
   (void)dir_name;
   std::string appr_type_str;
-  rhoban_utils::tryRead(v, "k"          , &k          );
-  rhoban_utils::tryRead(v, "n_min"      , &n_min      );
+  rhoban_utils::tryRead(v, "k", &k);
+  rhoban_utils::tryRead(v, "n_min", &n_min);
   rhoban_utils::tryRead(v, "max_samples", &max_samples);
-  rhoban_utils::tryRead(v, "nb_trees"   , &nb_trees   );
-  rhoban_utils::tryRead(v, "nb_threads" , &nb_threads );
-  rhoban_utils::tryRead(v, "min_var"    , &min_var    );
-  rhoban_utils::tryRead(v, "appr_type"  , &appr_type_str);
+  rhoban_utils::tryRead(v, "nb_trees", &nb_trees);
+  rhoban_utils::tryRead(v, "nb_threads", &nb_threads);
+  rhoban_utils::tryRead(v, "min_var", &min_var);
+  rhoban_utils::tryRead(v, "appr_type", &appr_type_str);
   if (appr_type_str != "")
   {
     appr_type = Approximation::loadID(appr_type_str);
   }
 #ifdef RHOBAN_RF_USES_GP
-  if (appr_type == Approximation::ID::GP) {
+  if (appr_type == Approximation::ID::GP)
+  {
     gp_conf.read(v, "gp_conf");
   }
 #endif
 }
 
-ExtraTrees::Config ExtraTrees::Config::generateAuto(const Eigen::MatrixXd &space_limits,
-                                                    int nb_samples,
+ExtraTrees::Config ExtraTrees::Config::generateAuto(const Eigen::MatrixXd& space_limits, int nb_samples,
                                                     Approximation::ID appr_type)
 {
   // Forbid PWL if nb_samples < 1 + space_limits.rows
@@ -89,8 +89,8 @@ ExtraTrees::Config ExtraTrees::Config::generateAuto(const Eigen::MatrixXd &space
   }
 
   ExtraTrees::Config conf;
-  conf.nb_trees = 25;// Widely accepted as high enough to bring satisfying results
-  //conf.k = (int)std::sqrt(space_limits.rows());// Usual heuristic proposed in Ernst05
+  conf.nb_trees = 25;  // Widely accepted as high enough to bring satisfying results
+  // conf.k = (int)std::sqrt(space_limits.rows());// Usual heuristic proposed in Ernst05
   conf.k = space_limits.rows();
   int n_min_base = std::max(1, (int)std::log(nb_samples));
   switch (appr_type)
@@ -111,15 +111,13 @@ ExtraTrees::Config ExtraTrees::Config::generateAuto(const Eigen::MatrixXd &space
       break;
 #endif
   }
-  //conf.max_samples = 4 * conf.n_min;
+  // conf.max_samples = 4 * conf.n_min;
   conf.max_samples = std::numeric_limits<int>::max();
   conf.appr_type = appr_type;
   return conf;
 }
 
-
-static double avgSquaredErrors(const TrainingSet &ts,
-                               const TrainingSet::Subset &samples,
+static double avgSquaredErrors(const TrainingSet& ts, const TrainingSet::Subset& samples,
                                std::shared_ptr<const Approximation> a)
 {
   std::vector<Eigen::VectorXd> inputs = ts.inputs(samples);
@@ -135,11 +133,9 @@ static double avgSquaredErrors(const TrainingSet &ts,
 
 // Here, scorecould be simplified: no real need to use varAll
 // no need to normalize by number of samples, we only want the lowest squaredError split
-double ExtraTrees::evalSplitScore(const TrainingSet &ts,
-                                  const TrainingSet::Subset &samples,
-                                  const OrthogonalSplit &split,
-                                  Approximator approximator,
-                                  const Eigen::MatrixXd &limits)
+double ExtraTrees::evalSplitScore(const TrainingSet& ts, const TrainingSet::Subset& samples,
+                                  const OrthogonalSplit& split, Approximator approximator,
+                                  const Eigen::MatrixXd& limits)
 {
   std::vector<int> samples_upper, samples_lower;
   ts.applySplit(split, samples, samples_lower, samples_upper);
@@ -148,58 +144,48 @@ double ExtraTrees::evalSplitScore(const TrainingSet &ts,
   limits_lower(split.dim, 1) = split.val;
   limits_upper(split.dim, 0) = split.val;
   // Computing approximations
-  std::shared_ptr<Approximation> approx       = approximator(samples      , limits      );
+  std::shared_ptr<Approximation> approx = approximator(samples, limits);
   std::shared_ptr<Approximation> approx_lower = approximator(samples_lower, limits_lower);
   std::shared_ptr<Approximation> approx_upper = approximator(samples_upper, limits_upper);
   // Computing variances
   double nb_samples = samples.size();
-  double varAll   = avgSquaredErrors(ts, samples      , approx);
+  double varAll = avgSquaredErrors(ts, samples, approx);
   double varLower = avgSquaredErrors(ts, samples_lower, approx_lower);
   double varUpper = avgSquaredErrors(ts, samples_upper, approx_upper);
-  double weightedNewVar = (varLower * samples_lower.size()
-                           + varUpper * samples_upper.size()) / nb_samples;
+  double weightedNewVar = (varLower * samples_lower.size() + varUpper * samples_upper.size()) / nb_samples;
   return (varAll - weightedNewVar) / varAll;
 }
 
-std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
-                                            const Eigen::MatrixXd &space)
+std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet& ts, const Eigen::MatrixXd& space)
 {
   Approximator approximateSamples;
   switch (conf.appr_type)
   {
     case Approximation::ID::PWC:
-      approximateSamples = [&ts](const TrainingSet::Subset &samples,
-                                 const Eigen::MatrixXd &limits)
-      {
-        (void) limits;
+      approximateSamples = [&ts](const TrainingSet::Subset& samples, const Eigen::MatrixXd& limits) {
+        (void)limits;
         double mean = Statistics::mean(ts.values(samples));
         return std::unique_ptr<Approximation>(new PWCApproximation(mean));
       };
       break;
     case Approximation::ID::PWL:
-      approximateSamples = [this,&ts](const TrainingSet::Subset &samples,
-                                      const Eigen::MatrixXd &limits)
-      {
-        return std::unique_ptr<Approximation>(new PWLApproximation(ts.inputs(samples),
-                                                                   ts.values(samples)));
+      approximateSamples = [this, &ts](const TrainingSet::Subset& samples, const Eigen::MatrixXd& limits) {
+        return std::unique_ptr<Approximation>(new PWLApproximation(ts.inputs(samples), ts.values(samples)));
       };
       break;
 #ifdef RHOBAN_RF_USES_GP
     case Approximation::ID::GP:
-      approximateSamples = [this,&ts](const TrainingSet::Subset &samples,
-                                      const Eigen::MatrixXd &limits)
-      {
-        (void) limits;
-        if (samples.size() > 2 * this->conf.n_min) {
+      approximateSamples = [this, &ts](const TrainingSet::Subset& samples, const Eigen::MatrixXd& limits) {
+        (void)limits;
+        if (samples.size() > 2 * this->conf.n_min)
+        {
           std::ostringstream oss;
-          oss << "Warning: large number of samples used for approximation: "
-              << samples.size() << " samples with n_min = " << this->conf.n_min
-              << std::endl;
+          oss << "Warning: large number of samples used for approximation: " << samples.size()
+              << " samples with n_min = " << this->conf.n_min << std::endl;
           std::cout << oss.str();
         }
-        return std::unique_ptr<Approximation>(new GPApproximation(ts.inputs(samples),
-                                                                  ts.values(samples),
-                                                                  this->conf.gp_conf));
+        return std::unique_ptr<Approximation>(
+            new GPApproximation(ts.inputs(samples), ts.values(samples), this->conf.gp_conf));
       };
       break;
 #endif
@@ -211,7 +197,7 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
   auto generator = rhoban_random::getRandomEngine();
   // All along the resolution, we will stack samples
   std::stack<TrainingSet::Subset> samples_stack;
-  std::stack<Node *> nodes_stack;
+  std::stack<Node*> nodes_stack;
   std::stack<Eigen::MatrixXd> limits_stack;
   t->root = new Node(NULL);
   // If splitting is not allowed, end directly the process
@@ -226,7 +212,7 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
   // While there is still nodes to explore
   while (nodes_stack.size() != 0)
   {
-    Node *node = nodes_stack.top();
+    Node* node = nodes_stack.top();
     TrainingSet::Subset samples = samples_stack.top();
     Eigen::MatrixXd limits = limits_stack.top();
     nodes_stack.pop();
@@ -245,9 +231,7 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
     TrainingSet::Subset split_samples;
     if (samples.size() > conf.max_samples)
     {
-      std::vector<size_t> used_indices = rhoban_random::getKDistinctFromN(conf.max_samples,
-                                                                               samples.size(),
-                                                                               &generator);
+      std::vector<size_t> used_indices = rhoban_random::getKDistinctFromN(conf.max_samples, samples.size(), &generator);
       split_samples.reserve(conf.max_samples);
       for (size_t idx : used_indices)
       {
@@ -282,12 +266,14 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
       // because split_value is supposed to be in [min,max[, but in practice, it happens.
       // Therefore this extra condition is required to ensure that there won't be any empty
       // square
-      if (split_value == s_val_max) continue;
+      if (split_value == s_val_max)
+        continue;
       split_candidates.push_back(OrthogonalSplit(dim, split_value));
 
 #ifdef RHOBAN_RF_USES_GP
       // When using GP approximations, use the first available split
-      if (conf.appr_type == Approximation::ID::GP) break;
+      if (conf.appr_type == Approximation::ID::GP)
+        break;
 #endif
     }
     // If no splits are available do not split node
@@ -303,20 +289,20 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
     double best_split_score = 0;
 #ifdef RHOBAN_RF_USES_GP
     // GP only uses 1 random split yet so no need to score them
-    if (conf.appr_type != Approximation::ID::GP) {
-      best_split_score= evalSplitScore(ts, split_samples, split_candidates[0],
-                                       approximateSamples, limits);
+    if (conf.appr_type != Approximation::ID::GP)
+    {
+      best_split_score = evalSplitScore(ts, split_samples, split_candidates[0], approximateSamples, limits);
     }
 #endif
     for (size_t split_idx = 1; split_idx < split_candidates.size(); split_idx++)
     {
 #ifdef RHOBAN_RF_USES_GP
-      if (conf.appr_type == Approximation::ID::GP) {
+      if (conf.appr_type == Approximation::ID::GP)
+      {
         throw std::runtime_error("Running ExtraTrees with GaussianProcesses and k > 1");
       }
 #endif
-      double splitScore = evalSplitScore(ts, split_samples, split_candidates[split_idx],
-                                         approximateSamples, limits);
+      double splitScore = evalSplitScore(ts, split_samples, split_candidates[split_idx], approximateSamples, limits);
       if (splitScore > best_split_score)
       {
         best_split_score = splitScore;
@@ -329,8 +315,8 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
     ts.applySplit(node->s, samples, lower_samples, upper_samples);
     // Compute limits for childs
     Eigen::MatrixXd upper_limits(limits), lower_limits(limits);
-    upper_limits(node->s.dim,0) = node->s.val;
-    lower_limits(node->s.dim,1) = node->s.val;
+    upper_limits(node->s.dim, 0) = node->s.val;
+    lower_limits(node->s.dim, 1) = node->s.val;
     // UpperChild
     node->upperChild = new Node(node);
     if (upper_samples.size() >= 2 * conf.n_min)
@@ -359,26 +345,24 @@ std::unique_ptr<Tree> ExtraTrees::solveTree(const TrainingSet &ts,
   return t;
 }
 
-std::unique_ptr<Forest> ExtraTrees::solve(const TrainingSet &ts,
-                                          const Eigen::MatrixXd &limits)
+std::unique_ptr<Forest> ExtraTrees::solve(const TrainingSet& ts, const Eigen::MatrixXd& limits)
 {
   std::unique_ptr<Forest> f(new Forest);
   std::vector<std::thread> threads;
   std::mutex forest_mutex;
-  auto solver = [this, &forest_mutex, &f, &ts, &limits] (int nb_trees)
+  auto solver = [this, &forest_mutex, &f, &ts, &limits](int nb_trees) {
+    double solving_time = 0;
+    double waiting_time = 0;
+    double pushing_time = 0;
+    for (int i = 0; i < nb_trees; i++)
     {
-      double solving_time = 0;
-      double waiting_time = 0;
-      double pushing_time = 0;
-      for (int i = 0; i < nb_trees; i++)
-      {
-        std::unique_ptr<Tree> tree = this->solveTree(ts, limits);
-        // Ensuring thread-safety when accessing the forest
-        forest_mutex.lock();
-        f->push(std::move(tree));
-        forest_mutex.unlock();
-      }
-    };
+      std::unique_ptr<Tree> tree = this->solveTree(ts, limits);
+      // Ensuring thread-safety when accessing the forest
+      forest_mutex.lock();
+      f->push(std::move(tree));
+      forest_mutex.unlock();
+    }
+  };
 
   int nb_threads = std::min(conf.nb_threads, conf.nb_trees);
 
@@ -391,7 +375,7 @@ std::unique_ptr<Forest> ExtraTrees::solve(const TrainingSet &ts,
     int nb_trees = end - start;
     threads.push_back(std::thread(solver, nb_trees));
   }
-  for (std::thread & t : threads)
+  for (std::thread& t : threads)
   {
     t.join();
   }
@@ -399,4 +383,4 @@ std::unique_ptr<Forest> ExtraTrees::solve(const TrainingSet &ts,
   return f;
 }
 
-}
+}  // namespace regression_forests

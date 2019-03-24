@@ -6,11 +6,10 @@
 
 namespace regression_forests
 {
-
 class ApproximationFactory : public rhoban_utils::Factory<Approximation>
 {
 public:
   ApproximationFactory();
 };
 
-}
+}  // namespace regression_forests

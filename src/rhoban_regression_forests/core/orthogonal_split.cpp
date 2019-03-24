@@ -12,20 +12,17 @@ OrthogonalSplit::OrthogonalSplit(int dim_, double val_) : dim(dim_), val(val_)
 {
 }
 
-OrthogonalSplit::OrthogonalSplit(const OrthogonalSplit & other)
-  : dim(other.dim), val(other.val)
+OrthogonalSplit::OrthogonalSplit(const OrthogonalSplit& other) : dim(other.dim), val(other.val)
 {
 }
 
-bool OrthogonalSplit::isLower(const Eigen::VectorXd &input) const
+bool OrthogonalSplit::isLower(const Eigen::VectorXd& input) const
 {
   return input(dim) <= val;
 }
 
-
-void OrthogonalSplit::splitEntries(const Eigen::MatrixXd & input,
-                                   Eigen::MatrixXd * lower_output,
-                                   Eigen::MatrixXd * upper_output)
+void OrthogonalSplit::splitEntries(const Eigen::MatrixXd& input, Eigen::MatrixXd* lower_output,
+                                   Eigen::MatrixXd* upper_output)
 {
   /// Building separation
   std::vector<int> lower_indices;
@@ -53,19 +50,18 @@ void OrthogonalSplit::splitEntries(const Eigen::MatrixXd & input,
   }
 }
 
-void OrthogonalSplit::splitSpace(const Eigen::MatrixXd & space,
-                                 Eigen::MatrixXd * lower_space,
-                                 Eigen::MatrixXd * upper_space)
+void OrthogonalSplit::splitSpace(const Eigen::MatrixXd& space, Eigen::MatrixXd* lower_space,
+                                 Eigen::MatrixXd* upper_space)
 {
   *lower_space = space;
   *upper_space = space;
-  (*lower_space)(dim,1) = val;
-  (*upper_space)(dim,0) = val;
+  (*lower_space)(dim, 1) = val;
+  (*upper_space)(dim, 0) = val;
 }
 
-}
+}  // namespace regression_forests
 
-std::ostream &operator<<(std::ostream &out, const regression_forests::OrthogonalSplit &split)
+std::ostream& operator<<(std::ostream& out, const regression_forests::OrthogonalSplit& split)
 {
   return out << "sd" << split.dim << "$v" << split.val << "$$";
 }

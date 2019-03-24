@@ -16,10 +16,12 @@ void testApproximations()
   std::vector<double> observations;
   // Creating sample from x - 2y = z
   int sample = 0;
-  for (int x = 0; x < nb_cells; x++) {
-    for (int y = 0; y < nb_cells; y++) {
+  for (int x = 0; x < nb_cells; x++)
+  {
+    for (int y = 0; y < nb_cells; y++)
+    {
       Eigen::VectorXd input(2);
-      input << x , y;
+      input << x, y;
       double z = x - 2 * y;
       inputs.push_back(input);
       observations.push_back(z);
@@ -27,17 +29,14 @@ void testApproximations()
     }
   }
   std::vector<std::unique_ptr<Approximation>> approximations;
-  approximations.push_back(std::unique_ptr<Approximation>(new GPApproximation(inputs,
-                                                                              observations)));
+  approximations.push_back(std::unique_ptr<Approximation>(new GPApproximation(inputs, observations)));
   approximations.push_back(std::unique_ptr<Approximation>(new PWCApproximation(-3.5)));
-  approximations.push_back(std::unique_ptr<Approximation>(new PWLApproximation(inputs,
-                                                                               observations)));
+  approximations.push_back(std::unique_ptr<Approximation>(new PWLApproximation(inputs, observations)));
   ApproximationFactory approximation_factory;
   for (int i = 0; i < approximations.size(); i++)
   {
-    std::cout << "-----------------------------------------" << std::endl
-              << "Testing approximation " << i << std::endl;
-    
+    std::cout << "-----------------------------------------" << std::endl << "Testing approximation " << i << std::endl;
+
     std::string filename("/tmp/approximation.bin");
     std::string copy_filename("/tmp/copy_approximation.bin");
 
@@ -48,11 +47,11 @@ void testApproximations()
 
     // Reading from original
     int original_bytes_read = approximation_factory.loadFromFile(filename, copy);
-    std::cout << "Original bytes read   : " << original_bytes_read    << std::endl;
+    std::cout << "Original bytes read   : " << original_bytes_read << std::endl;
 
     // writing copy
     int copy_bytes_written = copy->save(copy_filename);
-    std::cout << "Copy bytes written    : " << copy_bytes_written     << std::endl;
+    std::cout << "Copy bytes written    : " << copy_bytes_written << std::endl;
 
     // Used to test point
     Eigen::VectorXd test_input(2);
@@ -65,7 +64,7 @@ void testApproximations()
     // Outputting some messages:
     std::cout << "For test input: " << test_input.transpose() << std::endl
               << "\toriginal prediction : " << original_prediction << std::endl
-              << "\tcopy prediction     : " << copy_prediction     << std::endl;
+              << "\tcopy prediction     : " << copy_prediction << std::endl;
   }
 }
 

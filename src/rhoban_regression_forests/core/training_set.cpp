@@ -6,25 +6,23 @@
 
 namespace regression_forests
 {
-
 TrainingSet::TrainingSet(int inputDim_) : inputDim(inputDim_)
 {
 }
 
-TrainingSet::TrainingSet(const Eigen::MatrixXd & inputs,
-                         const Eigen::VectorXd & outputs)
-  : inputDim(inputs.rows())
+TrainingSet::TrainingSet(const Eigen::MatrixXd& inputs, const Eigen::VectorXd& outputs) : inputDim(inputs.rows())
 {
-  if (inputs.cols() != outputs.rows()) {
+  if (inputs.cols() != outputs.rows())
+  {
     throw std::runtime_error("TrainingSet creation: inputs.cols() != outputs.rows()");
   }
-  for (int sample_id = 0; sample_id < inputs.cols(); sample_id++) {
+  for (int sample_id = 0; sample_id < inputs.cols(); sample_id++)
+  {
     push(Sample(inputs.col(sample_id), outputs(sample_id)));
   }
 }
 
-
-void TrainingSet::push(const Sample &s)
+void TrainingSet::push(const Sample& s)
 {
   experiments.push_back(s);
 }
@@ -39,7 +37,7 @@ size_t TrainingSet::getInputDim() const
   return inputDim;
 }
 
-const Sample &TrainingSet::operator()(size_t idx) const
+const Sample& TrainingSet::operator()(size_t idx) const
 {
   return experiments.at(idx);
 }
@@ -55,16 +53,14 @@ TrainingSet::Subset TrainingSet::wholeSubset() const
   return s;
 }
 
-void TrainingSet::sortSubset(Subset &s, size_t dim) const
+void TrainingSet::sortSubset(Subset& s, size_t dim) const
 {
-  std::sort(s.begin(), s.end(), [this, dim](size_t i1, size_t i2)
-            {
-              return (*this)(i1).getInput(dim) < (*this)(i2).getInput(dim);
-            });
+  std::sort(s.begin(), s.end(),
+            [this, dim](size_t i1, size_t i2) { return (*this)(i1).getInput(dim) < (*this)(i2).getInput(dim); });
 }
 
-void TrainingSet::applySplit(const OrthogonalSplit &split, const Subset &subset, Subset &lowerSet,
-                             Subset &upperSet) const
+void TrainingSet::applySplit(const OrthogonalSplit& split, const Subset& subset, Subset& lowerSet,
+                             Subset& upperSet) const
 {
   lowerSet.clear();
   upperSet.clear();
@@ -81,7 +77,7 @@ void TrainingSet::applySplit(const OrthogonalSplit &split, const Subset &subset,
   }
 }
 
-std::vector<double> TrainingSet::values(const Subset &s) const
+std::vector<double> TrainingSet::values(const Subset& s) const
 {
   std::vector<double> result;
   result.reserve(s.size());
@@ -92,7 +88,7 @@ std::vector<double> TrainingSet::values(const Subset &s) const
   return result;
 }
 
-std::vector<Eigen::VectorXd> TrainingSet::inputs(const Subset &s) const
+std::vector<Eigen::VectorXd> TrainingSet::inputs(const Subset& s) const
 {
   std::vector<Eigen::VectorXd> result;
   result.reserve(s.size());
@@ -103,7 +99,7 @@ std::vector<Eigen::VectorXd> TrainingSet::inputs(const Subset &s) const
   return result;
 }
 
-std::vector<double> TrainingSet::inputs(const Subset &s, size_t dim) const
+std::vector<double> TrainingSet::inputs(const Subset& s, size_t dim) const
 {
   std::vector<double> result;
   result.reserve(s.size());
@@ -131,4 +127,4 @@ TrainingSet TrainingSet::buildBootstrap(size_t nbSamples) const
   }
   return bootstrap;
 }
-}
+}  // namespace regression_forests

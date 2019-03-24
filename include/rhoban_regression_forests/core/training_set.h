@@ -22,10 +22,9 @@ public:
   /// For outputs:
   /// - Each row is a different output
   /// f(inputs.col(i)) = outputs(i)
-  TrainingSet(const Eigen::MatrixXd & inputs,
-              const Eigen::VectorXd & outputs);
+  TrainingSet(const Eigen::MatrixXd& inputs, const Eigen::VectorXd& outputs);
 
-  void push(const Sample &s);
+  void push(const Sample& s);
 
   size_t size() const;
 
@@ -34,7 +33,7 @@ public:
   /**
    * throws an std::out_of_range exception if idx is invalid
    */
-  const Sample &operator()(size_t idx) const;
+  const Sample& operator()(size_t idx) const;
 
   /**
    * It is possible to use a vector of index in order to avoid copying all
@@ -47,19 +46,19 @@ public:
   /**
    * Sort the subset provided as argument along the dimension requested
    */
-  void sortSubset(Subset &s, size_t dim) const;
+  void sortSubset(Subset& s, size_t dim) const;
 
   /**
    * Build the lower and upper subsets obtained by applying the given split
    * to the given subset
    */
-  void applySplit(const OrthogonalSplit &split, const Subset &subset, Subset &lowerSet, Subset &upperSet) const;
+  void applySplit(const OrthogonalSplit& split, const Subset& subset, Subset& lowerSet, Subset& upperSet) const;
 
-  std::vector<double> values(const Subset &s) const;
-  std::vector<Eigen::VectorXd> inputs(const Subset &s) const;
-  std::vector<double> inputs(const Subset &s, size_t dim) const;
+  std::vector<double> values(const Subset& s) const;
+  std::vector<Eigen::VectorXd> inputs(const Subset& s) const;
+  std::vector<double> inputs(const Subset& s, size_t dim) const;
 
   TrainingSet buildBootstrap() const;
   TrainingSet buildBootstrap(size_t nbSamples) const;
 };
-}
+}  // namespace regression_forests

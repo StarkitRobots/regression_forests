@@ -13,11 +13,11 @@ Node::Node() : father(NULL), upperChild(NULL), lowerChild(NULL)
 {
 }
 
-Node::Node(Node *father_) : father(father_), upperChild(NULL), lowerChild(NULL)
+Node::Node(Node* father_) : father(father_), upperChild(NULL), lowerChild(NULL)
 {
 }
 
-Node::Node(Node *father_, std::shared_ptr<const Approximation> a_)
+Node::Node(Node* father_, std::shared_ptr<const Approximation> a_)
   : a(a_), father(father_), upperChild(NULL), lowerChild(NULL)
 {
 }
@@ -56,7 +56,7 @@ bool Node::isLeaf() const
   return (lowerChild == NULL && upperChild == NULL);
 }
 
-const Node *Node::getLeaf(const Eigen::VectorXd &state) const
+const Node* Node::getLeaf(const Eigen::VectorXd& state) const
 {
   if (isLeaf())
     return this;
@@ -67,10 +67,10 @@ const Node *Node::getLeaf(const Eigen::VectorXd &state) const
   return upperChild->getLeaf(state);
 }
 
-Eigen::MatrixXd Node::getSubSpace(const Eigen::MatrixXd &space) const
+Eigen::MatrixXd Node::getSubSpace(const Eigen::MatrixXd& space) const
 {
   Eigen::MatrixXd subSpace = space;
-  const Node *current = this;
+  const Node* current = this;
   while (current->father != NULL)
   {
     size_t sDim = current->father->s.dim;
@@ -118,39 +118,39 @@ void Node::addApproximation(std::shared_ptr<const Approximation> newApproximatio
   }
 }
 
-double Node::getValue(const Eigen::VectorXd &state) const
+double Node::getValue(const Eigen::VectorXd& state) const
 {
   if (!isLeaf())
   {
-    const Node *leaf = getLeaf(state);
+    const Node* leaf = getLeaf(state);
     return leaf->getValue(state);
   }
   return a->eval(state);
 }
 
-Eigen::VectorXd Node::getGrad(const Eigen::VectorXd &input) const
+Eigen::VectorXd Node::getGrad(const Eigen::VectorXd& input) const
 {
   if (!isLeaf())
   {
-    const Node *leaf = getLeaf(input);
+    const Node* leaf = getLeaf(input);
     return leaf->getGrad(input);
   }
   return a->getGrad(input);
 }
 
-double Node::getMax(Eigen::MatrixXd &limits) const
+double Node::getMax(Eigen::MatrixXd& limits) const
 {
   std::pair<double, Eigen::VectorXd> best;
   best.first = std::numeric_limits<double>::lowest();
   return getMaxPair(limits).first;
 }
 
-Eigen::VectorXd Node::getArgMax(Eigen::MatrixXd &limits) const
+Eigen::VectorXd Node::getArgMax(Eigen::MatrixXd& limits) const
 {
   return getMaxPair(limits).second;
 }
 
-std::pair<double, Eigen::VectorXd> Node::getMaxPair(Eigen::MatrixXd &limits) const
+std::pair<double, Eigen::VectorXd> Node::getMaxPair(Eigen::MatrixXd& limits) const
 {
   std::pair<double, Eigen::VectorXd> best;
   best.first = std::numeric_limits<double>::lowest();
@@ -159,7 +159,7 @@ std::pair<double, Eigen::VectorXd> Node::getMaxPair(Eigen::MatrixXd &limits) con
   return best;
 }
 
-void Node::updateMaxPair(Eigen::MatrixXd &limits, std::pair<double, Eigen::VectorXd> &best) const
+void Node::updateMaxPair(Eigen::MatrixXd& limits, std::pair<double, Eigen::VectorXd>& best) const
 {
   if (isLeaf())
   {
@@ -183,7 +183,7 @@ void Node::updateMaxPair(Eigen::MatrixXd &limits, std::pair<double, Eigen::Vecto
   }
 }
 
-std::pair<double, Eigen::VectorXd> Node::getMinPair(Eigen::MatrixXd &limits) const
+std::pair<double, Eigen::VectorXd> Node::getMinPair(Eigen::MatrixXd& limits) const
 {
   std::pair<double, Eigen::VectorXd> best;
   best.first = std::numeric_limits<double>::max();
@@ -192,7 +192,7 @@ std::pair<double, Eigen::VectorXd> Node::getMinPair(Eigen::MatrixXd &limits) con
   return best;
 }
 
-void Node::updateMinPair(Eigen::MatrixXd &limits, std::pair<double, Eigen::VectorXd> &best) const
+void Node::updateMinPair(Eigen::MatrixXd& limits, std::pair<double, Eigen::VectorXd>& best) const
 {
   if (isLeaf())
   {
@@ -216,8 +216,7 @@ void Node::updateMinPair(Eigen::MatrixXd &limits, std::pair<double, Eigen::Vecto
   }
 }
 
-std::vector<Eigen::VectorXd> Node::project(const std::vector<int> &freeDimensions,
-                                                     const Eigen::MatrixXd &limits)
+std::vector<Eigen::VectorXd> Node::project(const std::vector<int>& freeDimensions, const Eigen::MatrixXd& limits)
 {
   if (!a)
   {
@@ -248,12 +247,13 @@ std::vector<Eigen::VectorXd> Node::project(const std::vector<int> &freeDimension
   return result;
 }
 
-void Node::apply(Eigen::MatrixXd &limits, Function f)
+void Node::apply(Eigen::MatrixXd& limits, Function f)
 {
   // Start by applying function
   f(this, limits);
   // If we reached a leaf, return
-  if (isLeaf()) return;
+  if (isLeaf())
+    return;
   // Otherwise carry on to the childs
   double oldMin = limits(s.dim, 0);
   double oldMax = limits(s.dim, 1);
@@ -273,18 +273,18 @@ void Node::apply(Eigen::MatrixXd &limits, Function f)
   }
 }
 
-void Node::applyOnLeafs(Eigen::MatrixXd &limits, Function f)
+void Node::applyOnLeafs(Eigen::MatrixXd& limits, Function f)
 {
-  Function new_f = [f](Node* node, const Eigen::MatrixXd &limits)
-    {
-      if (node->isLeaf()) f(node, limits);
-    };
+  Function new_f = [f](Node* node, const Eigen::MatrixXd& limits) {
+    if (node->isLeaf())
+      f(node, limits);
+  };
   apply(limits, new_f);
 }
 
-Node *Node::clone() const
+Node* Node::clone() const
 {
-  Node *copy = softClone();
+  Node* copy = softClone();
   copy->copyContent(this);
   if (lowerChild != NULL)
   {
@@ -299,7 +299,7 @@ Node *Node::clone() const
   return copy;
 }
 
-void Node::copyContent(const Node *other)
+void Node::copyContent(const Node* other)
 {
   if (other->a != NULL)
   {
@@ -312,19 +312,19 @@ void Node::copyContent(const Node *other)
   s = other->s;
 }
 
-Node *Node::softClone() const
+Node* Node::softClone() const
 {
   return new Node();
 }
 
-Node *Node::subTreeCopy(const Eigen::MatrixXd &limits) const
+Node* Node::subTreeCopy(const Eigen::MatrixXd& limits) const
 {
   // End of recursion on leaf
   if (isLeaf())
   {
     return clone();
   }
-  Node *result = NULL;
+  Node* result = NULL;
   // If splitVal is above limits return a copy of the lower child
   if (s.val > limits(s.dim, 1))
   {
@@ -347,8 +347,7 @@ Node *Node::subTreeCopy(const Eigen::MatrixXd &limits) const
   return result;
 }
 
-void Node::parallelMerge(Node &node, const Node &t1, const Node &t2, double w1,
-                                   double w2, Eigen::MatrixXd &limits)
+void Node::parallelMerge(Node& node, const Node& t1, const Node& t2, double w1, double w2, Eigen::MatrixXd& limits)
 {
   // 1. T1 is a leaf
   if (t1.isLeaf())
@@ -402,14 +401,16 @@ void Node::parallelMerge(Node &node, const Node &t1, const Node &t2, double w1,
   }
 }
 
-int Node::write(std::ostream & out) const
+int Node::write(std::ostream& out) const
 {
   int bytes_written = 0;
-  if (isLeaf()) {
+  if (isLeaf())
+  {
     bytes_written += rhoban_utils::write<char>(out, 1);
     bytes_written += a->write(out);
   }
-  else {
+  else
+  {
     bytes_written += rhoban_utils::write<char>(out, 0);
     bytes_written += rhoban_utils::write<int>(out, s.dim);
     bytes_written += rhoban_utils::write<double>(out, s.val);
@@ -419,22 +420,26 @@ int Node::write(std::ostream & out) const
   return bytes_written;
 }
 
-int Node::read(std::istream & in)
+int Node::read(std::istream& in)
 {
   // start by removing eventual subtree / approximation
   a.reset();
-  if (upperChild != nullptr) delete(upperChild);
-  if (lowerChild != nullptr) delete(lowerChild);
+  if (upperChild != nullptr)
+    delete (upperChild);
+  if (lowerChild != nullptr)
+    delete (lowerChild);
   // Then read data
   int bytes_read = 0;
   char is_leaf;
   bytes_read += rhoban_utils::read<char>(in, &is_leaf);
-  if (is_leaf == 1) {
+  if (is_leaf == 1)
+  {
     std::unique_ptr<Approximation> approximation;
     bytes_read += approximation_factory.read(in, approximation);
     a = std::move(approximation);
   }
-  else if (is_leaf == 0) {
+  else if (is_leaf == 0)
+  {
     // Read split
     bytes_read += rhoban_utils::read<int>(in, &s.dim);
     bytes_read += rhoban_utils::read<double>(in, &s.val);
@@ -444,10 +449,11 @@ int Node::read(std::istream & in)
     upperChild = new Node();
     bytes_read += upperChild->read(in);
   }
-  else {
+  else
+  {
     throw std::runtime_error("Unexpected byte value when reading regression_forests::Node");
   }
   return bytes_read;
 }
 
-}
+}  // namespace regression_forests

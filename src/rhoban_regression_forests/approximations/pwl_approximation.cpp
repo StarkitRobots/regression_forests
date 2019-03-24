@@ -8,15 +8,15 @@
 
 namespace regression_forests
 {
-
-PWLApproximation::PWLApproximation() {}
-
-PWLApproximation::PWLApproximation(const Eigen::VectorXd &factors_) : factors(factors_)
+PWLApproximation::PWLApproximation()
 {
 }
 
-PWLApproximation::PWLApproximation(const std::vector<Eigen::VectorXd> &inputs,
-                                   const std::vector<double> &outputs)
+PWLApproximation::PWLApproximation(const Eigen::VectorXd& factors_) : factors(factors_)
+{
+}
+
+PWLApproximation::PWLApproximation(const std::vector<Eigen::VectorXd>& inputs, const std::vector<double>& outputs)
 {
   // Checking various stuff
   if (inputs.size() == 0)
@@ -35,8 +35,8 @@ PWLApproximation::PWLApproximation(const std::vector<Eigen::VectorXd> &inputs,
   if (inputDim >= (int)inputs.size())
   {
     std::ostringstream oss;
-    oss << "PWLApproximation: inputsDim (" << inputDim
-        << ") >= inputs.size() (" << inputs.size() << ") leastSquare impossible";
+    oss << "PWLApproximation: inputsDim (" << inputDim << ") >= inputs.size() (" << inputs.size()
+        << ") leastSquare impossible";
     throw std::runtime_error(oss.str());
   }
   // Solving ax = b to find the hyperplan
@@ -59,12 +59,12 @@ PWLApproximation::~PWLApproximation()
 {
 }
 
-const Eigen::VectorXd &PWLApproximation::getFactors() const
+const Eigen::VectorXd& PWLApproximation::getFactors() const
 {
   return factors;
 }
 
-double PWLApproximation::eval(const Eigen::VectorXd &state) const
+double PWLApproximation::eval(const Eigen::VectorXd& state) const
 {
   if (state.rows() != factors.rows() - 1)
   {
@@ -81,12 +81,12 @@ double PWLApproximation::eval(const Eigen::VectorXd &state) const
   return value;
 }
 
-Eigen::VectorXd PWLApproximation::getGrad(const Eigen::VectorXd &input) const
+Eigen::VectorXd PWLApproximation::getGrad(const Eigen::VectorXd& input) const
 {
-  return factors.segment(0,factors.rows() - 1);
+  return factors.segment(0, factors.rows() - 1);
 }
 
-std::pair<double,Eigen::VectorXd> PWLApproximation::getMinPair(const Eigen::MatrixXd &limits) const
+std::pair<double, Eigen::VectorXd> PWLApproximation::getMinPair(const Eigen::MatrixXd& limits) const
 {
   Eigen::VectorXd worst_state(factors.rows() - 1);
   for (int dim = 0; dim < worst_state.rows(); dim++)
@@ -105,9 +105,9 @@ std::pair<double,Eigen::VectorXd> PWLApproximation::getMinPair(const Eigen::Matr
     }
   }
   double value = eval(worst_state);
-  return std::pair<double,Eigen::VectorXd>(value, worst_state);
+  return std::pair<double, Eigen::VectorXd>(value, worst_state);
 }
-std::pair<double,Eigen::VectorXd> PWLApproximation::getMaxPair(const Eigen::MatrixXd &limits) const
+std::pair<double, Eigen::VectorXd> PWLApproximation::getMaxPair(const Eigen::MatrixXd& limits) const
 {
   Eigen::VectorXd best_state(factors.rows() - 1);
   for (int dim = 0; dim < best_state.rows(); dim++)
@@ -126,11 +126,10 @@ std::pair<double,Eigen::VectorXd> PWLApproximation::getMaxPair(const Eigen::Matr
     }
   }
   double value = eval(best_state);
-  return std::pair<double,Eigen::VectorXd>(value, best_state);
+  return std::pair<double, Eigen::VectorXd>(value, best_state);
 }
 
-void PWLApproximation::updateMinPair(const Eigen::MatrixXd &limits,
-                                     std::pair<double, Eigen::VectorXd> &best) const
+void PWLApproximation::updateMinPair(const Eigen::MatrixXd& limits, std::pair<double, Eigen::VectorXd>& best) const
 {
   auto new_pair = getMinPair(limits);
   if (best.first > new_pair.first)
@@ -140,8 +139,7 @@ void PWLApproximation::updateMinPair(const Eigen::MatrixXd &limits,
   }
 }
 
-void PWLApproximation::updateMaxPair(const Eigen::MatrixXd &limits,
-                                     std::pair<double, Eigen::VectorXd> &best) const
+void PWLApproximation::updateMaxPair(const Eigen::MatrixXd& limits, std::pair<double, Eigen::VectorXd>& best) const
 {
   auto new_pair = getMaxPair(limits);
   if (best.first < new_pair.first)
@@ -151,7 +149,7 @@ void PWLApproximation::updateMaxPair(const Eigen::MatrixXd &limits,
   }
 }
 
-std::unique_ptr<Approximation>PWLApproximation::clone() const
+std::unique_ptr<Approximation> PWLApproximation::clone() const
 {
   return std::unique_ptr<Approximation>(new PWLApproximation(factors));
 }
@@ -161,7 +159,7 @@ int PWLApproximation::getClassID() const
   return Approximation::PWL;
 }
 
-int PWLApproximation::writeInternal(std::ostream & out) const
+int PWLApproximation::writeInternal(std::ostream& out) const
 {
   int bytes_written = 0;
   bytes_written += rhoban_utils::write<int>(out, factors.rows());
@@ -169,7 +167,7 @@ int PWLApproximation::writeInternal(std::ostream & out) const
   return bytes_written;
 }
 
-int PWLApproximation::read(std::istream & in)
+int PWLApproximation::read(std::istream& in)
 {
   int bytes_read = 0;
   int nb_factors;
@@ -179,4 +177,4 @@ int PWLApproximation::read(std::istream & in)
   return bytes_read;
 }
 
-}
+}  // namespace regression_forests

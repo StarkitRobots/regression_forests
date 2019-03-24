@@ -6,11 +6,11 @@ Sample::Sample() : input(), output(0)
 {
 }
 
-Sample::Sample(const Eigen::VectorXd &input_, double output_) : input(input_), output(output_)
+Sample::Sample(const Eigen::VectorXd& input_, double output_) : input(input_), output(output_)
 {
 }
 
-const Eigen::VectorXd &Sample::getInput() const
+const Eigen::VectorXd& Sample::getInput() const
 {
   return input;
 }
@@ -24,4 +24,4 @@ double Sample::getOutput() const
 {
   return output;
 }
-}
+}  // namespace regression_forests

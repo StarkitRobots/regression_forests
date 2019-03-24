@@ -8,7 +8,7 @@ namespace regression_forests
 {
 namespace Statistics
 {
-double mean(const std::vector<double> &vec)
+double mean(const std::vector<double>& vec)
 {
   if (vec.size() == 0)
     throw std::runtime_error("Impossible to compute mean from an empty set");
@@ -20,7 +20,7 @@ double mean(const std::vector<double> &vec)
   return total / vec.size();
 }
 
-double median(const std::vector<double> &vec)
+double median(const std::vector<double>& vec)
 {
   if (vec.size() == 0)
     throw std::runtime_error("Impossible to compute median from an empty set");
@@ -35,14 +35,14 @@ double median(const std::vector<double> &vec)
   return (val1 + val2) / 2;
 }
 
-double stdDev(const std::vector<double> &vec)
+double stdDev(const std::vector<double>& vec)
 {
   if (vec.size() == 0)
     throw std::runtime_error("Impossible to compute standard deviation from an empty set");
   return std::sqrt(variance(vec));
 }
 
-double variance(const std::vector<double> &vec)
+double variance(const std::vector<double>& vec)
 {
   if (vec.size() == 0)
     throw std::runtime_error("Impossible to compute variance from an empty set");
@@ -56,7 +56,7 @@ double variance(const std::vector<double> &vec)
   return total / vec.size();
 }
 
-std::vector<double> getQuartiles(const std::vector<double> &vec)
+std::vector<double> getQuartiles(const std::vector<double>& vec)
 {
   if (vec.size() == 0)
     throw std::runtime_error("Impossible to compute median from an empty set");
@@ -96,5 +96,5 @@ std::vector<double> getQuartiles(const std::vector<double> &vec)
   }
   return result;
 }
-}
-}
+}  // namespace Statistics
+}  // namespace regression_forests

@@ -13,20 +13,21 @@ using rhoban_gp::SquaredExponential;
 
 namespace regression_forests
 {
+GPApproximation::GPApproximation()
+{
+}
 
-GPApproximation::GPApproximation() {}
-
-GPApproximation::GPApproximation(const std::vector<Eigen::VectorXd> & inputs,
-                                 const std::vector<double> & outputs)
+GPApproximation::GPApproximation(const std::vector<Eigen::VectorXd>& inputs, const std::vector<double>& outputs)
   : GPApproximation(inputs, outputs, rhoban_gp::RandomizedRProp::Config())
-{}
+{
+}
 
-GPApproximation::GPApproximation(const std::vector<Eigen::VectorXd> & inputs,
-                                 const std::vector<double> & outputs,
-                                 const rhoban_gp::RandomizedRProp::Config & conf)
+GPApproximation::GPApproximation(const std::vector<Eigen::VectorXd>& inputs, const std::vector<double>& outputs,
+                                 const rhoban_gp::RandomizedRProp::Config& conf)
 {
   /// Checking conditions
-  if (inputs.size() == 0) throw std::runtime_error("GPApproximation: inputs.size() == 0");
+  if (inputs.size() == 0)
+    throw std::runtime_error("GPApproximation: inputs.size() == 0");
   if (inputs.size() != outputs.size())
   {
     std::ostringstream oss;
@@ -36,9 +37,10 @@ GPApproximation::GPApproximation(const std::vector<Eigen::VectorXd> & inputs,
     throw std::runtime_error(oss.str());
   }
   /// Converting data
-  Eigen::MatrixXd input_mat (inputs[0].rows(), inputs.size());
+  Eigen::MatrixXd input_mat(inputs[0].rows(), inputs.size());
   Eigen::VectorXd observations(outputs.size());
-  for (int i = 0; i < inputs.size(); i++) {
+  for (int i = 0; i < inputs.size(); i++)
+  {
     input_mat.col(i) = inputs[i];
     observations(i) = outputs[i];
   }
@@ -48,19 +50,20 @@ GPApproximation::GPApproximation(const std::vector<Eigen::VectorXd> & inputs,
   gp.autoTune(conf);
 }
 
-GPApproximation::GPApproximation(const GPApproximation & other)
-  : gp(other.gp)
+GPApproximation::GPApproximation(const GPApproximation& other) : gp(other.gp)
 {
 }
 
-GPApproximation::~GPApproximation() {}
+GPApproximation::~GPApproximation()
+{
+}
 
-double GPApproximation::eval(const Eigen::VectorXd & state) const
+double GPApproximation::eval(const Eigen::VectorXd& state) const
 {
   return gp.getPrediction(state);
 }
 
-Eigen::VectorXd GPApproximation::getGrad(const Eigen::VectorXd & state) const
+Eigen::VectorXd GPApproximation::getGrad(const Eigen::VectorXd& state) const
 {
   return gp.getGradient(state);
 }
@@ -70,14 +73,11 @@ std::unique_ptr<Approximation> GPApproximation::clone() const
   return std::unique_ptr<Approximation>(new GPApproximation(*this));
 }
 
-
-void GPApproximation::updateMinPair(const Eigen::MatrixXd &limits,
-                                    std::pair<double, Eigen::VectorXd> &best) const
+void GPApproximation::updateMinPair(const Eigen::MatrixXd& limits, std::pair<double, Eigen::VectorXd>& best) const
 {
   throw std::logic_error("GPApproximation::updateMinPair: not implemented");
 }
-void GPApproximation::updateMaxPair(const Eigen::MatrixXd &limits,
-                                    std::pair<double, Eigen::VectorXd> &best) const
+void GPApproximation::updateMaxPair(const Eigen::MatrixXd& limits, std::pair<double, Eigen::VectorXd>& best) const
 {
   throw std::logic_error("GPApproximation::updateMaxPair: not implemented");
 }
@@ -87,14 +87,14 @@ int GPApproximation::getClassID() const
   return Approximation::GP;
 }
 
-int GPApproximation::writeInternal(std::ostream & out) const
+int GPApproximation::writeInternal(std::ostream& out) const
 {
   return gp.write(out);
 }
 
-int GPApproximation::read(std::istream & in)
+int GPApproximation::read(std::istream& in)
 {
   return gp.read(in);
 }
 
-}
+}  // namespace regression_forests

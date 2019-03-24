@@ -29,40 +29,40 @@ size_t Tree::maxSplitDim() const
   return root->maxSplitDim();
 }
 
-double Tree::getValue(const Eigen::VectorXd &input) const
+double Tree::getValue(const Eigen::VectorXd& input) const
 {
   return root->getValue(input);
 }
 
-Eigen::VectorXd Tree::getGrad(const Eigen::VectorXd &input) const
+Eigen::VectorXd Tree::getGrad(const Eigen::VectorXd& input) const
 {
   return root->getGrad(input);
 }
 
-double Tree::getMax(const Eigen::MatrixXd &limits) const
+double Tree::getMax(const Eigen::MatrixXd& limits) const
 {
   return getMaxPair(limits).first;
 }
 
-Eigen::VectorXd Tree::getArgMax(const Eigen::MatrixXd &limits) const
+Eigen::VectorXd Tree::getArgMax(const Eigen::MatrixXd& limits) const
 {
   return getMaxPair(limits).second;
 }
 
-std::pair<double, Eigen::VectorXd> Tree::getMinPair(const Eigen::MatrixXd &limits) const
+std::pair<double, Eigen::VectorXd> Tree::getMinPair(const Eigen::MatrixXd& limits) const
 {
   Eigen::MatrixXd localLimits = limits;
   return root->getMinPair(localLimits);
 }
 
-std::pair<double, Eigen::VectorXd> Tree::getMaxPair(const Eigen::MatrixXd &limits) const
+std::pair<double, Eigen::VectorXd> Tree::getMaxPair(const Eigen::MatrixXd& limits) const
 {
   Eigen::MatrixXd localLimits = limits;
   return root->getMaxPair(localLimits);
 }
 
-void Tree::fillProjection(std::vector<std::vector<Eigen::VectorXd>> &out, Node *currentNode,
-                          const std::vector<int> &freeDimensions, Eigen::MatrixXd &limits)
+void Tree::fillProjection(std::vector<std::vector<Eigen::VectorXd>>& out, Node* currentNode,
+                          const std::vector<int>& freeDimensions, Eigen::MatrixXd& limits)
 {
   // If leaf, fill vector and return
   if (currentNode->isLeaf())
@@ -96,8 +96,8 @@ void Tree::fillProjection(std::vector<std::vector<Eigen::VectorXd>> &out, Node *
   }
 }
 
-std::vector<std::vector<Eigen::VectorXd>> Tree::project(const std::vector<int> &freeDimensions,
-                                                        const Eigen::MatrixXd &limits)
+std::vector<std::vector<Eigen::VectorXd>> Tree::project(const std::vector<int>& freeDimensions,
+                                                        const Eigen::MatrixXd& limits)
 {
   std::vector<std::vector<Eigen::VectorXd>> out;
   Eigen::MatrixXd localLimits = limits;  // Copying to allow modification
@@ -105,8 +105,7 @@ std::vector<std::vector<Eigen::VectorXd>> Tree::project(const std::vector<int> &
   return out;
 }
 
-void Tree::addSubTree(Node *node, Eigen::MatrixXd &limits, const Tree &other,
-                                double otherWeight)
+void Tree::addSubTree(Node* node, Eigen::MatrixXd& limits, const Tree& other, double otherWeight)
 {
   if (otherWeight == 0)
   {
@@ -115,7 +114,7 @@ void Tree::addSubTree(Node *node, Eigen::MatrixXd &limits, const Tree &other,
   if (node->isLeaf())
   {
     // Deep copy of the 'other' subTree corresponding to limits
-    Node *subTreeRoot = other.root->subTreeCopy(limits);
+    Node* subTreeRoot = other.root->subTreeCopy(limits);
     // If the subTree is void, then nothing needs to be done
     if (subTreeRoot == NULL)
     {
@@ -163,7 +162,7 @@ void Tree::addSubTree(Node *node, Eigen::MatrixXd &limits, const Tree &other,
   }
 }
 
-void Tree::avgTree(const Tree &other, double otherWeight)
+void Tree::avgTree(const Tree& other, double otherWeight)
 {
   size_t dim = 1 + std::max(maxSplitDim(), other.maxSplitDim());
   Eigen::MatrixXd limits(dim, 2);
@@ -175,14 +174,14 @@ void Tree::avgTree(const Tree &other, double otherWeight)
   avgTree(other, otherWeight, limits);
 }
 
-void Tree::avgTree(const Tree &other, double otherWeight, const Eigen::MatrixXd &limits)
+void Tree::avgTree(const Tree& other, double otherWeight, const Eigen::MatrixXd& limits)
 {
   Eigen::MatrixXd localLimits = limits;
   addSubTree(root, localLimits, other, otherWeight);
 }
 
-std::unique_ptr<Tree> Tree::avgTrees(const Tree &t1, const Tree &t2, double w1,
-                                     double w2, const Eigen::MatrixXd &limits)
+std::unique_ptr<Tree> Tree::avgTrees(const Tree& t1, const Tree& t2, double w1, double w2,
+                                     const Eigen::MatrixXd& limits)
 {
   Eigen::MatrixXd localLimits = limits;
   std::unique_ptr<Tree> result(new Tree());
@@ -191,7 +190,7 @@ std::unique_ptr<Tree> Tree::avgTrees(const Tree &t1, const Tree &t2, double w1,
   return result;
 }
 
-std::unique_ptr<Tree> Tree::project(const Eigen::MatrixXd &limits) const
+std::unique_ptr<Tree> Tree::project(const Eigen::MatrixXd& limits) const
 {
   std::unique_ptr<Tree> t(new Tree);
   t->root = new Node(NULL, NULL);
@@ -200,48 +199,52 @@ std::unique_ptr<Tree> Tree::project(const Eigen::MatrixXd &limits) const
   return t;
 }
 
-void Tree::apply(Eigen::MatrixXd &limits, Node::Function f)
+void Tree::apply(Eigen::MatrixXd& limits, Node::Function f)
 {
   root->apply(limits, f);
 }
 
-void Tree::applyOnLeafs(Eigen::MatrixXd &limits, Node::Function f)
+void Tree::applyOnLeafs(Eigen::MatrixXd& limits, Node::Function f)
 {
   root->applyOnLeafs(limits, f);
 }
 
-int Tree::write(std::ostream & out) const
+int Tree::write(std::ostream& out) const
 {
   char has_root = 1;
-  if (root == nullptr) has_root = 0;
+  if (root == nullptr)
+    has_root = 0;
   int bytes_written = 0;
   bytes_written += rhoban_utils::write<char>(out, has_root);
-  if (has_root) {
+  if (has_root)
+  {
     bytes_written += root->write(out);
   }
-  return bytes_written;  
+  return bytes_written;
 }
 
-int Tree::read(std::istream & in)
+int Tree::read(std::istream& in)
 {
   // First free currently used data
-  if (root != nullptr) delete(root);
+  if (root != nullptr)
+    delete (root);
   // Then read
   char has_root;
   int bytes_read = 0;
   bytes_read += rhoban_utils::read<char>(in, &has_root);
-  if (has_root) {
+  if (has_root)
+  {
     root = new Node();
     bytes_read += root->read(in);
   }
   return bytes_read;
 }
 
-Tree * Tree::clone() const
+Tree* Tree::clone() const
 {
-  Tree * copy = new Tree();
+  Tree* copy = new Tree();
   copy->root = root->clone();
   return copy;
 }
 
-}
+}  // namespace regression_forests

@@ -4,8 +4,9 @@
 
 namespace regression_forests
 {
-
-PWCApproximation::PWCApproximation() : value(0) {}
+PWCApproximation::PWCApproximation() : value(0)
+{
+}
 
 PWCApproximation::PWCApproximation(double value_) : value(value_)
 {
@@ -20,19 +21,19 @@ double PWCApproximation::getValue() const
   return value;
 }
 
-double PWCApproximation::eval(const Eigen::VectorXd &state) const
+double PWCApproximation::eval(const Eigen::VectorXd& state) const
 {
   // Just ignore state since the reward is piecewise constant
   (void)state;
   return value;
 }
 
-Eigen::VectorXd PWCApproximation::getGrad(const Eigen::VectorXd &input) const
+Eigen::VectorXd PWCApproximation::getGrad(const Eigen::VectorXd& input) const
 {
   return Eigen::VectorXd::Zero(input.rows());
 }
 
-void PWCApproximation::updateMaxPair(const Eigen::MatrixXd &limits, std::pair<double, Eigen::VectorXd> &best) const
+void PWCApproximation::updateMaxPair(const Eigen::MatrixXd& limits, std::pair<double, Eigen::VectorXd>& best) const
 {
   if (best.first < value)
   {
@@ -44,8 +45,7 @@ void PWCApproximation::updateMaxPair(const Eigen::MatrixXd &limits, std::pair<do
   }
 }
 
-void PWCApproximation::updateMinPair(const Eigen::MatrixXd &limits,
-                                     std::pair<double, Eigen::VectorXd> &best) const
+void PWCApproximation::updateMinPair(const Eigen::MatrixXd& limits, std::pair<double, Eigen::VectorXd>& best) const
 {
   if (best.first > value)
   {
@@ -67,14 +67,14 @@ int PWCApproximation::getClassID() const
   return Approximation::PWC;
 }
 
-int PWCApproximation::writeInternal(std::ostream & out) const
+int PWCApproximation::writeInternal(std::ostream& out) const
 {
   return rhoban_utils::write<double>(out, value);
 }
 
-int PWCApproximation::read(std::istream & in)
+int PWCApproximation::read(std::istream& in)
 {
   return rhoban_utils::read<double>(in, &value);
 }
 
-}
+}  // namespace regression_forests

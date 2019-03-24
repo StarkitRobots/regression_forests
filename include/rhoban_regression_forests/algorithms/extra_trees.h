@@ -18,9 +18,8 @@ namespace regression_forests
 class ExtraTrees
 {
 public:
-
-  typedef std::function<std::unique_ptr<Approximation> (const TrainingSet::Subset &,
-                                                        const Eigen::MatrixXd &)> Approximator;
+  typedef std::function<std::unique_ptr<Approximation>(const TrainingSet::Subset&, const Eigen::MatrixXd&)>
+      Approximator;
 
   class Config : public rhoban_utils::JsonSerializable
   {
@@ -51,25 +50,18 @@ public:
     // XML stuff
     virtual std::string getClassName() const override;
     virtual Json::Value toJson() const override;
-    virtual void fromJson(const Json::Value & v, const std::string & dir_name) override;
+    virtual void fromJson(const Json::Value& v, const std::string& dir_name) override;
 
-    static Config generateAuto(const Eigen::MatrixXd &space_limits,
-                               int nb_samples,
-                               Approximation::ID appr_type);
+    static Config generateAuto(const Eigen::MatrixXd& space_limits, int nb_samples, Approximation::ID appr_type);
   };
 
   Config conf;
 
-  static double evalSplitScore(const TrainingSet &ls,
-                               const TrainingSet::Subset &samples,
-                               const OrthogonalSplit &split,
-                               Approximator approximator,
-                               const Eigen::MatrixXd &limits);
+  static double evalSplitScore(const TrainingSet& ls, const TrainingSet::Subset& samples, const OrthogonalSplit& split,
+                               Approximator approximator, const Eigen::MatrixXd& limits);
 
-  std::unique_ptr<Tree> solveTree(const TrainingSet &ts,
-                                  const Eigen::MatrixXd &limits);
-  std::unique_ptr<Forest> solve(const TrainingSet &ts,
-                                const Eigen::MatrixXd &limits);
+  std::unique_ptr<Tree> solveTree(const TrainingSet& ts, const Eigen::MatrixXd& limits);
+  std::unique_ptr<Forest> solve(const TrainingSet& ts, const Eigen::MatrixXd& limits);
 };
 
-}
+}  // namespace regression_forests

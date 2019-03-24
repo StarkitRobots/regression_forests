@@ -8,10 +8,10 @@
 
 namespace regression_forests
 {
-typedef std::pair<Node *, double> EvaluatedNode;
+typedef std::pair<Node*, double> EvaluatedNode;
 typedef std::pair<std::shared_ptr<const Approximation>, double> EvaluatedApproximation;
 
-static double spaceSize(const Eigen::MatrixXd &space)
+static double spaceSize(const Eigen::MatrixXd& space)
 {
   if (space.cols() != 2)
   {
@@ -25,12 +25,12 @@ static double spaceSize(const Eigen::MatrixXd &space)
   return size;
 }
 
-bool isLastSplit(Node *node)
+bool isLastSplit(Node* node)
 {
   return node->lowerChild->isLeaf() && node->upperChild->isLeaf();
 }
 
-void pushLastSplitNodes(Node *node, std::list<Node *> &splitNodes)
+void pushLastSplitNodes(Node* node, std::list<Node*>& splitNodes)
 {
   if (node->isLeaf())
   {
@@ -49,7 +49,7 @@ void pushLastSplitNodes(Node *node, std::list<Node *> &splitNodes)
   }
 }
 
-EvaluatedApproximation getSplitData(Node *node, const Eigen::MatrixXd &limits)
+EvaluatedApproximation getSplitData(Node* node, const Eigen::MatrixXd& limits)
 {
   EvaluatedApproximation result;
   Eigen::MatrixXd nodeSpace = node->getSubSpace(limits);
@@ -63,16 +63,13 @@ EvaluatedApproximation getSplitData(Node *node, const Eigen::MatrixXd &limits)
                                                        node->upperChild->a->clone(), upperRatio);
   double lowerSize = upperRatio * nodeSize;
   double upperSize = upperRatio * nodeSize;
-  double upperDiff = CompositeApproximation::avgDifference(node->upperChild->a, result.first,
-                                                           nodeSpace);
-  double lowerDiff = CompositeApproximation::avgDifference(node->lowerChild->a, result.first,
-                                                           nodeSpace);
+  double upperDiff = CompositeApproximation::avgDifference(node->upperChild->a, result.first, nodeSpace);
+  double lowerDiff = CompositeApproximation::avgDifference(node->lowerChild->a, result.first, nodeSpace);
   result.second = lowerSize * lowerDiff + upperSize * upperDiff;
   return result;
 }
 
-std::unique_ptr<Tree> pruneTree(std::unique_ptr<Tree> tree, const Eigen::MatrixXd &limits,
-                                          size_t maxLeafs)
+std::unique_ptr<Tree> pruneTree(std::unique_ptr<Tree> tree, const Eigen::MatrixXd& limits, size_t maxLeafs)
 {
   // 1. count leafs and add preLeafs
   size_t nbLeafs = tree->nbLeafs();
@@ -80,10 +77,9 @@ std::unique_ptr<Tree> pruneTree(std::unique_ptr<Tree> tree, const Eigen::MatrixX
   {
     return tree;
   }
-  std::list<Node *> splitNodes;
+  std::list<Node*> splitNodes;
   pushLastSplitNodes(tree->root, splitNodes);
-  auto nodeComp = [](const EvaluatedNode &a, const EvaluatedNode &b)
-  {
+  auto nodeComp = [](const EvaluatedNode& a, const EvaluatedNode& b) {
     if (a.second == b.second)
     {
       return a.first < b.first;
@@ -91,7 +87,7 @@ std::unique_ptr<Tree> pruneTree(std::unique_ptr<Tree> tree, const Eigen::MatrixX
     return a.second < b.second;
   };
   std::map<EvaluatedNode, std::shared_ptr<const Approximation>, decltype(nodeComp)> splits(nodeComp);
-  for (Node *node : splitNodes)
+  for (Node* node : splitNodes)
   {
     auto splitData = getSplitData(node, limits);
     EvaluatedNode key(node, splitData.second);
@@ -101,7 +97,7 @@ std::unique_ptr<Tree> pruneTree(std::unique_ptr<Tree> tree, const Eigen::MatrixX
   while (nbLeafs > maxLeafs)
   {
     // Retrieving node which bring the lowest quality improvement
-    Node *current = splits.begin()->first.first;
+    Node* current = splits.begin()->first.first;
     std::shared_ptr<const Approximation> app = splits.begin()->second;
     auto second = ++splits.begin();
     splits.erase(splits.begin(), second);
@@ -113,7 +109,7 @@ std::unique_ptr<Tree> pruneTree(std::unique_ptr<Tree> tree, const Eigen::MatrixX
     current->upperChild = NULL;
     nbLeafs--;
     // If father is now a lastSplit, add it to the splitNodes
-    Node *father = current->father;
+    Node* father = current->father;
     if (father != NULL && isLastSplit(father))
     {
       auto splitData = getSplitData(father, limits);
@@ -123,4 +119,4 @@ std::unique_ptr<Tree> pruneTree(std::unique_ptr<Tree> tree, const Eigen::MatrixX
   }
   return tree;
 }
-}
+}  // namespace regression_forests

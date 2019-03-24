@@ -4,8 +4,8 @@
 
 namespace regression_forests
 {
-
-class Viewer : public rhoban_viewer::Viewer {
+class Viewer : public rhoban_viewer::Viewer
+{
 private:
   /// The forest which is being visualized
   std::unique_ptr<Forest> forest;
@@ -39,7 +39,6 @@ private:
   std::vector<std::vector<rhoban_viewer::Color>> corners_color;
 
 protected:
-
   /// Rescale rawValue from current limits to [0,1]
   double rescaleValue(double rawValue, int dim);
 
@@ -68,13 +67,13 @@ protected:
   std::vector<int> freeDimensions();
 
   /// Accessors to current limits
-  const Eigen::MatrixXd & getCurrentLimits() const;
+  const Eigen::MatrixXd& getCurrentLimits() const;
 
   /// Append dimension description to a stream
-  void appendDim(int dim, std::ostream &out) const;
+  void appendDim(int dim, std::ostream& out) const;
 
   /// Append dimension limits to a stream
-  void appendLimits(int dim, std::ostream &out) const;
+  void appendLimits(int dim, std::ostream& out) const;
 
 public:
   /// ForestFile should be readable by the Math::RegressionTree:Parser
@@ -82,9 +81,8 @@ public:
   /// 1. headers (including value)
   /// 2. mins
   /// 3. maxs
-  Viewer(const std::string& forest_path,
-         const std::string& config_path,
-         unsigned int width = 800, unsigned int height = 600);
+  Viewer(const std::string& forest_path, const std::string& config_path, unsigned int width = 800,
+         unsigned int height = 600);
 
   /// Update status message
   void updateStatus();
@@ -94,9 +92,8 @@ public:
   int inputSize() const;
 
   /**
-   * Jump to previous index if shift is pressed, next otherwise 
+   * Jump to previous index if shift is pressed, next otherwise
    */
   void navigate();
-      
 };
-}
+}  // namespace regression_forests
