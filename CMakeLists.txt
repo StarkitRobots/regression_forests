@@ -26,7 +26,7 @@ find_package(catkin REQUIRED COMPONENTS ${CATKIN_DEPS})
 set(DELEG_INCLUDE_DIRS include ${catkin_INCLUDE_DIRS})
 set(DELEG_LIBRARIES rhoban_regression_forests ${catkin_LIBRARIES})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 
 ###################################
 ## catkin specific configuration ##
