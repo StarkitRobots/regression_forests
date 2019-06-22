@@ -1,8 +1,8 @@
-#include "rhoban_regression_forests/approximations/gp_approximation.h"
-#include "rhoban_regression_forests/approximations/pwc_approximation.h"
-#include "rhoban_regression_forests/approximations/pwl_approximation.h"
+#include "starkit_regression_forests/approximations/gp_approximation.h"
+#include "starkit_regression_forests/approximations/pwc_approximation.h"
+#include "starkit_regression_forests/approximations/pwl_approximation.h"
 
-#include "rhoban_regression_forests/approximations/approximation_factory.h"
+#include "starkit_regression_forests/approximations/approximation_factory.h"
 
 #include <iostream>
 

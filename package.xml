@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>rhoban_regression_forests</name>
+  <name>starkit_regression_forests</name>
   <version>0.0.0</version>
   <description>A package containing tools to work with regression forests</description>
 

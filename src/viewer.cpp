@@ -1,4 +1,4 @@
-#include "rhoban_regression_forests/tools/viewer.h"
+#include "starkit_regression_forests/tools/viewer.h"
 
 #include <iostream>
 

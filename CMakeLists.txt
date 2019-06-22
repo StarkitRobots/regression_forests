@@ -1,30 +1,30 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(rhoban_regression_forests)
+project(starkit_regression_forests)
 
 # Build options
-option(RHOBAN_RF_USES_GP "Is support for gaussian processes activated" OFF)
-option(RHOBAN_RF_BUILD_VIEWER "Build regression forests Viewer (require SFML)" OFF)
-option(RHOBAN_RF_BUILD_EXAMPLES "Build examples/tools" OFF)
+option(STARKIT_RF_USES_GP "Is support for gaussian processes activated" OFF)
+option(STARKIT_RF_BUILD_VIEWER "Build regression forests Viewer (require SFML)" OFF)
+option(STARKIT_RF_BUILD_EXAMPLES "Build examples/tools" OFF)
 
 
 set (CATKIN_DEPS
-  rhoban_utils
-  rhoban_random
+  starkit_utils
+  starkit_random
 )
 
-if (RHOBAN_RF_USES_GP)
-  set (CATKIN_DEPS ${CATKIN_DEPS} rhoban_gp)
-  add_definitions(-DRHOBAN_RF_USES_GP)
-endif(RHOBAN_RF_USES_GP)
-if (RHOBAN_RF_BUILD_VIEWER)
-  set (CATKIN_DEPS ${CATKIN_DEPS} rhoban_viewer)
-endif(RHOBAN_RF_BUILD_VIEWER)
+if (STARKIT_RF_USES_GP)
+  set (CATKIN_DEPS ${CATKIN_DEPS} starkit_gp)
+  add_definitions(-DSTARKIT_RF_USES_GP)
+endif(STARKIT_RF_USES_GP)
+if (STARKIT_RF_BUILD_VIEWER)
+  set (CATKIN_DEPS ${CATKIN_DEPS} starkit_viewer)
+endif(STARKIT_RF_BUILD_VIEWER)
 
 
 find_package(catkin REQUIRED COMPONENTS ${CATKIN_DEPS})
 
 set(DELEG_INCLUDE_DIRS include ${catkin_INCLUDE_DIRS})
-set(DELEG_LIBRARIES rhoban_regression_forests ${catkin_LIBRARIES})
+set(DELEG_LIBRARIES starkit_regression_forests ${catkin_LIBRARIES})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 
@@ -54,10 +54,10 @@ include_directories(
 
 # Directories containing sources files
 set(DIRECTORIES
-  src/rhoban_regression_forests/algorithms
-  src/rhoban_regression_forests/approximations
-  src/rhoban_regression_forests/core
-  src/rhoban_regression_forests/tools
+  src/starkit_regression_forests/algorithms
+  src/starkit_regression_forests/approximations
+  src/starkit_regression_forests/core
+  src/starkit_regression_forests/tools
   )
 
 # Build ALL_SOURCES
@@ -75,37 +75,37 @@ foreach (DIRECTORY ${DIRECTORIES})
     set (ALL_SOURCES ${ALL_SOURCES} ${PREFIXED_SOURCES})
 endforeach (DIRECTORY)
 
-# if rhoban_viewer is found, then add the support for viewers
+# if starkit_viewer is found, then add the support for viewers
 if (BUILD_VIEWER)
   set (ALL_SOURCES
     ${ALL_SOURCES}
-    src/rhoban_regression_forests/tools/viewer.cpp
+    src/starkit_regression_forests/tools/viewer.cpp
     )
 endif(BUILD_VIEWER)
 
 # Declare a C++ library
-add_library(rhoban_regression_forests
+add_library(starkit_regression_forests
   ${ALL_SOURCES}
 )
 
-target_link_libraries(rhoban_regression_forests
+target_link_libraries(starkit_regression_forests
   ${catkin_LIBRARIES}
   ${EXTRA_LIBS}
   )
 
 
 # Testing input output functions
-if (RHOBAN_RF_BUILD_EXAMPLES)
+if (STARKIT_RF_BUILD_EXAMPLES)
   add_executable(test_rf_io src/test_io.cpp)
   target_link_libraries(test_rf_io ${catkin_LIBRARIES} ${DELEG_LIBRARIES} )
-endif (RHOBAN_RF_BUILD_EXAMPLES)
+endif (STARKIT_RF_BUILD_EXAMPLES)
 
-# if rhoban_viewer is found, then add the viewer executable as target
-if (RHOBAN_RF_BUILD_VIEWER)
+# if starkit_viewer is found, then add the viewer executable as target
+if (STARKIT_RF_BUILD_VIEWER)
   add_executable(viewer src/viewer.cpp)
 
   target_link_libraries(viewer
     ${catkin_LIBRARIES}
     ${DELEG_LIBRARIES}
     )
-endif(RHOBAN_RF_BUILD_VIEWER)
+endif(STARKIT_RF_BUILD_VIEWER)
